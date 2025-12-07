@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
             widgets.dashCardRoute(
               'Phone',
               Icons.phone,
-              '/phone',
+              '/phone_fav',
               context,
               itemCount,
             ),

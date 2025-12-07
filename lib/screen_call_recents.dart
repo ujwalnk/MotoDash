@@ -5,14 +5,14 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class CallHistoryScreen extends StatefulWidget {
-  const CallHistoryScreen({super.key});
+class CallLogScreen extends StatefulWidget {
+  const CallLogScreen({super.key});
 
   @override
-  State<CallHistoryScreen> createState() => _CallHistoryScreenState();
+  State<CallLogScreen> createState() => _CallLogScreenState();
 }
 
-class _CallHistoryScreenState extends State<CallHistoryScreen> {
+class _CallLogScreenState extends State<CallLogScreen> {
   Color backgroundColor = Colors.black;
   Color fontColor = Colors.white;
   Color borderColor = Colors.white;

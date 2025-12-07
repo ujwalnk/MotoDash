@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
+import 'package:moto_dash/screen_call_fav.dart';
 import 'package:moto_dash/screen_call_recents.dart';
 
 import 'package:moto_dash/screen_home.dart';
@@ -67,7 +68,8 @@ class _MotoDashState extends State<MotoDash>
       initialRoute: '/home',
       routes: {
         '/home': (_) => const HomeScreen(),
-        '/phone': (_) => const CallHistoryScreen(),
+        '/phone_log': (_) => const CallLogScreen(),
+        '/phone_fav': (_) => const FavContactsScreen(),
         '/music': (_) => const MusicScreen(),
         '/volume': (_) => const VolumeScreen(),
         '/settings': (_) => const SettingsScreen(),

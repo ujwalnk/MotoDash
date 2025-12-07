@@ -24,7 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool volumeShowLabel = false;
 
   // Phone
-  String favouriteContacts = "";
+  String favouriteContactNames = "";
 
   // Blank screen settings
   bool keepScreenBlank = false;
@@ -64,7 +64,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       volumeShowIcons = prefs.getBool("volume_show_icons") ?? false;
       volumeShowLabel = prefs.getBool("volume_show_label") ?? false;
 
-      favouriteContacts = prefs.getString("phone_favourite_contacts") ?? "";
+      // favouriteContacts = prefs.getString("phone_favourite_contacts") ?? "";
 
       brightness = prefs.getDouble("brightness") ?? 50.0;
 
@@ -87,6 +87,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       optionBorderColor = Color(
         prefs.getInt("option_border_color") ?? Colors.grey.toARGB32(),
       );
+
+      favouriteContactNames = prefs.getStringList("fav_contact_names")?.join(", ") ?? "";
     });
   }
 
@@ -105,7 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool("volume_show_icons", volumeShowIcons);
     await prefs.setBool("volume_show_label", volumeShowLabel);
 
-    await prefs.setString("phone_favourite_contacts", favouriteContacts);
+    // await prefs.setString("phone_favourite_contacts", favouriteContacts);
 
     await prefs.setDouble("brightness", brightness);
 
@@ -332,22 +334,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           sectionHeader("Phone Screen"),
           tappableField(
             label: "Pick Favourite Contacts",
-            value: favouriteContacts,
-            onTap: () async {
-              final selected = await Navigator.push(
+            value: favouriteContactNames,
+            onTap: () {
+              Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ContactPickerScreen(
-                    preSelected: favouriteContacts.split(","),
-                  ),
+                  builder: (_) => const FavouriteContactsScreen(),
                 ),
               );
-
-              if (selected != null && selected is List<String>) {
-                setState(() {
-                  favouriteContacts = selected.join(",");
-                });
-              }
             },
           ),
 
