@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ScreenSaver extends StatefulWidget {
   const ScreenSaver({super.key});
@@ -14,15 +15,27 @@ class _ScreenSaverState extends State<ScreenSaver> {
   Offset _position = Offset.zero;
   late Timer _timer;
 
+  Color dotColor = Colors.red;
+
   @override
   void initState() {
     super.initState();
+
+    _loadPrefs();
     _setRandomPosition();
 
     // Move every 2 minutes
     _timer = Timer.periodic(const Duration(minutes: 2), (_) {
       _setRandomPosition();
     });
+  }
+
+  Future<void> _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    dotColor = Color(
+      prefs.getInt("font_color") ?? Colors.red.toARGB32(),
+    );
   }
 
   void _setRandomPosition() {
@@ -59,9 +72,9 @@ class _ScreenSaverState extends State<ScreenSaver> {
               child: Container(
                 width: 20,
                 height: 20,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.red,
+                  color: dotColor,
                 ),
               ),
             ),

@@ -10,7 +10,7 @@ class IdleTimer with WidgetsBindingObserver {
 
   Timer? _timer;
   bool enabled = false; // keepScreenBlank
-  Duration timeout = const Duration(seconds: 2);
+  Duration timeout = const Duration(minutes: 2);
 
   /// Setup (called once from MaterialApp builder)
   void initialize(GlobalKey<NavigatorState> key) {

@@ -13,6 +13,7 @@ import 'package:moto_dash/service/timer.dart';
 import 'package:moto_dash/service/transitions.dart';
 
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -50,9 +51,16 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     WakelockPlus.enable();
 
-    // Enable idle timer after home loads
+    _loadPrefs();
+  }
+
+  Future<void> _loadPrefs() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+      // Enable idle timer after home loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      IdleTimer.instance.setEnabled(true);
+      IdleTimer.instance.setEnabled(prefs.getBool("keep_screen_blank") ?? false);
     });
   }
 
