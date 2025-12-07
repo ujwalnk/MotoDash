@@ -9,7 +9,7 @@ class MusicScreen extends StatelessWidget {
   Widget build(BuildContext context) {
 
     DashWidgets widgets = DashWidgets();
-    int itemCount = 6;
+    int itemCount = 4;
     widgets.showIcons = true;
 
     return Scaffold(
@@ -19,11 +19,9 @@ class MusicScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(10),
           children: [
-            widgets.dashCardRoute('Previous', Icons.skip_previous, '/phone', context, itemCount),
-            widgets.dashCardRoute('Rewind', Icons.replay, '/music', context, itemCount),
+            widgets.dashCardFunc('Previous', Icons.skip_previous, () async => await FlutterMediaController.previousTrack(), context, itemCount),
             widgets.dashCardFunc('Play / Pause', Icons.play_arrow, () async => await FlutterMediaController.togglePlayPause(), context, itemCount),
-            widgets.dashCardRoute('Fast Forward', Icons.forward_5, '/maps', context, itemCount),
-            widgets.dashCardRoute('Next', Icons.skip_next, '/volume', context, itemCount),
+            widgets.dashCardFunc('Next', Icons.skip_next, () async => await FlutterMediaController.nextTrack(), context, itemCount),
             widgets.dashCardFunc('Return', Icons.undo, () => Navigator.pop(context), context, itemCount),
           ],
         ),

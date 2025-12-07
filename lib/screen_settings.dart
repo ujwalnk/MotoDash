@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final Map<String, dynamic>? initialValues; // optional incoming settings
+
+  const SettingsScreen({super.key, this.initialValues});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -29,6 +31,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final optionBorderColorController = TextEditingController();
   final fontSizeController = TextEditingController();
 
+  // NEW: Screen brightness (0–100)
+  double screenBrightness = 50;
+
+  // NEW: Keep screen blank
+  bool keepScreenBlank = false;
+  final blankTimeController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialValues != null) {
+      loadSettings(widget.initialValues!);
+    }
+  }
+
+  // ---------------------- LOAD FROM SECURE STORAGE VALUES ----------------------
+  void loadSettings(Map<String, dynamic> values) {
+    setState(() {
+      homeShowIcons = values["homeShowIcons"] ?? false;
+      homeShowLabel = values["homeShowLabel"] ?? false;
+
+      musicShowIcons = values["musicShowIcons"] ?? false;
+      musicShowLabel = values["musicShowLabel"] ?? false;
+
+      volumeShowIcons = values["volumeShowIcons"] ?? false;
+      volumeShowLabel = values["volumeShowLabel"] ?? false;
+
+      favouriteContacts = values["favouriteContacts"] ?? "";
+
+      fontColorController.text = values["fontColor"] ?? "";
+      backgroundColorController.text = values["backgroundColor"] ?? "";
+      optionBorderColorController.text = values["optionBorderColor"] ?? "";
+      fontSizeController.text = values["fontSize"] ?? "";
+
+      screenBrightness =
+          double.tryParse(values["screenBrightness"] ?? "") ?? 50;
+
+      keepScreenBlank = values["keepScreenBlank"] ?? false;
+      blankTimeController.text = values["blankTimeMinutes"] ?? "";
+    });
+  }
+
+  // ---------------------- SAVE FUNCTION ----------------------
+  Map<String, dynamic> saveSettings() {
+    return {
+      // Home Screen
+      "homeShowIcons": homeShowIcons,
+      "homeShowLabel": homeShowLabel,
+
+      // Music Screen
+      "musicShowIcons": musicShowIcons,
+      "musicShowLabel": musicShowLabel,
+
+      // Volume Screen
+      "volumeShowIcons": volumeShowIcons,
+      "volumeShowLabel": volumeShowLabel,
+
+      // Phone
+      "favouriteContacts": favouriteContacts,
+
+      // General
+      "fontColor": fontColorController.text,
+      "backgroundColor": backgroundColorController.text,
+      "optionBorderColor": optionBorderColorController.text,
+      "fontSize": fontSizeController.text,
+
+      // NEW: Brightness
+      "screenBrightness": screenBrightness.toString(),
+
+      // NEW: Blank Screen Mode
+      "keepScreenBlank": keepScreenBlank,
+      "blankTimeMinutes": blankTimeController.text,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,6 +113,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text('Settings', style: TextStyle(color: Colors.white)),
+        actions: [
+          TextButton(
+            onPressed: () {
+              final saved = saveSettings();
+              Navigator.pop(context, saved); // return to caller
+            },
+            child: const Text("Save", style: TextStyle(color: Colors.white)),
+          )
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -85,17 +171,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
             controller: favouriteContacts,
             label: "Pick Favourite Contacts",
             onTap: () {
-              // TODO: Add contact picker action
+              // TODO: Add contact picker
             },
-            readOnly: true,
           ),
+
+          // -------------------------- NEW: SCREEN BRIGHTNESS --------------------------
+          sectionHeader("Screen Brightness"),
+          Slider(
+            value: screenBrightness,
+            min: 0,
+            max: 100,
+            divisions: 100,
+            onChanged: (v) => setState(() => screenBrightness = v),
+            label: "${screenBrightness.toInt()}%",
+          ),
+          Text("${screenBrightness.toInt()}%",
+              style: const TextStyle(color: Colors.white)),
+
+          // -------------------------- NEW: SCREEN BLANK OPTION --------------------------
+          sectionHeader("Blank Screen Settings"),
+          checkboxTile(
+            title: "Keep screen blank & wake on single tap",
+            value: keepScreenBlank,
+            onChanged: (v) => setState(() => keepScreenBlank = v),
+          ),
+
+          if (keepScreenBlank)
+            textField(
+              "Blank time (minutes)",
+              blankTimeController,
+              inputType: TextInputType.number,
+            ),
 
           // -------------------------- GENERAL SETTINGS --------------------------
           sectionHeader("General Settings"),
           textField("Font Color (Hex)", fontColorController),
           textField("Background Color (Hex)", backgroundColorController),
           textField("Option Border Color (Hex)", optionBorderColorController),
-          textField("Font Size", fontSizeController, inputType: TextInputType.number),
+          textField("Font Size", fontSizeController,
+              inputType: TextInputType.number),
         ],
       ),
     );
@@ -132,9 +246,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Standard text field
-  Widget textField(String label, TextEditingController controller,
-      {TextInputType inputType = TextInputType.text}) {
+  Widget textField(
+      String label, TextEditingController controller, {
+        TextInputType inputType = TextInputType.text,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: TextField(
@@ -143,7 +258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(color: Colors.white70),
+          labelStyle: const TextStyle(color: Colors.white54),
           enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.white54),
           ),
@@ -155,12 +270,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Fake input for "Pick Favourite Contacts"
   Widget textInput({
     required String label,
     required String controller,
     required VoidCallback onTap,
-    bool readOnly = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(top: 12),

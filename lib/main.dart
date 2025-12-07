@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
 
-import 'package:moto_dash/home_screen/interface.dart';
-import 'package:moto_dash/music_screen/interface.dart';
+import 'package:moto_dash/screen_home.dart';
+import 'package:moto_dash/screen_music.dart';
 import 'package:moto_dash/screen_settings.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
