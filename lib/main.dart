@@ -14,16 +14,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Request notification listener permission
-  // await FlutterMediaController.requestPermissions();
+  await FlutterMediaController.requestPermissions();
 
   // Set Fullscreen
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
   // Set Brightness
-  // await ScreenBrightness.instance.setApplicationScreenBrightness(0.3);
+  await ScreenBrightness.instance.setApplicationScreenBrightness(0.3);
 
   // Don't show system volume UI
-  VolumeController.instance.showSystemUI = false;
+  VolumeController.instance.showSystemUI = true;
 
   runApp(const MotoDash());
 }
@@ -41,7 +41,7 @@ class _MotoDashState extends State<MotoDash>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // WakelockPlus.enable();
+    WakelockPlus.enable();
   }
 
   @override

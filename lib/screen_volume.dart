@@ -93,7 +93,7 @@ class _VolumeScreenState extends State<VolumeScreen> {
               'Mute / Unmute',
               Icons.volume_off,
               () async => await VolumeController.instance.setMute(
-                await VolumeController.instance.isMuted(),
+                !(await VolumeController.instance.isMuted()),
               ),
               context,
               itemCount,
