@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:volume_controller/volume_controller.dart';
 
-class MusicScreen extends StatefulWidget {
-  const MusicScreen({super.key});
+class VolumeScreen extends StatefulWidget {
+  const VolumeScreen({super.key});
 
   @override
-  State<MusicScreen> createState() => _MusicScreenState();
+  State<VolumeScreen> createState() => _VolumeScreenState();
 }
 
-class _MusicScreenState extends State<MusicScreen> {
+class _VolumeScreenState extends State<VolumeScreen> {
   Color backgroundColor = Colors.black;
   Color fontColor = Colors.white;
   Color borderColor = Colors.white;
@@ -38,8 +39,8 @@ class _MusicScreenState extends State<MusicScreen> {
       prefs.getInt("option_border_color") ?? Colors.white.toARGB32(),
     );
 
-    showIcons = prefs.getBool("music_show_icons") ?? true;
-    showLabel = prefs.getBool("music_show_label") ?? true;
+    showIcons = prefs.getBool("volume_show_icons") ?? true;
+    showLabel = prefs.getBool("volume_show_label") ?? true;
 
     fontSize = double.tryParse(prefs.getString("font_size") ?? "16.0") ?? 16.0;
 
@@ -71,23 +72,29 @@ class _MusicScreenState extends State<MusicScreen> {
           padding: const EdgeInsets.all(10),
           children: [
             widgets.dashCardFunc(
-              'Previous',
-              Icons.skip_previous,
-              () async => await FlutterMediaController.previousTrack(),
+              'Increase Volume',
+              Icons.add,
+              () async => await VolumeController.instance.setVolume(
+                await VolumeController.instance.getVolume() + 0.1,
+              ),
               context,
               itemCount,
             ),
             widgets.dashCardFunc(
-              'Play / Pause',
-              Icons.play_arrow,
-              () async => await FlutterMediaController.togglePlayPause(),
+              'Decrease Volume',
+              Icons.remove,
+              () async => await VolumeController.instance.setVolume(
+                await VolumeController.instance.getVolume() - 0.1,
+              ),
               context,
               itemCount,
             ),
             widgets.dashCardFunc(
-              'Next',
-              Icons.skip_next,
-              () async => await FlutterMediaController.nextTrack(),
+              'Mute / Unmute',
+              Icons.volume_off,
+              () async => await VolumeController.instance.setMute(
+                await VolumeController.instance.isMuted(),
+              ),
               context,
               itemCount,
             ),

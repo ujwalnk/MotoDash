@@ -5,6 +5,7 @@ import 'package:flutter_media_controller/flutter_media_controller.dart';
 import 'package:moto_dash/screen_home.dart';
 import 'package:moto_dash/screen_music.dart';
 import 'package:moto_dash/screen_settings.dart';
+import 'package:moto_dash/screen_volume.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -13,13 +14,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Request notification listener permission
-  await FlutterMediaController.requestPermissions();
+  // await FlutterMediaController.requestPermissions();
 
   // Set Fullscreen
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
   // Set Brightness
-  await ScreenBrightness.instance.setApplicationScreenBrightness(0.3);
+  // await ScreenBrightness.instance.setApplicationScreenBrightness(0.3);
 
   // Don't show system volume UI
   VolumeController.instance.showSystemUI = false;
@@ -40,7 +41,7 @@ class _MotoDashState extends State<MotoDash>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    WakelockPlus.enable();
+    // WakelockPlus.enable();
   }
 
   @override
@@ -66,6 +67,7 @@ class _MotoDashState extends State<MotoDash>
       routes: {
         '/home': (_) => const HomeScreen(),
         '/music': (_) => const MusicScreen(),
+        '/volume': (_) => const VolumeScreen(),
         '/settings': (_) => const SettingsScreen(),
       },
     );

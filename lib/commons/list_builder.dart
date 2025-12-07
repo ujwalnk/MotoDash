@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
 class DashWidgets {
-  static final DashWidgets _instance = DashWidgets._internal();
+  // static final DashWidgets _instance = DashWidgets._internal();
 
-  factory DashWidgets() {
-    return _instance;
-  }
+  // factory DashWidgets() {
+  //   return _instance;
+  // }
 
-  DashWidgets._internal();
+  // DashWidgets._internal();
 
   Color? backgroundColor;
   Color? fontColor;
   Color? borderColor;
-  bool showIcons = false;
+
+  bool showIcons = true;
+  bool showLabel = true;
 
   Widget dashListView(List<Widget> children) {
     return ListView(padding: const EdgeInsets.all(10), children: children);
@@ -23,10 +25,11 @@ class DashWidgets {
     IconData icon,
     String route,
     BuildContext context,
-    int itemCount,
-    {String? routeOnLongTap}
-  ) {
+    int itemCount, {
+    String? routeOnLongTap,
+  }) {
     final screenHeight = MediaQuery.of(context).size.height;
+    debugPrint("Long Tap Route: $routeOnLongTap");
     return GestureDetector(
       onTap: () {
         if (route != "/home") {
@@ -36,6 +39,7 @@ class DashWidgets {
         }
       },
       onHorizontalDragEnd: (_) {
+        debugPrint("Double Tap on $title, $routeOnLongTap");
         if (routeOnLongTap != null) {
           Navigator.pushNamed(context, routeOnLongTap);
         }
@@ -59,9 +63,9 @@ class DashWidgets {
     IconData icon,
     Function() onTap,
     BuildContext context,
-    int itemCount,
-    {Function()? onLongPress}
-  ) {
+    int itemCount, {
+    Function()? onLongPress,
+  }) {
     final screenHeight = MediaQuery.of(context).size.height;
     return GestureDetector(
       onTap: onTap,
@@ -92,11 +96,12 @@ class DashWidgets {
               size: 40,
             ), // Show icon if enabled
           SizedBox(width: 8.0), // Space between icon and text
-          Text(
-            title,
-            style: TextStyle(color: fontColor ?? Colors.white, fontSize: 30),
-            textAlign: TextAlign.center,
-          ),
+          if (showLabel)
+            Text(
+              title,
+              style: TextStyle(color: fontColor ?? Colors.white, fontSize: 30),
+              textAlign: TextAlign.center,
+            ),
         ],
       ),
     );
