@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-class MovingDotScreen extends StatefulWidget {
-  const MovingDotScreen({super.key});
+class ScreenSaver extends StatefulWidget {
+  const ScreenSaver({super.key});
 
   @override
-  State<MovingDotScreen> createState() => _MovingDotScreenState();
+  State<ScreenSaver> createState() => _ScreenSaverState();
 }
 
-class _MovingDotScreenState extends State<MovingDotScreen> {
+class _ScreenSaverState extends State<ScreenSaver> {
   final Random _random = Random();
   Offset _position = Offset.zero;
   late Timer _timer;
