@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:moto_dash/service/contact_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -332,8 +333,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
           tappableField(
             label: "Pick Favourite Contacts",
             value: favouriteContacts,
-            onTap: () {
-              // TODO: implement contact picker
+            onTap: () async {
+              final selected = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ContactPickerScreen(
+                    preSelected: favouriteContacts.split(","),
+                  ),
+                ),
+              );
+
+              if (selected != null && selected is List<String>) {
+                setState(() {
+                  favouriteContacts = selected.join(",");
+                });
+              }
             },
           ),
 

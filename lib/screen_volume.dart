@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_media_controller/flutter_media_controller.dart';
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:volume_controller/volume_controller.dart';
