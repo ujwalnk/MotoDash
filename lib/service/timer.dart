@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:moto_dash/commons/commons.dart';
 
 class IdleTimer with WidgetsBindingObserver {
   static final IdleTimer instance = IdleTimer._internal();
@@ -18,9 +19,14 @@ class IdleTimer with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
+  Future<void> loadTimeoutFromPrefs() async {
+    timeout = await loadBlankTimeDuration();
+  }
+
   /// Enable or disable the idle timer
   void setEnabled(bool value) {
     enabled = value;
+    loadTimeoutFromPrefs();
 
     if (!enabled) {
       _timer?.cancel();

@@ -331,7 +331,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           // PHONE
-          sectionHeader("Phone Screen"),
+          sectionHeader("Phone Favourite Contacts"),
           tappableField(
             label: "Pick Favourite Contacts",
             value: favouriteContactNames,
