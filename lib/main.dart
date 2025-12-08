@@ -11,6 +11,7 @@ import 'package:moto_dash/screen_settings.dart';
 import 'package:moto_dash/screen_volume.dart';
 import 'package:moto_dash/service/timer.dart';
 import 'package:moto_dash/service/transitions.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +31,13 @@ void main() async {
 
   // Set Brightness
   await ScreenBrightness.instance.setApplicationScreenBrightness(0.3);
+
+  var status = await Permission.phone.status;
+
+  if (!status.isGranted) {
+    status = await Permission.phone.request();
+    if (!status.isGranted) return;
+  }
 
   // Don't show system volume UI
   VolumeController.instance.showSystemUI = true;
@@ -55,12 +63,13 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
   }
 
   Future<void> _loadPrefs() async {
-
     final prefs = await SharedPreferences.getInstance();
 
-      // Enable idle timer after home loads
+    // Enable idle timer after home loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      IdleTimer.instance.setEnabled(prefs.getBool("keep_screen_blank") ?? false);
+      IdleTimer.instance.setEnabled(
+        prefs.getBool("keep_screen_blank") ?? false,
+      );
     });
   }
 

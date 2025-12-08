@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:moto_dash/commons/list_builder.dart';
-import 'package:moto_dash/service/caller.dart';
 
 class FavContactsScreen extends StatefulWidget {
   const FavContactsScreen({super.key});
@@ -64,7 +64,7 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
     widgets.showIcons = showIcons;
     widgets.showLabel = showLabel;
 
-    const int itemCount = 6;
+    int itemCount = 2 + names.length;
 
     if (loading) {
       return const Scaffold(
@@ -87,7 +87,10 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
               widgets.dashCardFunc(
                 names[i], // Title (name only)
                 Icons.person, // Simple icon (or customize)
-                () async => await callNumber(numbers[i]),
+                () async {
+                  await FlutterPhoneDirectCaller.callNumber(numbers[i]);
+                  debugPrint("Calling Directly: ${numbers[i]}");
+                }, // Call directly
                 context,
                 itemCount,
               ),
