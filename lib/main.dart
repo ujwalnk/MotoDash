@@ -34,8 +34,16 @@ void main() async {
   // Set Fullscreen
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-  // Set Brightness
-  await ScreenBrightness.instance.setApplicationScreenBrightness(0.3);
+  if (prefs.getDouble("brightness") != null &&
+      prefs.getDouble("brightness") != 0) {
+    // Set Brightness
+    await ScreenBrightness.instance.setApplicationScreenBrightness(
+      prefs.getDouble("brightness")! / 100,
+    );
+  } else{
+    // Set to default brightness
+    await ScreenBrightness.instance.resetApplicationScreenBrightness();
+  }
 
   var status = await Permission.phone.status;
 

@@ -346,7 +346,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           // BRIGHTNESS
-          sectionHeader("Screen Brightness"),
+          sectionHeader("Screen Brightness (O for auto)"),
           Slider(
             value: brightness,
             min: 0,

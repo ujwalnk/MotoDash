@@ -17,10 +17,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool showIcons = true;
   bool showLabel = true;
+  bool loading = true;
+  bool showVolumeTip = true;
 
   double fontSize = 16.0;
 
-  bool loading = true;
 
   @override
   void initState() {
@@ -39,8 +40,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     fontSize = double.tryParse(prefs.getString("font_size") ?? "16.0") ?? 16.0;
 
+    showVolumeTip = prefs.getBool("show_volume_tip") ?? true;
+
     loading = false;
     setState(() {});
+
+
+    // Show popup after UI builds
+    if (showVolumeTip) {
+      Future.delayed(Duration(milliseconds: 300), _showVolumeTipDialog);
+    }
   }
 
   @override
@@ -106,6 +115,33 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showVolumeTipDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Tip"),
+        content: const Text(
+            "Slide from left to right on the Volume button to open the Settings page."),
+        actions: [
+          TextButton(
+            child: const Text("Close"),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          TextButton(
+            child: const Text("Never show again"),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool("show_volume_tip", false);
+              showVolumeTip = false;
+              if (mounted) Navigator.pop(ctx);
+            },
+          ),
+        ],
       ),
     );
   }
