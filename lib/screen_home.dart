@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/list_builder.dart';
+import 'package:moto_dash/service/assistant_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -88,10 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
               context,
               itemCount,
             ),
-            widgets.dashCardRoute(
-              'Maps',
-              Icons.map,
-              '/maps',
+            widgets.dashCardFunc(
+              'Assistant',
+              Icons.assistant,
+              (){AssistantLauncher.launch();},
               context,
               itemCount,
             ),

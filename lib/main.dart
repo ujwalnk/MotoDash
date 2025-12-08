@@ -23,8 +23,13 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Request notification listener permission
-  await FlutterMediaController.requestPermissions();
+  final prefs = await SharedPreferences.getInstance();
+
+  if (prefs.getBool("first_run") ?? true) {
+    // Request notification listener permission
+    await FlutterMediaController.requestPermissions();
+    await prefs.setBool("first_run", false);
+  }
 
   // Set Fullscreen
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
