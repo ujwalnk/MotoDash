@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
 import 'package:moto_dash/commons/list_builder.dart';
+import 'package:moto_dash/service/media_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MusicScreen extends StatefulWidget {
@@ -80,7 +81,8 @@ class _MusicScreenState extends State<MusicScreen> {
             widgets.dashCardFunc(
               'Play / Pause',
               Icons.play_arrow,
-              () async => await FlutterMediaController.togglePlayPause(),
+              // () async => await FlutterMediaController.togglePlayPause(),
+              () async => MediaSessionController.toggle(),
               context,
               itemCount,
             ),
