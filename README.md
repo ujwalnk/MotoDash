@@ -1,6 +1,6 @@
 # moto_dash
 
-![Banner](image.png)
+![Banner](banner.png)
 
 **moto_dash** is a minimal, glove-friendly Android application designed for motorcycle riders.
 
@@ -199,7 +199,6 @@ This ensures that:
 ---
 
 ## Media
-![Home Screen](demo/screen-home.jpg)
-![Music Control](demo/screen-music.jpg)
-![Call Log](demo/screen-call-log.jpg)
-![Volume Control](demo/screen-volume.jpg)
+| Home Screen | Call Log | Music Control | Volume Control |
+| --- | --- | --- | --- |
+| ![Home Screen](demo/screen-home.jpg) | ![Call Log](demo/screen-call-log.jpg) | ![Music Control](demo/screen-music.jpg)  | ![Volume Control](demo/screen-volume.jpg) |
