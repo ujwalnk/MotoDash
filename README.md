@@ -1,5 +1,7 @@
 # moto_dash
 
+![Banner](image.png)
+
 **moto_dash** is a minimal, glove-friendly Android application designed for motorcycle riders.
 
 It provides a simple, fast, and distraction-reduced interface for common actions like calls, music control, assistant triggering, volume control, and quick voice notes. The app is intended to be used while the phone is mounted on the motorcycle and the rider is wearing gloves.
