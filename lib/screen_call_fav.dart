@@ -76,7 +76,7 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
         child: ListView(
           padding: const EdgeInsets.all(10),
           children: [
@@ -86,7 +86,7 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
             for (int i = 0; i < names.length; i++)
               widgets.dashCardFunc(
                 names[i], // Title (name only)
-                Icons.person, // Simple icon (or customize)
+                [Icons.person], // Simple icon (or customize)
                 () async {
                   await FlutterPhoneDirectCaller.callNumber(numbers[i]);
                   debugPrint("Calling Directly: ${numbers[i]}");
@@ -95,14 +95,14 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
                 itemCount,
               ),
 
-            const SizedBox(height: 10),
+            // const SizedBox(height: 10),
 
             // -------------------------------
             // CALL LOG BUTTON
             // -------------------------------
             widgets.dashCardFunc(
               'Call Log',
-              Icons.history,
+              [Icons.history_rounded],
               () {
                 Navigator.pushNamed(context, "/phone_log");
               },
@@ -115,7 +115,7 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
             // -------------------------------
             widgets.dashCardFunc(
               'Return',
-              Icons.undo,
+              [Icons.undo_rounded],
               () => Navigator.pop(context),
               context,
               itemCount,

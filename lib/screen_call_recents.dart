@@ -34,7 +34,7 @@ class _CallLogScreenState extends State<CallLogScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
-    backgroundColor = Color(prefs.getInt("background_color") ?? Colors.white.toARGB32());
+    backgroundColor = Color(prefs.getInt("background_color") ?? Colors.black.toARGB32());
     fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
     borderColor = Color(prefs.getInt("option_border_color") ?? Colors.white.toARGB32());
 
@@ -76,11 +76,11 @@ class _CallLogScreenState extends State<CallLogScreen> {
   IconData _callIcon(CallType? type) {
     switch (type) {
       case CallType.incoming:
-        return Icons.call_received;
+        return Icons.call_received_rounded;
       case CallType.outgoing:
-        return Icons.call_made;
+        return Icons.call_made_rounded;
       case CallType.missed:
-        return Icons.call_missed;
+        return Icons.call_missed_rounded;
       default:
         return Icons.phone;
     }
@@ -108,7 +108,7 @@ class _CallLogScreenState extends State<CallLogScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
         child: ListView(
           padding: const EdgeInsets.all(10),
           children: [
@@ -118,7 +118,7 @@ class _CallLogScreenState extends State<CallLogScreen> {
                 call.name ?? "Unknown",
 
                 // Icon depends on call type
-                _callIcon(call.callType),
+                [_callIcon(call.callType)],
 
                 // On tap: Call number
                 () async => await callNumber(call.number ?? ''),
@@ -134,7 +134,7 @@ class _CallLogScreenState extends State<CallLogScreen> {
             /// Back button
             widgets.dashCardFunc(
               'Return',
-              Icons.undo,
+              [Icons.undo_rounded],
               () => Navigator.pop(context),
               context,
               itemCount,

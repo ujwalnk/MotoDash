@@ -22,7 +22,7 @@ class DashWidgets {
 
   Widget dashCardRoute(
     String title,
-    IconData icon,
+    List<IconData> icons,
     String route,
     BuildContext context,
     int itemCount, {
@@ -52,7 +52,7 @@ class DashWidgets {
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(color: borderColor ?? Colors.grey, width: 1),
           ),
-          child: Center(child: dashListTile(icon, title)),
+          child: Center(child: dashListTile(icons, title)),
         ),
       ),
     );
@@ -60,14 +60,14 @@ class DashWidgets {
 
   Widget dashCardFunc(
     String title,
-    IconData icon,
+    List<IconData> icons,
     Function() onTap,
     BuildContext context,
     int itemCount, {
     Function()? onLongPress,
   }) {
     final screenHeight = MediaQuery.of(context).size.height;
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
       child: SizedBox(
         height: screenHeight / (itemCount) - 10,
@@ -77,24 +77,25 @@ class DashWidgets {
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(color: borderColor ?? Colors.grey, width: 1),
           ),
-          child: Center(child: dashListTile(icon, title)),
+          child: Center(child: dashListTile(icons, title)),
         ),
       ),
     );
   }
 
-  ListTile dashListTile(IconData icon, String title) {
+  ListTile dashListTile(List<IconData> icons, String title) {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 16.0), // Add padding
       title: Row(
         mainAxisAlignment: MainAxisAlignment.center, // Center the row
         children: [
           if (showIcons)
-            Icon(
-              icon,
-              color: fontColor ?? Colors.white,
-              size: 40,
-            ), // Show icon if enabled
+            for (IconData icon in icons)
+              Icon(
+                icon,
+                color: fontColor ?? Colors.white,
+                size: 40,
+              ), // Show icon if enabled
           SizedBox(width: 8.0), // Space between icon and text
           if (showLabel)
             Text(

@@ -19,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool showLabel = true;
   bool loading = true;
   bool showVolumeTip = true;
+  bool hasFavContacts = false;
 
   double fontSize = 16.0;
 
@@ -41,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     fontSize = double.tryParse(prefs.getString("font_size") ?? "16.0") ?? 16.0;
 
     showVolumeTip = prefs.getBool("show_volume_tip") ?? true;
+    hasFavContacts = prefs.getStringList("fav_contact_names")?.isEmpty ?? false;
 
     loading = false;
     setState(() {});
@@ -79,35 +81,35 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             widgets.dashCardRoute(
               'Phone',
-              Icons.phone,
-              '/phone_fav',
+              [Icons.phone_rounded],
+              hasFavContacts ? '/phone_fav' : '/phone_log',
               context,
               itemCount,
             ),
             widgets.dashCardRoute(
               'Music',
-              Icons.music_note,
+              [Icons.music_note_rounded],
               '/music',
               context,
               itemCount,
             ),
             widgets.dashCardRoute(
               'Voice Note',
-              Icons.mic,
+              [Icons.mic_rounded],
               '/voicenote',
               context,
               itemCount,
             ),
             widgets.dashCardFunc(
               'Assistant',
-              Icons.assistant,
+              [Icons.assistant_rounded],
               (){AssistantLauncher.launch();},
               context,
               itemCount,
             ),
             widgets.dashCardRoute(
               'Volume',
-              Icons.volume_up,
+              [Icons.volume_up_rounded],
               '/volume',
               context,
               itemCount,

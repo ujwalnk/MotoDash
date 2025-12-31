@@ -69,20 +69,20 @@ class _MusicScreenState extends State<MusicScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
         child: ListView(
           padding: const EdgeInsets.all(10),
           children: [
             widgets.dashCardFunc(
               'Previous',
-              Icons.skip_previous,
+              [Icons.skip_previous_rounded],
               () async => await FlutterMediaController.previousTrack(),
               context,
               itemCount,
             ),
             widgets.dashCardFunc(
               'Play / Pause',
-              Icons.play_arrow,
+              [Icons.play_arrow_rounded, Icons.pause_rounded],
               () async {
                 try {
                   await _channel.invokeMethod('togglePlayPause');
@@ -95,14 +95,14 @@ class _MusicScreenState extends State<MusicScreen> {
             ),
             widgets.dashCardFunc(
               'Next',
-              Icons.skip_next,
+              [Icons.skip_next_rounded],
               () async => await FlutterMediaController.nextTrack(),
               context,
               itemCount,
             ),
             widgets.dashCardFunc(
               'Return',
-              Icons.undo,
+              [Icons.undo_rounded],
               () => Navigator.pop(context),
               context,
               itemCount,

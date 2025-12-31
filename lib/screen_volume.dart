@@ -66,13 +66,13 @@ class _VolumeScreenState extends State<VolumeScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
         child: ListView(
           padding: const EdgeInsets.all(10),
           children: [
             widgets.dashCardFunc(
               'Increase Volume',
-              Icons.add,
+              [Icons.add_rounded],
               () async => await VolumeController.instance.setVolume(
                 await VolumeController.instance.getVolume() + 0.1,
               ),
@@ -81,7 +81,7 @@ class _VolumeScreenState extends State<VolumeScreen> {
             ),
             widgets.dashCardFunc(
               'Decrease Volume',
-              Icons.remove,
+              [Icons.remove_rounded],
               () async => await VolumeController.instance.setVolume(
                 await VolumeController.instance.getVolume() - 0.1,
               ),
@@ -90,7 +90,7 @@ class _VolumeScreenState extends State<VolumeScreen> {
             ),
             widgets.dashCardFunc(
               'Mute / Unmute',
-              Icons.volume_off,
+              [Icons.volume_off_rounded],
               () async => await VolumeController.instance.setMute(
                 !(await VolumeController.instance.isMuted()),
               ),
@@ -99,7 +99,7 @@ class _VolumeScreenState extends State<VolumeScreen> {
             ),
             widgets.dashCardFunc(
               'Return',
-              Icons.undo,
+              [Icons.undo_rounded],
               () => Navigator.pop(context),
               context,
               itemCount,
