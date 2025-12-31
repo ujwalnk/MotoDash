@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    backgroundColor = Color(prefs.getInt("background_color") ?? Colors.white.toARGB32());
+    backgroundColor = Color(prefs.getInt("background_color") ?? Colors.black.toARGB32());
     fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
     borderColor = Color(prefs.getInt("option_border_color") ?? Colors.white.toARGB32());
 

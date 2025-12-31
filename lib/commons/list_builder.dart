@@ -30,7 +30,7 @@ class DashWidgets {
   }) {
     final screenHeight = MediaQuery.of(context).size.height;
     debugPrint("Long Tap Route: $routeOnLongTap");
-    return GestureDetector(
+    return InkWell(
       onTap: () {
         if (route != "/home") {
           Navigator.pushNamed(context, route);
@@ -38,7 +38,7 @@ class DashWidgets {
           Navigator.pop(context);
         }
       },
-      onHorizontalDragEnd: (_) {
+      onDoubleTap: () {
         debugPrint("Double Tap on $title, $routeOnLongTap");
         if (routeOnLongTap != null) {
           Navigator.pushNamed(context, routeOnLongTap);

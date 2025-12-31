@@ -35,7 +35,7 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
     final prefs = await SharedPreferences.getInstance();
 
     backgroundColor = Color(
-      prefs.getInt("background_color") ?? Colors.white.toARGB32(),
+      prefs.getInt("background_color") ?? Colors.black.toARGB32(),
     );
     fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
     borderColor = Color(

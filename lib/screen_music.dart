@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 class MusicScreen extends StatefulWidget {
   const MusicScreen({super.key});
@@ -22,6 +23,8 @@ class _MusicScreenState extends State<MusicScreen> {
 
   bool loading = true;
 
+  static const MethodChannel _channel = MethodChannel('assistant.launcher');
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +34,7 @@ class _MusicScreenState extends State<MusicScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     backgroundColor = Color(
-      prefs.getInt("background_color") ?? Colors.white.toARGB32(),
+      prefs.getInt("background_color") ?? Colors.black.toARGB32(),
     );
     fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
     borderColor = Color(
@@ -80,7 +83,13 @@ class _MusicScreenState extends State<MusicScreen> {
             widgets.dashCardFunc(
               'Play / Pause',
               Icons.play_arrow,
-              () async => await FlutterMediaController.togglePlayPause(),
+              () async {
+                try {
+                  await _channel.invokeMethod('togglePlayPause');
+                } on PlatformException {
+                  await FlutterMediaController.togglePlayPause();
+                }
+              },
               context,
               itemCount,
             ),
