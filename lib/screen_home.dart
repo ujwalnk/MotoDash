@@ -145,7 +145,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
       builder: (ctx) => AlertDialog(
         title: const Text("Tip"),
         content: const Text(
-          "Slide from left to right on the Volume button to open the Settings page.",
+          "Double tap the Volume button on screen to open the Settings page.",
         ),
         actions: [
           TextButton(
