@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
 import 'package:moto_dash/commons/list_builder.dart';
+import 'package:moto_dash/commons/split_screen_observer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 
@@ -11,7 +12,7 @@ class MusicScreen extends StatefulWidget {
   State<MusicScreen> createState() => _MusicScreenState();
 }
 
-class _MusicScreenState extends State<MusicScreen> {
+class _MusicScreenState extends SplitScreenState<MusicScreen> {
   Color backgroundColor = Colors.black;
   Color fontColor = Colors.white;
   Color borderColor = Colors.white;
@@ -59,8 +60,13 @@ class _MusicScreenState extends State<MusicScreen> {
     widgets.backgroundColor = backgroundColor;
     widgets.fontColor = fontColor;
     widgets.borderColor = borderColor;
-    widgets.showIcons = showIcons;
-    widgets.showLabel = showLabel;
+    if (isSplitScreen) {
+      widgets.showLabel = false;
+      widgets.showIcons = true;
+    } else {
+      widgets.showIcons = showIcons;
+      widgets.showLabel = showLabel;
+    }
 
     if (loading) {
       return const Center(child: CircularProgressIndicator());
@@ -70,9 +76,10 @@ class _MusicScreenState extends State<MusicScreen> {
       backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-        child: ListView(
-          padding: const EdgeInsets.all(10),
-          children: [
+        child: widgets.dashView(
+          // padding: const EdgeInsets.all(10),
+          isSplitScreen,
+          [
             widgets.dashCardFunc(
               'Previous',
               [Icons.skip_previous_rounded],

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
+// import android.os.build
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -11,6 +12,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
 
     private val CHANNEL = "assistant.launcher"
+    private var isSplitScreen: Boolean = false;
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -42,9 +44,18 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
+                "getSplitScreenState" -> {
+                    result.success(isSplitScreen)
+                }
+
                 else -> result.notImplemented()
             }
         }
+    }
+
+    override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode)
+        isSplitScreen = isInMultiWindowMode
     }
 
     private fun toggleActiveMediaSession() {

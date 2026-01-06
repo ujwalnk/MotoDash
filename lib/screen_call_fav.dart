@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:moto_dash/commons/split_screen_observer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:moto_dash/commons/list_builder.dart';
 
@@ -10,7 +11,7 @@ class FavContactsScreen extends StatefulWidget {
   State<FavContactsScreen> createState() => _FavContactsScreenState();
 }
 
-class _FavContactsScreenState extends State<FavContactsScreen> {
+class _FavContactsScreenState extends SplitScreenState<FavContactsScreen> {
   Color backgroundColor = Colors.black;
   Color fontColor = Colors.white;
   Color borderColor = Colors.white;
@@ -61,8 +62,13 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
     widgets.backgroundColor = backgroundColor;
     widgets.fontColor = fontColor;
     widgets.borderColor = borderColor;
-    widgets.showIcons = showIcons;
-    widgets.showLabel = showLabel;
+    if (isSplitScreen) {
+      widgets.showLabel = true;
+      widgets.showIcons = false;
+    } else {
+      widgets.showIcons = showIcons;
+      widgets.showLabel = showLabel;
+    }
 
     int itemCount = 2 + names.length;
 
@@ -77,29 +83,29 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
       backgroundColor: backgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-        child: ListView(
-          padding: const EdgeInsets.all(10),
-          children: [
-            // -------------------------------
-            // LIST OF FAVOURITE CONTACTS
-            // -------------------------------
-            for (int i = 0; i < names.length; i++)
-              widgets.dashCardFunc(
-                names[i], // Title (name only)
-                [Icons.person], // Simple icon (or customize)
-                () async {
-                  await FlutterPhoneDirectCaller.callNumber(numbers[i]);
-                  debugPrint("Calling Directly: ${numbers[i]}");
-                }, // Call directly
-                context,
-                itemCount,
-              ),
+        child: widgets.dashView(isSplitScreen, [
+          // -------------------------------
+          // LIST OF FAVOURITE CONTACTS
+          // -------------------------------
+          for (int i = 0; i < (isSplitScreen ? 4 : names.length); i++)
+            widgets.dashCardFunc(
+              isSplitScreen
+                  ? (names[i].substring(
+                      0,
+                      names[i].length > 10 ? 10 : names[i].length,
+                    ))
+                  : names[i], // Title (name only)
+              [Icons.person], // Simple icon (or customize)
+              () async {
+                await FlutterPhoneDirectCaller.callNumber(numbers[i]);
+                debugPrint("Calling Directly: ${numbers[i]}");
+              }, // Call directly
+              context,
+              itemCount,
+            ),
 
-            // const SizedBox(height: 10),
-
-            // -------------------------------
-            // CALL LOG BUTTON
-            // -------------------------------
+          // const SizedBox(height: 10),
+          if (!isSplitScreen)
             widgets.dashCardFunc(
               'Call Log',
               [Icons.history_rounded],
@@ -110,18 +116,19 @@ class _FavContactsScreenState extends State<FavContactsScreen> {
               itemCount,
             ),
 
-            // -------------------------------
-            // RETURN BUTTON
-            // -------------------------------
-            widgets.dashCardFunc(
-              'Return',
-              [Icons.undo_rounded],
-              () => Navigator.pop(context),
-              context,
-              itemCount,
-            ),
-          ],
-        ),
+          // -------------------------------
+          // RETURN BUTTON
+          // -------------------------------
+          widgets.dashCardFunc(
+            'Return',
+            [Icons.undo_rounded],
+            () => Navigator.pop(context),
+            context,
+            itemCount,
+            overrideShowIcons: true,
+            overrideShowLabel: false,
+          ),
+        ]),
       ),
     );
   }

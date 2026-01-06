@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
 
 import 'package:moto_dash/screen_call_fav.dart';
+import 'package:moto_dash/screen_call_nav.dart';
 import 'package:moto_dash/screen_call_recents.dart';
 import 'package:moto_dash/screen_home.dart';
 import 'package:moto_dash/screen_music.dart';
@@ -40,7 +41,7 @@ void main() async {
     await ScreenBrightness.instance.setApplicationScreenBrightness(
       prefs.getDouble("brightness")! / 100,
     );
-  } else{
+  } else {
     // Set to default brightness
     await ScreenBrightness.instance.resetApplicationScreenBrightness();
   }
@@ -131,6 +132,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
 
         routes: {
           '/home': (_) => const HomeScreen(),
+          '/phone_nav': (_) => const CallNavScreen(),
           '/phone_log': (_) => const CallLogScreen(),
           '/phone_fav': (_) => const FavContactsScreen(),
           '/music': (_) => const MusicScreen(),
