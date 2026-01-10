@@ -8,6 +8,9 @@ import android.media.session.PlaybackState
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.media.AudioManager
+import android.view.KeyEvent
+
 
 class MainActivity : FlutterActivity() {
 
@@ -34,15 +37,21 @@ class MainActivity : FlutterActivity() {
                         result.error("ERR", e.message, null)
                     }
                 }
-
                 "togglePlayPause" -> {
-                    try {
-                        toggleActiveMediaSession()
-                        result.success(true)
-                    } catch (e: Exception) {
-                        result.error("ERR", e.message, null)
-                    }
-                }
+    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+    result.success(true)
+}
+
+"nextTrack" -> {
+    sendMediaKey(KeyEvent.KEYCODE_MEDIA_NEXT)
+    result.success(true)
+}
+
+"previousTrack" -> {
+    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
+    result.success(true)
+}
+
 
                 "getSplitScreenState" -> {
                     result.success(isSplitScreen)
@@ -58,25 +67,14 @@ class MainActivity : FlutterActivity() {
         isSplitScreen = isInMultiWindowMode
     }
 
-    private fun toggleActiveMediaSession() {
-        val mediaSessionManager =
-            getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+    private fun sendMediaKey(keyCode: Int) {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        val sessions = mediaSessionManager.getActiveSessions(null)
+        val down = KeyEvent(KeyEvent.ACTION_DOWN, keyCode)
+        val up = KeyEvent(KeyEvent.ACTION_UP, keyCode)
 
-        for (controller in sessions) {
-            val state = controller.playbackState ?: continue
-
-            when (state.state) {
-                PlaybackState.STATE_PLAYING -> {
-                    controller.transportControls.pause()
-                    return
-                }
-                PlaybackState.STATE_PAUSED -> {
-                    controller.transportControls.play()
-                    return
-                }
-            }
-        }
+        audioManager.dispatchMediaKeyEvent(down)
+        audioManager.dispatchMediaKeyEvent(up)
     }
+
 }

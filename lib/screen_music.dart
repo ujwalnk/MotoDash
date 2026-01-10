@@ -83,27 +83,21 @@ class _MusicScreenState extends SplitScreenState<MusicScreen> {
             widgets.dashCardFunc(
               'Previous',
               [Icons.skip_previous_rounded],
-              () async => await FlutterMediaController.previousTrack(),
+              () async => await _channel.invokeMethod('previousTrack'),
               context,
               itemCount,
             ),
             widgets.dashCardFunc(
               'Play / Pause',
               [Icons.play_arrow_rounded, Icons.pause_rounded],
-              () async {
-                try {
-                  await _channel.invokeMethod('togglePlayPause');
-                } on PlatformException {
-                  await FlutterMediaController.togglePlayPause();
-                }
-              },
+              () async => await _channel.invokeMethod('togglePlayPause'),
               context,
               itemCount,
             ),
             widgets.dashCardFunc(
               'Next',
               [Icons.skip_next_rounded],
-              () async => await FlutterMediaController.nextTrack(),
+              () async => await _channel.invokeMethod('nextTrack'),
               context,
               itemCount,
             ),
