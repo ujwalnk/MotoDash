@@ -34,7 +34,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
     Future.delayed(const Duration(seconds: 10), () {
       if (mounted) {
         setState(() {
-          showSettingsButton = false;
+          // showSettingsButton = false;
         });
       }
     });

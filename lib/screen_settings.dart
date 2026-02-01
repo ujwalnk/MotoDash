@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:moto_dash/service/contact_picker.dart';
+import 'package:moto_dash/service/rgb_color_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -130,6 +131,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> showRgbPicker({
+    required Color currentColor,
+    required ValueChanged<Color> onColorSelected,
+  }) async {
+    await showDialog(
+      context: context,
+      builder: (_) => HexWheelColorPickerDialog(
+        color: currentColor,
+        onChanged: (c) {
+          onColorSelected(c);
+        },
+      ),
+    );
+  }
+
   Widget checkboxTile(String title, bool value, Function(bool) onChanged) {
     return CheckboxListTile(
       title: Text(title, style: const TextStyle(color: Colors.white)),
@@ -189,7 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-
+  /*
   Future<void> showColorPickerDialog({
     required Color currentColor,
     required ValueChanged<Color> onColorSelected,
@@ -225,7 +241,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       },
     );
-  }
+  }*/
 
   Widget colorTile({
     required String label,
@@ -233,10 +249,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required ValueChanged<Color> onColorSelected,
   }) {
     return GestureDetector(
-      onTap: () => showColorPickerDialog(
-        currentColor: color,
-        onColorSelected: onColorSelected,
-      ),
+      onTap: () =>
+          showRgbPicker(currentColor: color, onColorSelected: onColorSelected),
       child: Container(
         margin: const EdgeInsets.only(top: 12),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
