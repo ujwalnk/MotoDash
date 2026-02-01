@@ -23,11 +23,21 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
   bool hasFavContacts = false;
 
   double fontSize = 16.0;
+  bool showSettingsButton = true;
 
   @override
   void initState() {
     super.initState();
     _loadSettings();
+
+    // Hide settings button after 7 seconds (launch-only)
+    Future.delayed(const Duration(seconds: 10), () {
+      if (mounted) {
+        setState(() {
+          showSettingsButton = false;
+        });
+      }
+    });
   }
 
   Future<void> _loadSettings() async {
@@ -57,14 +67,14 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
 
     // Show popup after UI builds
     if (showVolumeTip) {
-      Future.delayed(Duration(milliseconds: 300), _showVolumeTipDialog);
+      Future.delayed(Duration(milliseconds: 300), _showSettingsTip);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     DashWidgets widgets = DashWidgets();
-    int itemCount = 4;
+    int itemCount = showSettingsButton ? 5 : 4;
 
     // Set Widget properties
     widgets.backgroundColor = backgroundColor;
@@ -124,6 +134,14 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
               context,
               itemCount,
             ),
+            if (showSettingsButton)
+              widgets.dashCardRoute(
+                'Settings',
+                [Icons.settings_rounded],
+                '/settings',
+                context,
+                itemCount,
+              ),
             widgets.dashCardRoute(
               'Volume',
               [Icons.volume_up_rounded],
@@ -138,14 +156,14 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
     );
   }
 
-  void _showVolumeTipDialog() {
+  void _showSettingsTip() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         title: const Text("Tip"),
         content: const Text(
-          "Double tap the Volume button on screen to open the Settings page.",
+          "Settings menu button will be displayed on every app launch for 10 seconds. Relaunch the app to see it again.",
         ),
         actions: [
           TextButton(
