@@ -31,9 +31,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final blankTimeController = TextEditingController();
 
   // General settings
-  // final fontColorController = TextEditingController();
-  // final backgroundColorController = TextEditingController();
-  // final optionBorderColorController = TextEditingController();
   Color fontColor = Colors.white;
   Color backgroundColor = Colors.black;
   Color optionBorderColor = Colors.grey;
@@ -64,18 +61,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       volumeShowIcons = prefs.getBool("volume_show_icons") ?? false;
       volumeShowLabel = prefs.getBool("volume_show_label") ?? false;
 
-      // favouriteContacts = prefs.getString("phone_favourite_contacts") ?? "";
-
       brightness = prefs.getDouble("brightness") ?? 50.0;
 
       keepScreenBlank = prefs.getBool("keep_screen_blank") ?? false;
       blankTimeController.text = prefs.getString("blank_time_minutes") ?? "";
 
-      // fontColorController.text = prefs.getString("font_color") ?? "";
-      // backgroundColorController.text =
-      //     prefs.getString("background_color") ?? "";
-      // optionBorderColorController.text =
-      //     prefs.getString("option_border_color") ?? "";
       fontSizeController.text = prefs.getString("font_size") ?? "";
 
       fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
@@ -88,7 +78,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         prefs.getInt("option_border_color") ?? Colors.grey.toARGB32(),
       );
 
-      favouriteContactNames = prefs.getStringList("fav_contact_names")?.join(", ") ?? "";
+      favouriteContactNames =
+          prefs.getStringList("fav_contact_names")?.join(", ") ?? "";
     });
   }
 

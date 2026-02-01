@@ -49,7 +49,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
     hasFavContacts =
         prefs.getStringList("fav_contact_names")?.toList().isNotEmpty ?? false;
     debugPrint(
-      "hasFavContacts: ${prefs.getStringList("fav_contact_names")}, ${hasFavContacts}",
+      "hasFavContacts: ${prefs.getStringList("fav_contact_names")}, $hasFavContacts",
     );
 
     loading = false;

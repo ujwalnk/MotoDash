@@ -77,4 +77,9 @@ class MainActivity : FlutterActivity() {
         audioManager.dispatchMediaKeyEvent(up)
     }
 
+    override fun onStart() {
+        super.onStart()
+        isSplitScreen = isInMultiWindowMode
+    }
+
 }

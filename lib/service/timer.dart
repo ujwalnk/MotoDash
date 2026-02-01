@@ -6,14 +6,12 @@ class IdleTimer with WidgetsBindingObserver {
   static final IdleTimer instance = IdleTimer._internal();
   IdleTimer._internal();
 
-  // Navigator key injected from main.dart
   GlobalKey<NavigatorState>? navigatorKey;
 
   Timer? _timer;
-  bool enabled = false; // keepScreenBlank
+  bool enabled = false;
   Duration timeout = const Duration(minutes: 2);
 
-  /// Setup (called once from MaterialApp builder)
   void initialize(GlobalKey<NavigatorState> key) {
     navigatorKey = key;
     WidgetsBinding.instance.addObserver(this);
@@ -23,24 +21,23 @@ class IdleTimer with WidgetsBindingObserver {
     timeout = await loadBlankTimeDuration();
   }
 
-  /// Enable or disable the idle timer
-  void setEnabled(bool value) {
+  /// Enable or disable idle detection
+  Future<void> setEnabled(bool value) async {
     enabled = value;
-    loadTimeoutFromPrefs();
 
-    if (!enabled) {
-      _timer?.cancel();
-    } else {
-      resetTimer();
-    }
-  }
+    _timer?.cancel();
 
-  /// Reset timer when user touches screen or app resumes
-  void registerActivity() {
+    if (!enabled) return;
+
+    await loadTimeoutFromPrefs();
     resetTimer();
   }
 
-  /// Start the inactivity countdown
+  void registerActivity() {
+    if (!enabled) return;
+    resetTimer();
+  }
+
   void resetTimer() {
     if (!enabled) return;
 
@@ -48,23 +45,19 @@ class IdleTimer with WidgetsBindingObserver {
     _timer = Timer(timeout, _triggerSaver);
   }
 
-  /// Navigate to /saver using the global navigator key
   void _triggerSaver() {
     final navigator = navigatorKey?.currentState;
     if (navigator == null) return;
 
-    // Prevent multiple pushes when user taps while navigating
-    if (navigator.canPop()) {
-      navigator.pushNamed("/saver");
-    } else {
-      navigator.pushNamed("/saver");
-    }
+    // Prevent stacking saver routes
+    if (navigator.canPop()) return;
+
+    navigator.pushNamed("/saver");
   }
 
-  /// Reset timer when app resumes from background
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed && enabled) {
       resetTimer();
     }
   }

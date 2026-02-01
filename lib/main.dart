@@ -137,14 +137,12 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
           '/phone_fav': (_) => const FavContactsScreen(),
           '/music': (_) => const MusicScreen(),
           '/volume': (_) => const VolumeScreen(),
-          '/settings': (_) => const SettingsScreen(),
-
-          // 🟢 Add your blank/black saver screen here
           '/saver': (_) => const ScreenSaver(),
+          '/settings': (_) => const SettingsScreen(),
         },
 
         builder: (context, child) {
-          // 🟢 Allow IdleTimer to access global navigation context
+          // Allow IdleTimer to access global navigation context
           IdleTimer.instance.initialize(navigatorKey);
 
           return child!;

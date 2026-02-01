@@ -35,8 +35,11 @@ class DashWidgets {
     }
   }
 
-  ListView dashListView(List<Widget> children) =>
-      ListView(padding: const EdgeInsets.all(10), children: children);
+  ListView dashListView(List<Widget> children) => ListView(
+    padding: const EdgeInsets.all(10),
+    physics: const NeverScrollableScrollPhysics(),
+    children: children,
+  );
 
   Widget dashGridView(List<Widget> children) {
     final bool isOdd = children.length.isOdd;
@@ -159,8 +162,12 @@ class DashWidgets {
     bool? overrideShowLabel,
   }) {
     final screenHeight = MediaQuery.of(context).size.height;
-    return InkWell(
-      onTap: onTap,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (details) {
+        onTap();
+      },
+      onDoubleTap: onLongPress,
       child: SizedBox(
         height: screenHeight / (itemCount) - 10,
         child: Card(
