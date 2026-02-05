@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show MethodChannel;
 
 class DashWidgets {
-  // static final DashWidgets _instance = DashWidgets._internal();
-
-  // factory DashWidgets() {
-  //   return _instance;
-  // }
-
-  // DashWidgets._internal();
-
   Color? backgroundColor;
   Color? fontColor;
   Color? borderColor;
@@ -69,9 +61,7 @@ class DashWidgets {
 
         // ONE canonical tile height
         final tileHeight = usableHeight / totalRows;
-
         final tileWidth = (totalWidth - padding * 2 - spacing) / columns;
-
         final aspectRatio = tileWidth / tileHeight;
 
         return Padding(
@@ -118,23 +108,16 @@ class DashWidgets {
     List<IconData> icons,
     String route,
     BuildContext context,
-    int itemCount, {
-    String? routeOnLongTap,
-  }) {
+    int itemCount,
+  ) {
     final screenHeight = MediaQuery.of(context).size.height;
-    debugPrint("Long Tap Route: $routeOnLongTap");
-    return InkWell(
-      onTap: () {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) {
         if (route != "/home") {
           Navigator.pushNamed(context, route);
         } else {
           Navigator.pop(context);
-        }
-      },
-      onDoubleTap: () {
-        debugPrint("Double Tap on $title, $routeOnLongTap");
-        if (routeOnLongTap != null) {
-          Navigator.pushNamed(context, routeOnLongTap);
         }
       },
       child: SizedBox(
@@ -157,17 +140,15 @@ class DashWidgets {
     Function() onTap,
     BuildContext context,
     int itemCount, {
-    Function()? onLongPress,
     bool? overrideShowIcons,
     bool? overrideShowLabel,
   }) {
     final screenHeight = MediaQuery.of(context).size.height;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (details) {
+      onTapDown: (_) {
         onTap();
       },
-      onDoubleTap: onLongPress,
       child: SizedBox(
         height: screenHeight / (itemCount) - 10,
         child: Card(

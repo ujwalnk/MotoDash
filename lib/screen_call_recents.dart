@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+
 import 'package:call_log/call_log.dart';
-import 'package:moto_dash/commons/split_screen_observer.dart';
-import 'package:moto_dash/service/caller.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart' show FlutterPhoneDirectCaller;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:moto_dash/commons/list_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:moto_dash/commons/split_screen_observer.dart';
+import 'package:moto_dash/commons/list_builder.dart';
 
 class CallLogScreen extends StatefulWidget {
   const CallLogScreen({super.key});
@@ -136,14 +138,11 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen> {
               [_callIcon(call.callType)],
 
               // On tap: Call number
-              () async => await callNumber(call.number ?? ''),
+              () async => await FlutterPhoneDirectCaller.callNumber(call.number ?? ''),
 
               // Send context & count
               context,
               itemCount,
-
-              // Subtitle: Phone number displayed beneath
-              // subtitle: call.number ?? "Unknown",
             ),
 
           /// Back button

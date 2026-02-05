@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:moto_dash/commons/split_screen_observer.dart';
+
 import 'package:moto_dash/service/assistant_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -148,7 +151,6 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
               '/volume',
               context,
               itemCount,
-              routeOnLongTap: "/settings",
             ),
           ],
         ),
@@ -176,7 +178,9 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
               final prefs = await SharedPreferences.getInstance();
               await prefs.setBool("show_volume_tip", false);
               showVolumeTip = false;
-              if (mounted) Navigator.pop(ctx);
+
+              if (!mounted) return;
+              Navigator.pop(ctx);
             },
           ),
         ],

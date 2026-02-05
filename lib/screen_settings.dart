@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flex_color_picker/flex_color_picker.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:moto_dash/service/contact_picker.dart';
 import 'package:moto_dash/service/rgb_color_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -205,43 +206,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-  /*
-  Future<void> showColorPickerDialog({
-    required Color currentColor,
-    required ValueChanged<Color> onColorSelected,
-  }) async {
-    Color pickerColor = currentColor;
-
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.black,
-          title: const Text(
-            'Pick a Color',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: pickerColor,
-              onColorChanged: (color) {
-                setState(() => pickerColor = color);
-              },
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                onColorSelected(pickerColor);
-                Navigator.of(context).pop();
-              },
-              child: const Text("Got it"),
-            ),
-          ],
-        );
-      },
-    );
-  }*/
 
   Widget colorTile({
     required String label,
@@ -287,7 +251,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () async {
               await saveSettings();
-              Navigator.pop(context); // finished
+              if(!mounted) return;
+              Navigator.pop(context);
             },
             child: const Text("Save", style: TextStyle(color: Colors.white)),
           ),

@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:moto_dash/service/timer.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:moto_dash/service/timer.dart';
 
 class ScreenSaver extends StatefulWidget {
   const ScreenSaver({super.key});
@@ -123,7 +126,7 @@ class _ScreenSaverState extends State<ScreenSaver>
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).pop(),
+      onTapDown: (details) => Navigator.of(context).pop(),
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Stack(
