@@ -14,7 +14,7 @@ class CallNavScreen extends StatefulWidget {
 class _CallNavScreenState extends State<CallNavScreen> {
   final Color backgroundColor = ConfigProvider.getBackgroundColor;
   final Color fontColor = ConfigProvider.getFontColor;
-  final Color borderColor = ConfigProvider.getOptionBorderColor;
+  final Color borderColor = ConfigProvider.getBorderColor;
 
   final bool showIcons = ConfigProvider.getShowIcons(Constants.kPathCallNav);
   final bool showLabel = ConfigProvider.getShowLabel(Constants.kPathCallNav);

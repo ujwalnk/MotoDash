@@ -2,6 +2,7 @@
 // Created On: 10 Feb, 2026
 
 import 'package:flutter/material.dart';
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,7 +43,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // General settings
   Color fontColor = Colors.white;
   Color backgroundColor = Colors.black;
-  Color optionBorderColor = Colors.grey;
+  Color BorderColor = Colors.grey;
   final fontSizeController = TextEditingController();
 
   // Brightness
@@ -63,34 +64,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
 
     setState(() {
-      homeShowIcons = prefs.getBool("home_show_icons") ?? false;
-      homeShowLabel = prefs.getBool("home_show_label") ?? false;
+      homeShowIcons = ConfigProvider.getShowIcons(Constants.kPathHome);
+      homeShowLabel = ConfigProvider.getShowLabel(Constants.kPathHome);
 
-      musicShowIcons = prefs.getBool("music_show_icons") ?? false;
-      musicShowLabel = prefs.getBool("music_show_label") ?? false;
+      musicShowIcons = ConfigProvider.getShowIcons(Constants.kPathMusic);
+      musicShowLabel = ConfigProvider.getShowLabel(Constants.kPathMusic);
 
-      volumeShowIcons = prefs.getBool("volume_show_icons") ?? false;
-      volumeShowLabel = prefs.getBool("volume_show_label") ?? false;
+      volumeShowIcons = ConfigProvider.getShowIcons(Constants.kPathVolume);
+      volumeShowLabel = ConfigProvider.getShowLabel(Constants.kPathVolume);
 
-      brightness = prefs.getDouble("brightness") ?? 50.0;
+      brightness = prefs.getDouble(Constants.kKeyBrightness) ?? 50.0;
 
       keepScreenBlank = prefs.getBool("keep_screen_blank") ?? false;
       blankTimeController.text = prefs.getString("blank_time_minutes") ?? "";
 
-      fontSizeController.text = prefs.getString("font_size") ?? "";
+      fontSizeController.text = ConfigProvider.getFontSize.toString();
 
-      fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
-
-      backgroundColor = Color(
-        prefs.getInt("background_color") ?? Colors.black.toARGB32(),
-      );
-
-      optionBorderColor = Color(
-        prefs.getInt("option_border_color") ?? Colors.grey.toARGB32(),
-      );
+      backgroundColor = ConfigProvider.getBackgroundColor;
+      BorderColor = ConfigProvider.getBorderColor;
+      fontColor = ConfigProvider.getFontColor;
 
       favouriteContactNames =
-          prefs.getStringList("fav_contact_names")?.join(", ") ?? "";
+          prefs.getStringList(Constants.kKeyFavContactNames)?.join(", ") ?? "";
+
+      magnetGesturesEnabled = ConfigProvider.getEnableMagnetGestures;
     });
   }
 
@@ -100,27 +97,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setBool("home_show_icons", homeShowIcons);
-    await prefs.setBool("home_show_label", homeShowLabel);
+    await prefs.setBool(Constants.kKeyHomeShowIcons, homeShowIcons);
+    await prefs.setBool(Constants.kKeyHomeShowLabel, homeShowLabel);
 
-    await prefs.setBool("music_show_icons", musicShowIcons);
-    await prefs.setBool("music_show_label", musicShowLabel);
+    await prefs.setBool(Constants.kKeyMusicShowIcons, musicShowIcons);
+    await prefs.setBool(Constants.kKeyMusicShowLabel, musicShowLabel);
 
-    await prefs.setBool("volume_show_icons", volumeShowIcons);
-    await prefs.setBool("volume_show_label", volumeShowLabel);
+    await prefs.setBool(Constants.kKeyVolumeShowIcons, volumeShowIcons);
+    await prefs.setBool(Constants.kKeyVolumeShowLabel, volumeShowLabel);
 
     // await prefs.setString("phone_favourite_contacts", favouriteContacts);
 
-    await prefs.setDouble("brightness", brightness);
+    await prefs.setDouble(Constants.kKeyBrightness, brightness);
 
     await prefs.setBool("keep_screen_blank", keepScreenBlank);
     await prefs.setString("blank_time_minutes", blankTimeController.text);
 
-    // await prefs.setString("font_color", fontColorController.text);
-    await prefs.setInt("font_color", fontColor.toARGB32());
-    await prefs.setInt("background_color", backgroundColor.toARGB32());
-    await prefs.setInt("option_border_color", optionBorderColor.toARGB32());
-    await prefs.setString("font_size", fontSizeController.text);
+    await prefs.setInt(Constants.kKeyFontColor, fontColor.toARGB32());
+    await prefs.setInt(
+      Constants.kKeyBackgroundColor,
+      backgroundColor.toARGB32(),
+    );
+    await prefs.setInt(Constants.kKeyBorderColor, BorderColor.toARGB32());
+    await prefs.setString(Constants.kKeyFontSize, fontSizeController.text);
+    await prefs.setBool(
+      Constants.kKeyEnableMagnetGestures,
+      magnetGesturesEnabled,
+    );
   }
 
   // ------------------------------------------------------------
@@ -133,7 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Text(
         title,
         style: const TextStyle(
-          color: Colors.white,
+          color: settingsScreenFontColor,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
@@ -161,7 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       title: Text(title, style: TextStyle(color: settingsScreenFontColor)),
       value: value,
       onChanged: (v) => onChanged(v!),
-      activeColor: Colors.white,
+      activeColor: settingsScreenFontColor,
       checkColor: Colors.black,
       contentPadding: EdgeInsets.zero,
     );
@@ -177,7 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: TextField(
         controller: controller,
         keyboardType: inputType,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(color: settingsScreenFontColor),
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(color: settingsScreenFontColor),
@@ -243,7 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               height: 28,
               decoration: BoxDecoration(
                 color: color,
-                border: Border.all(color: Colors.white),
+                border: Border.all(color: settingsScreenFontColor),
               ),
             ),
           ],
@@ -389,8 +392,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           colorTile(
             label: "Option Border Color",
-            color: optionBorderColor,
-            onColorSelected: (c) => setState(() => optionBorderColor = c),
+            color: BorderColor,
+            onColorSelected: (c) => setState(() => BorderColor = c),
           ),
 
           // Experimental Settings
@@ -400,38 +403,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             magnetGesturesEnabled,
             (v) => setState(() => magnetGesturesEnabled = v),
           ),
-          if (magnetGesturesEnabled)
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(
-                      0xFF2C2C2E,
-                    ), // slightly lighter than bg
-                    foregroundColor: settingsScreenFontColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: const BorderSide(color: Color(0xFF3A3A3C)),
-                    ),
-                  ),
-                  onPressed: () {
-                    // TODO: Implement calibration logic
-                    debugPrint("Calibrate & Test Magnet Pressed");
-                    Navigator.pushNamed(
-                      context,
-                      Constants.kPathMagnetCalibration,
-                    );
-                  },
-                  child: const Text(
-                    "Calibrate & Test Magnet",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );

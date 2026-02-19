@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 enum AppIntent { next, select, back }
@@ -46,13 +48,17 @@ class MagnetIntentService {
       event.x * event.x + event.y * event.y + event.z * event.z,
     );
 
-    if (magnitude > 70) {
+    debugPrint("State: $magnitude");
+
+    if (magnitude > 100) {
       if (!_isNear) {
         _isNear = true;
+        debugPrint("Outer State: Near");
         _onEnterActive();
       }
-    } else if (magnitude < 50) {
+    } else if (magnitude < 70) {
       _isNear = false;
+      debugPrint("Outer State: Far");
     }
   }
 
@@ -61,6 +67,7 @@ class MagnetIntentService {
   // ==========================
 
   void _onEnterActive() {
+    debugPrint("Inner State: Active");
     _count++;
     _lastActiveTime = DateTime.now();
 
@@ -86,6 +93,8 @@ class MagnetIntentService {
   void _emitIntentFromCount(int count) {
     if (count == 1) {
       _intentController.add(AppIntent.next);
+      // HapticFeedback.selectionClick();
+      // SystemSound.play(SystemSoundType.alert);
     } else if (count == 2) {
       _intentController.add(AppIntent.select);
     } else if (count >= 3) {

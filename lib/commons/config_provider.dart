@@ -1,7 +1,8 @@
 // Author: Ujwal N K
 // Created On: 05 Feb, 2026
+// All Option Defaults are defined here to consistantly maintain a list.
 
-import 'package:flutter/material.dart' show Color, Colors;
+import 'package:flutter/material.dart' show Color, Colors, debugPrint;
 import 'package:moto_dash/commons/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferences;
@@ -11,6 +12,10 @@ class ConfigProvider {
 
   static Future<void> init() async {
     prefs = await SharedPreferences.getInstance();
+  }
+
+  static bool get getIsFirstRun {
+    return prefs?.getBool(Constants.kKeyIsFirstRun) ?? true;
   }
 
   static Color get getBackgroundColor {
@@ -25,9 +30,9 @@ class ConfigProvider {
     );
   }
 
-  static Color get getOptionBorderColor {
+  static Color get getBorderColor {
     return Color(
-      prefs?.getInt(Constants.kKeyOptionBorderColor) ?? Colors.white.toARGB32(),
+      prefs?.getInt(Constants.kKeyBorderColor) ?? Colors.white.toARGB32(),
     );
   }
 
@@ -59,5 +64,12 @@ class ConfigProvider {
 
   static double get getFontSize {
     return prefs?.getDouble(Constants.kKeyFontSize) ?? 16;
+  }
+
+  static bool get getEnableMagnetGestures {
+    debugPrint(
+      "Magnet Gestures: ${prefs!.getBool(Constants.kKeyEnableMagnetGestures)}",
+    );
+    return prefs?.getBool(Constants.kKeyEnableMagnetGestures) ?? false;
   }
 }
