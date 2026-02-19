@@ -2,6 +2,7 @@
 // Created On: 10 Feb, 2026
 
 import 'package:flutter/material.dart';
+import 'package:moto_dash/commons/constants.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,6 +29,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool volumeShowIcons = false;
   bool volumeShowLabel = false;
 
+  // Magnetic Gestures
+  bool magnetGesturesEnabled = false;
+
   // Phone
   String favouriteContactNames = "";
 
@@ -43,6 +47,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Brightness
   double brightness = 50;
+
+  static const Color settingsScreenFontColor = Color(0xFFF2F2F7);
 
   @override
   void initState() {
@@ -152,7 +158,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget checkboxTile(String title, bool value, Function(bool) onChanged) {
     return CheckboxListTile(
-      title: Text(title, style: const TextStyle(color: Colors.white)),
+      title: Text(title, style: TextStyle(color: settingsScreenFontColor)),
       value: value,
       onChanged: (v) => onChanged(v!),
       activeColor: Colors.white,
@@ -174,12 +180,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: const TextStyle(color: Colors.white70),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white54),
+          labelStyle: TextStyle(color: settingsScreenFontColor),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: settingsScreenFontColor),
           ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: settingsScreenFontColor),
           ),
         ),
       ),
@@ -198,11 +204,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Container(
         margin: const EdgeInsets.only(top: 12),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(border: Border.all(color: Colors.white54)),
+        decoration: BoxDecoration(
+          border: Border.all(color: settingsScreenFontColor),
+        ),
         child: Text(
           display,
           style: TextStyle(
-            color: value.isEmpty ? Colors.white54 : Colors.white,
+            color: value.isEmpty
+                ? settingsScreenFontColor
+                : settingsScreenFontColor,
             fontSize: 16,
           ),
         ),
@@ -221,11 +231,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Container(
         margin: const EdgeInsets.only(top: 12),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-        decoration: BoxDecoration(border: Border.all(color: Colors.white54)),
+        decoration: BoxDecoration(
+          border: Border.all(color: settingsScreenFontColor),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: const TextStyle(color: Colors.white)),
+            Text(label, style: TextStyle(color: settingsScreenFontColor)),
             Container(
               width: 28,
               height: 28,
@@ -246,10 +258,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black54,
+      backgroundColor: Color(0xFF1C1C1E),
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: const Text("Settings", style: TextStyle(color: Colors.white)),
+        backgroundColor: Color(0xFF1C1C1E),
+        title: Text(
+          "Settings",
+          style: TextStyle(color: settingsScreenFontColor),
+        ),
         actions: [
           TextButton(
             onPressed: () async {
@@ -258,7 +273,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (!context.mounted) return;
               Navigator.pop(context);
             },
-            child: const Text("Save", style: TextStyle(color: Colors.white)),
+            child: Text(
+              "Save",
+              style: TextStyle(color: settingsScreenFontColor),
+            ),
           ),
         ],
       ),
@@ -330,7 +348,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           Text(
             "${brightness.toInt()}%",
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: settingsScreenFontColor),
           ),
 
           // BLANK SCREEN
@@ -374,6 +392,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: optionBorderColor,
             onColorSelected: (c) => setState(() => optionBorderColor = c),
           ),
+
+          // Experimental Settings
+          sectionHeader("Experimental Settings"),
+          checkboxTile(
+            "Enable Magnet Gestures",
+            magnetGesturesEnabled,
+            (v) => setState(() => magnetGesturesEnabled = v),
+          ),
+          if (magnetGesturesEnabled)
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(
+                      0xFF2C2C2E,
+                    ), // slightly lighter than bg
+                    foregroundColor: settingsScreenFontColor,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: const BorderSide(color: Color(0xFF3A3A3C)),
+                    ),
+                  ),
+                  onPressed: () {
+                    // TODO: Implement calibration logic
+                    debugPrint("Calibrate & Test Magnet Pressed");
+                    Navigator.pushNamed(
+                      context,
+                      Constants.kPathMagnetCalibration,
+                    );
+                  },
+                  child: const Text(
+                    "Calibrate & Test Magnet",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

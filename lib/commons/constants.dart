@@ -31,4 +31,5 @@ class Constants {
   static const kPathVolume = "/volume";
   static const kPathScreenSaver = "/saver";
   static const kPathSettings = "/settings";
+  static const kPathMagnetCalibration = "/magnet_calibration";
 }

@@ -7,10 +7,12 @@ import 'package:moto_dash/screen_call_fav.dart';
 import 'package:moto_dash/screen_call_nav.dart';
 import 'package:moto_dash/screen_call_recents.dart';
 import 'package:moto_dash/screen_home.dart';
+import 'package:moto_dash/screen_mangetic_calibration.dart';
 import 'package:moto_dash/screen_music.dart';
 import 'package:moto_dash/screen_saver.dart';
 import 'package:moto_dash/screen_settings.dart';
 import 'package:moto_dash/screen_volume.dart';
+import 'package:moto_dash/service/magent_intent_detector.dart';
 import 'package:moto_dash/service/timer.dart';
 import 'package:moto_dash/service/transitions.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -21,6 +23,7 @@ import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final magnetService = MagnetIntentService();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,6 +77,8 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     WakelockPlus.enable();
 
+    magnetService.start();
+
     _loadPrefs();
   }
 
@@ -117,6 +122,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
         debugShowCheckedModeBanner: false,
 
         initialRoute: Constants.kPathHome,
+        // initialRoute: Constants.kPathMagnetCalibration,
         navigatorKey: navigatorKey,
 
         theme: ThemeData(
@@ -140,6 +146,8 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
           Constants.kPathVolume: (_) => const VolumeScreen(),
           Constants.kPathScreenSaver: (_) => const ScreenSaver(),
           Constants.kPathSettings: (_) => const SettingsScreen(),
+          Constants.kPathMagnetCalibration: (_) =>
+              const MagneticCalibrationScreen(),
         },
 
         builder: (context, child) {

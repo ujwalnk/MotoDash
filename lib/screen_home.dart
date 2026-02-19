@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:moto_dash/service/magent_intent_detector.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:moto_dash/commons/config_provider.dart';
@@ -21,19 +23,31 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
 
   bool showIcons = ConfigProvider.getShowIcons(Constants.kPathHome);
   bool showLabel = ConfigProvider.getShowLabel(Constants.kPathHome);
-  bool loading = true;
-  bool showVolumeTip = true;
   bool hasFavContacts = false;
+  bool showVolumeTip = true;
 
-  double fontSize = ConfigProvider.getFontSize;
+  bool loading = true;
+
   bool showSettingsButton = true;
+
+  int selectedIndex = 0;
+
+  late MagnetIntentService magnetService;
+  late StreamSubscription<AppIntent> _intentSub;
+
+  late List<VoidCallback> _actions;
 
   @override
   void initState() {
     super.initState();
     _loadSettings();
 
-    // Hide settings button after 10 seconds (launch-only)
+    magnetService = MagnetIntentService();
+    magnetService.start();
+
+    _intentSub = magnetService.intents.listen(handleIntent);
+
+    // Hide settings button after 10 seconds
     Future.delayed(const Duration(seconds: 10), () {
       if (mounted) {
         setState(() {
@@ -43,104 +57,143 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _intentSub.cancel();
+    magnetService.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
     showVolumeTip = prefs.getBool("show_volume_tip") ?? true;
     hasFavContacts =
-        prefs.getStringList("fav_contact_names")?.toList().isNotEmpty ?? false;
+        prefs.getStringList("fav_contact_names")?.isNotEmpty ?? false;
 
     loading = false;
-    setState(() {});
 
-    // Show popup after UI builds
+    if (mounted) setState(() {});
+
     if (showVolumeTip) {
-      Future.delayed(Duration(milliseconds: 300), _showSettingsTip);
+      Future.delayed(const Duration(milliseconds: 300), _showSettingsTip);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     DashWidgets widgets = DashWidgets();
-    int itemCount = showSettingsButton ? 5 : 4;
 
-    // Set Widget properties
     widgets.backgroundColor = backgroundColor;
     widgets.fontColor = fontColor;
     widgets.borderColor = borderColor;
 
-    // Split Screen Settings
-    if (isSplitScreen) {
-      widgets.showLabel = false;
-      widgets.showIcons = true;
-    } else {
-      widgets.showIcons = showIcons;
-      widgets.showLabel = showLabel;
-    }
+    widgets.showLabel = isSplitScreen ? false : showIcons;
+    widgets.showIcons = isSplitScreen ? true : showLabel;
+
+    final int itemCount = showSettingsButton ? 5 : 4;
+
     if (loading) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    // ==============================
+    // Define Actions (Single Source)
+    // ==============================
+
+    _actions = [
+      () => Navigator.pushNamed(context, resolvePhonePath()),
+      () => Navigator.pushNamed(context, Constants.kPathMusic),
+      () => AssistantLauncher.launch(),
+      () => Navigator.pushNamed(context, Constants.kPathVolume),
+    ];
 
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
         child: widgets.dashView(isSplitScreen, [
-          // Phone
-          widgets.dashCardRoute(
+          widgets.dashCardFunc(
             'Phone',
             [Icons.phone_rounded],
-            isSplitScreen
-                ? (!hasFavContacts
-                      ? Constants.kPathCallLog
-                      : Constants.kPathCallNav)
-                : (hasFavContacts
-                      ? Constants.kPathCallFav
-                      : Constants.kPathCallLog),
+            _actions[0],
             context,
             itemCount,
+            isSelected: selectedIndex == 0,
           ),
-
-          // Music Control
-          widgets.dashCardRoute(
+          widgets.dashCardFunc(
             'Music',
             [Icons.music_note_rounded],
-            Constants.kPathMusic,
+            _actions[1],
             context,
             itemCount,
+            isSelected: selectedIndex == 1,
           ),
-
-          // Assistant Trigger
           widgets.dashCardFunc(
             'Assistant',
             [Icons.assistant_rounded],
-            () => AssistantLauncher.launch(),
+            _actions[2],
             context,
             itemCount,
+            isSelected: selectedIndex == 2,
           ),
-
-          // Settings Button
           if (showSettingsButton)
-            widgets.dashCardRoute(
+            widgets.dashCardFunc(
               'Settings',
               [Icons.settings_rounded],
-              Constants.kPathSettings,
+              () => Navigator.pushNamed(context, Constants.kPathSettings),
               context,
               itemCount,
+              isSelected: selectedIndex == 3,
             ),
-
-          // Volume Control
-          widgets.dashCardRoute(
+          widgets.dashCardFunc(
             'Volume',
             [Icons.volume_up_rounded],
-            Constants.kPathVolume,
+            _actions[3],
             context,
             itemCount,
+            isSelected: selectedIndex == 3,
           ),
         ]),
       ),
     );
   }
+
+  String resolvePhonePath() {
+    return isSplitScreen
+        ? (!hasFavContacts ? Constants.kPathCallLog : Constants.kPathCallNav)
+        : (hasFavContacts ? Constants.kPathCallFav : Constants.kPathCallLog);
+  }
+
+  // ==============================
+  // Magnet Intent Handler
+  // ==============================
+
+  void handleIntent(AppIntent intent) {
+    final itemCount = _actions.length;
+
+    switch (intent) {
+      case AppIntent.next:
+        setState(() {
+          selectedIndex = (selectedIndex + 1) % itemCount;
+        });
+        break;
+
+      case AppIntent.select:
+        _actions[selectedIndex]();
+        break;
+
+      case AppIntent.back:
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        break;
+    }
+  }
+
+  // ==============================
+  // Settings Tip Dialog
+  // ==============================
 
   void _showSettingsTip() {
     showDialog(

@@ -109,8 +109,9 @@ class DashWidgets {
     List<IconData> icons,
     String route,
     BuildContext context,
-    int itemCount,
-  ) {
+    int itemCount, {
+    bool isSelected = false,
+  }) {
     final screenHeight = MediaQuery.of(context).size.height;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -127,7 +128,10 @@ class DashWidgets {
           color: backgroundColor ?? Colors.black,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: borderColor ?? Colors.grey, width: 1),
+            side: BorderSide(
+              color: (borderColor ?? Colors.grey),
+              width: isSelected ? 3 : 1,
+            ),
           ),
           child: Center(child: dashListTile(icons, title, null, null)),
         ),
@@ -143,6 +147,7 @@ class DashWidgets {
     int itemCount, {
     bool? overrideShowIcons,
     bool? overrideShowLabel,
+    bool isSelected = false,
   }) {
     final screenHeight = MediaQuery.of(context).size.height;
     return GestureDetector(
@@ -156,7 +161,10 @@ class DashWidgets {
           color: backgroundColor ?? Colors.black,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: borderColor ?? Colors.grey, width: 1),
+            side: BorderSide(
+              color: (borderColor ?? Colors.grey),
+              width: isSelected ? 3 : 1,
+            ),
           ),
           child: Center(
             child: dashListTile(
