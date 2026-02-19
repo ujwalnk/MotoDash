@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
+import 'package:moto_dash/commons/constants.dart';
 
 import 'package:moto_dash/screen_call_fav.dart';
 import 'package:moto_dash/screen_call_nav.dart';
@@ -115,7 +116,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
 
-        initialRoute: '/home',
+        initialRoute: Constants.kPathHome,
         navigatorKey: navigatorKey,
 
         theme: ThemeData(
@@ -131,14 +132,14 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
         ),
 
         routes: {
-          '/home': (_) => const HomeScreen(),
-          '/phone_nav': (_) => const CallNavScreen(),
-          '/phone_log': (_) => const CallLogScreen(),
-          '/phone_fav': (_) => const FavContactsScreen(),
-          '/music': (_) => const MusicScreen(),
-          '/volume': (_) => const VolumeScreen(),
-          '/saver': (_) => const ScreenSaver(),
-          '/settings': (_) => const SettingsScreen(),
+          Constants.kPathHome: (_) => const HomeScreen(),
+          Constants.kPathCallNav: (_) => const CallNavScreen(),
+          Constants.kPathCallLog: (_) => const CallLogScreen(),
+          Constants.kPathCallFav: (_) => const FavContactsScreen(),
+          Constants.kPathMusic: (_) => const MusicScreen(),
+          Constants.kPathVolume: (_) => const VolumeScreen(),
+          Constants.kPathScreenSaver: (_) => const ScreenSaver(),
+          Constants.kPathSettings: (_) => const SettingsScreen(),
         },
 
         builder: (context, child) {

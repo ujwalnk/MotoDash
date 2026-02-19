@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/commons.dart';
+import 'package:moto_dash/commons/constants.dart';
 
 class IdleTimer with WidgetsBindingObserver {
   static final IdleTimer instance = IdleTimer._internal();
@@ -52,7 +53,7 @@ class IdleTimer with WidgetsBindingObserver {
     // Prevent stacking saver routes
     if (navigator.canPop()) return;
 
-    navigator.pushNamed("/saver");
+    navigator.pushNamed(Constants.kPathScreenSaver);
   }
 
   @override

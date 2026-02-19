@@ -1,3 +1,6 @@
+// Author: Ujwal N K
+// Created On: 10 Feb, 2026
+
 import 'package:flutter/material.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -243,7 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.black54,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text("Settings", style: TextStyle(color: Colors.white)),
@@ -251,7 +254,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () async {
               await saveSettings();
-              if(!mounted) return;
+
+              if (!context.mounted) return;
               Navigator.pop(context);
             },
             child: const Text("Save", style: TextStyle(color: Colors.white)),

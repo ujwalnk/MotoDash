@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'package:call_log/call_log.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart' show FlutterPhoneDirectCaller;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart'
+    show FlutterPhoneDirectCaller;
 
+import 'package:moto_dash/commons/config_provider.dart';
+import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/split_screen_observer.dart';
 import 'package:moto_dash/commons/list_builder.dart';
 
@@ -16,14 +18,14 @@ class CallLogScreen extends StatefulWidget {
 }
 
 class _CallLogScreenState extends SplitScreenState<CallLogScreen> {
-  Color backgroundColor = Colors.black;
-  Color fontColor = Colors.white;
-  Color borderColor = Colors.white;
+  Color backgroundColor = ConfigProvider.getBackgroundColor;
+  Color fontColor = ConfigProvider.getFontColor;
+  Color borderColor = ConfigProvider.getOptionBorderColor;
 
-  bool showIcons = true;
-  bool showLabel = true;
+  bool showIcons = ConfigProvider.getShowIcons(Constants.kPathCallLog);
+  bool showLabel = ConfigProvider.getShowLabel(Constants.kPathCallLog);
 
-  double fontSize = 16.0;
+  double fontSize = ConfigProvider.getFontSize;
 
   bool loading = true;
   List<CallLogEntry> lastCalls = [];
@@ -35,21 +37,6 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen> {
   }
 
   Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    backgroundColor = Color(
-      prefs.getInt("background_color") ?? Colors.black.toARGB32(),
-    );
-    fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
-    borderColor = Color(
-      prefs.getInt("option_border_color") ?? Colors.white.toARGB32(),
-    );
-
-    showIcons = prefs.getBool("call_show_icons") ?? true;
-    showLabel = prefs.getBool("call_show_label") ?? true;
-
-    fontSize = double.tryParse(prefs.getString("font_size") ?? "16.0") ?? 16.0;
-
     await _loadCallLogs();
 
     loading = false;
@@ -123,7 +110,7 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: backgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
         child: widgets.dashView(isSplitScreen, [
@@ -138,7 +125,8 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen> {
               [_callIcon(call.callType)],
 
               // On tap: Call number
-              () async => await FlutterPhoneDirectCaller.callNumber(call.number ?? ''),
+              () async =>
+                  await FlutterPhoneDirectCaller.callNumber(call.number ?? ''),
 
               // Send context & count
               context,
@@ -166,6 +154,7 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen> {
     if (call.number![0] == "0") {
       return call.number!.substring(1, 10);
     } else {
+      // TODO: Fix later for all international numbers
       return call.number!.replaceFirst("+91", "").substring(0, 10);
     }
   }

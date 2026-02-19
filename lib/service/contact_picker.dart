@@ -58,6 +58,7 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
           : "";
 
       if (name.isEmpty || phone.isEmpty) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Contact must have name & phone")),
         );
@@ -111,6 +112,7 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
           TextButton(
             onPressed: () async {
               await saveContacts();
+              if (!context.mounted) return;
               Navigator.pop(context);
             },
             child: const Text("Done", style: TextStyle(color: Colors.white)),
@@ -121,7 +123,7 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: pickContact,
         backgroundColor: Colors.white,
-        child: const Icon(Icons.add, color: Colors.black),
+        child: const Icon(Icons.add_rounded, color: Colors.black),
       ),
       body: names.isEmpty
           ? const Center(
@@ -149,7 +151,10 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
                       style: const TextStyle(color: Colors.white70),
                     ),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                      icon: const Icon(
+                        Icons.delete_rounded,
+                        color: Colors.redAccent,
+                      ),
                       onPressed: () => deleteContact(index),
                     ),
                   ),

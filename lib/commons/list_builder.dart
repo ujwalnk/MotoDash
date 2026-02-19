@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show MethodChannel;
+import 'package:moto_dash/commons/constants.dart';
 
 class DashWidgets {
   Color? backgroundColor;
@@ -114,7 +115,7 @@ class DashWidgets {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: (_) {
-        if (route != "/home") {
+        if (route != Constants.kPathHome) {
           Navigator.pushNamed(context, route);
         } else {
           Navigator.pop(context);

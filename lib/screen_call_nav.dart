@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:moto_dash/commons/config_provider.dart';
+import 'package:moto_dash/commons/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:moto_dash/commons/list_builder.dart';
 
@@ -10,14 +12,14 @@ class CallNavScreen extends StatefulWidget {
 }
 
 class _CallNavScreenState extends State<CallNavScreen> {
-  Color backgroundColor = Colors.black;
-  Color fontColor = Colors.white;
-  Color borderColor = Colors.white;
+  final Color backgroundColor = ConfigProvider.getBackgroundColor;
+  final Color fontColor = ConfigProvider.getFontColor;
+  final Color borderColor = ConfigProvider.getOptionBorderColor;
 
-  bool showIcons = true;
-  bool showLabel = true;
+  final bool showIcons = ConfigProvider.getShowIcons(Constants.kPathCallNav);
+  final bool showLabel = ConfigProvider.getShowLabel(Constants.kPathCallNav);
 
-  double fontSize = 16.0;
+  double fontSize = ConfigProvider.getFontSize;
 
   List<String> names = [];
   List<String> numbers = [];
@@ -32,19 +34,6 @@ class _CallNavScreenState extends State<CallNavScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-
-    backgroundColor = Color(
-      prefs.getInt("background_color") ?? Colors.black.toARGB32(),
-    );
-    fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
-    borderColor = Color(
-      prefs.getInt("option_border_color") ?? Colors.white.toARGB32(),
-    );
-
-    showIcons = prefs.getBool("fav_show_icons") ?? true;
-    showLabel = prefs.getBool("fav_show_label") ?? true;
-
-    fontSize = double.tryParse(prefs.getString("font_size") ?? "16.0") ?? 16.0;
 
     names = prefs.getStringList("fav_contact_names") ?? [];
     numbers = prefs.getStringList("fav_contact_numbers") ?? [];
@@ -83,9 +72,7 @@ class _CallNavScreenState extends State<CallNavScreen> {
           widgets.dashCardFunc(
             'Favourites',
             [Icons.star_rounded],
-            () {
-              Navigator.pushNamed(context, "/phone_fav");
-            },
+            () => Navigator.pushNamed(context, Constants.kPathCallFav),
             context,
             itemCount,
           ),
@@ -96,9 +83,7 @@ class _CallNavScreenState extends State<CallNavScreen> {
           widgets.dashCardFunc(
             'Call Log',
             [Icons.history_rounded],
-            () {
-              Navigator.pushNamed(context, "/phone_log");
-            },
+            () => Navigator.pushNamed(context, Constants.kPathCallLog),
             context,
             itemCount,
           ),

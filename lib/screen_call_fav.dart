@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:moto_dash/commons/config_provider.dart';
+import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/split_screen_observer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:moto_dash/commons/list_builder.dart';
@@ -12,14 +14,12 @@ class FavContactsScreen extends StatefulWidget {
 }
 
 class _FavContactsScreenState extends SplitScreenState<FavContactsScreen> {
-  Color backgroundColor = Colors.black;
-  Color fontColor = Colors.white;
-  Color borderColor = Colors.white;
+  final Color backgroundColor = ConfigProvider.getBackgroundColor;
+  final Color fontColor = ConfigProvider.getFontColor;
+  final Color borderColor = ConfigProvider.getOptionBorderColor;
 
-  bool showIcons = true;
-  bool showLabel = true;
-
-  double fontSize = 16.0;
+  final bool showIcons = ConfigProvider.getShowIcons(Constants.kPathCallFav);
+  final bool showLabel = ConfigProvider.getShowLabel(Constants.kPathCallFav);
 
   List<String> names = [];
   List<String> numbers = [];
@@ -35,19 +35,6 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
-    backgroundColor = Color(
-      prefs.getInt("background_color") ?? Colors.black.toARGB32(),
-    );
-    fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
-    borderColor = Color(
-      prefs.getInt("option_border_color") ?? Colors.white.toARGB32(),
-    );
-
-    showIcons = prefs.getBool("fav_show_icons") ?? true;
-    showLabel = prefs.getBool("fav_show_label") ?? true;
-
-    fontSize = double.tryParse(prefs.getString("font_size") ?? "16.0") ?? 16.0;
-
     names = prefs.getStringList("fav_contact_names") ?? [];
     numbers = prefs.getStringList("fav_contact_numbers") ?? [];
 
@@ -62,6 +49,8 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen> {
     widgets.backgroundColor = backgroundColor;
     widgets.fontColor = fontColor;
     widgets.borderColor = borderColor;
+
+    // Split Screen Settings
     if (isSplitScreen) {
       widgets.showLabel = true;
       widgets.showIcons = false;
@@ -73,8 +62,8 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen> {
     int itemCount = 2 + names.length;
 
     if (loading) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
+      return Scaffold(
+        backgroundColor: backgroundColor,
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -82,7 +71,7 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
+        padding: const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
         child: widgets.dashView(isSplitScreen, [
           // -------------------------------
           // LIST OF FAVOURITE CONTACTS
@@ -95,11 +84,10 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen> {
                       names[i].length > 10 ? 10 : names[i].length,
                     ))
                   : names[i], // Title (name only)
-              [Icons.person], // Simple icon (or customize)
-              () async {
-                await FlutterPhoneDirectCaller.callNumber(numbers[i]);
-                debugPrint("Calling Directly: ${numbers[i]}");
-              }, // Call directly
+              [Icons.person_rounded], // Simple icon (or customize)
+              () async => await FlutterPhoneDirectCaller.callNumber(
+                numbers[i],
+              ), // Call directly
               context,
               itemCount,
             ),
@@ -109,9 +97,7 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen> {
             widgets.dashCardFunc(
               'Call Log',
               [Icons.history_rounded],
-              () {
-                Navigator.pushNamed(context, "/phone_log");
-              },
+              () => Navigator.pushNamed(context, Constants.kPathCallLog),
               context,
               itemCount,
             ),

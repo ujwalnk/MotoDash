@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:moto_dash/commons/config_provider.dart';
+import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:moto_dash/commons/split_screen_observer.dart';
-
 import 'package:moto_dash/service/assistant_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,17 +15,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends SplitScreenState<HomeScreen> {
-  Color backgroundColor = Colors.black;
-  Color fontColor = Colors.white;
-  Color borderColor = Colors.white;
+  Color backgroundColor = ConfigProvider.getBackgroundColor;
+  Color fontColor = ConfigProvider.getFontColor;
+  Color borderColor = ConfigProvider.getOptionBorderColor;
 
-  bool showIcons = true;
-  bool showLabel = true;
+  bool showIcons = ConfigProvider.getShowIcons(Constants.kPathHome);
+  bool showLabel = ConfigProvider.getShowLabel(Constants.kPathHome);
   bool loading = true;
   bool showVolumeTip = true;
   bool hasFavContacts = false;
 
-  double fontSize = 16.0;
+  double fontSize = ConfigProvider.getFontSize;
   bool showSettingsButton = true;
 
   @override
@@ -33,7 +33,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
     super.initState();
     _loadSettings();
 
-    // Hide settings button after 7 seconds (launch-only)
+    // Hide settings button after 10 seconds (launch-only)
     Future.delayed(const Duration(seconds: 10), () {
       if (mounted) {
         setState(() {
@@ -45,25 +45,10 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    backgroundColor = Color(
-      prefs.getInt("background_color") ?? Colors.black.toARGB32(),
-    );
-    fontColor = Color(prefs.getInt("font_color") ?? Colors.white.toARGB32());
-    borderColor = Color(
-      prefs.getInt("option_border_color") ?? Colors.white.toARGB32(),
-    );
-
-    showIcons = prefs.getBool("home_show_icons") ?? true;
-    showLabel = prefs.getBool("home_show_label") ?? true;
-
-    fontSize = double.tryParse(prefs.getString("font_size") ?? "16.0") ?? 16.0;
 
     showVolumeTip = prefs.getBool("show_volume_tip") ?? true;
     hasFavContacts =
         prefs.getStringList("fav_contact_names")?.toList().isNotEmpty ?? false;
-    debugPrint(
-      "hasFavContacts: ${prefs.getStringList("fav_contact_names")}, $hasFavContacts",
-    );
 
     loading = false;
     setState(() {});
@@ -83,6 +68,8 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
     widgets.backgroundColor = backgroundColor;
     widgets.fontColor = fontColor;
     widgets.borderColor = borderColor;
+
+    // Split Screen Settings
     if (isSplitScreen) {
       widgets.showLabel = false;
       widgets.showIcons = true;
@@ -94,66 +81,63 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    debugPrint("hasFavContacts: $hasFavContacts");
-
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: backgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-        // child: ListView(
-        child: widgets.dashView(
-          // padding: const EdgeInsets.all(10),
-          isSplitScreen,
-          [
+        child: widgets.dashView(isSplitScreen, [
+          // Phone
+          widgets.dashCardRoute(
+            'Phone',
+            [Icons.phone_rounded],
+            isSplitScreen
+                ? (!hasFavContacts
+                      ? Constants.kPathCallLog
+                      : Constants.kPathCallNav)
+                : (hasFavContacts
+                      ? Constants.kPathCallFav
+                      : Constants.kPathCallLog),
+            context,
+            itemCount,
+          ),
+
+          // Music Control
+          widgets.dashCardRoute(
+            'Music',
+            [Icons.music_note_rounded],
+            Constants.kPathMusic,
+            context,
+            itemCount,
+          ),
+
+          // Assistant Trigger
+          widgets.dashCardFunc(
+            'Assistant',
+            [Icons.assistant_rounded],
+            () => AssistantLauncher.launch(),
+            context,
+            itemCount,
+          ),
+
+          // Settings Button
+          if (showSettingsButton)
             widgets.dashCardRoute(
-              'Phone',
-              [Icons.phone_rounded],
-              isSplitScreen
-                  ? (!hasFavContacts ? "/phone_log" : "/phone_nav")
-                  : (hasFavContacts ? '/phone_fav' : '/phone_log'),
+              'Settings',
+              [Icons.settings_rounded],
+              Constants.kPathSettings,
               context,
               itemCount,
             ),
-            widgets.dashCardRoute(
-              'Music',
-              [Icons.music_note_rounded],
-              '/music',
-              context,
-              itemCount,
-            ),
-            // widgets.dashCardRoute(
-            //   'Voice Note',
-            //   [Icons.mic_rounded],
-            //   '/voicenote',
-            //   context,
-            //   itemCount,
-            // ),
-            widgets.dashCardFunc(
-              'Assistant',
-              [Icons.assistant_rounded],
-              () {
-                AssistantLauncher.launch();
-              },
-              context,
-              itemCount,
-            ),
-            if (showSettingsButton)
-              widgets.dashCardRoute(
-                'Settings',
-                [Icons.settings_rounded],
-                '/settings',
-                context,
-                itemCount,
-              ),
-            widgets.dashCardRoute(
-              'Volume',
-              [Icons.volume_up_rounded],
-              '/volume',
-              context,
-              itemCount,
-            ),
-          ],
-        ),
+
+          // Volume Control
+          widgets.dashCardRoute(
+            'Volume',
+            [Icons.volume_up_rounded],
+            Constants.kPathVolume,
+            context,
+            itemCount,
+          ),
+        ]),
       ),
     );
   }
@@ -179,7 +163,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> {
               await prefs.setBool("show_volume_tip", false);
               showVolumeTip = false;
 
-              if (!mounted) return;
+              if (!context.mounted) return;
               Navigator.pop(ctx);
             },
           ),

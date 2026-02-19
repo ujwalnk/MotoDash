@@ -8,7 +8,8 @@ class WakeStateManager extends StatefulWidget {
   State<WakeStateManager> createState() => _WakeStateManagerState();
 }
 
-class _WakeStateManagerState extends State<WakeStateManager>     with WidgetsBindingObserver {
+class _WakeStateManagerState extends State<WakeStateManager>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -22,7 +23,7 @@ class _WakeStateManagerState extends State<WakeStateManager>     with WidgetsBin
     WakelockPlus.disable();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return const Placeholder();
