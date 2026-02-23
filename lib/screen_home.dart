@@ -1,3 +1,7 @@
+// Author: Ujwal N K
+// Date: 2026-02-24
+// Description: Home screen for MotoDash
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,14 +37,9 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
 
   StreamSubscription<AppIntent>? _intentSub;
 
-  // NEVER late
   List<DashAction> _items = [];
 
   bool _didAutoSpeak = false;
-
-  // ------------------------------------------------
-  // RouteAware
-  // ------------------------------------------------
 
   @override
   void didChangeDependencies() {
@@ -51,24 +50,21 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
-    _unsubscribe();
+    _intentSub?.cancel();
     super.dispose();
   }
 
   @override
-  void didPush() {
-    _subscribe();
-  }
+  void didPush() => _subscribe();
 
   @override
-  void didPushNext() {
-    _unsubscribe();
-  }
+  void didPushNext() => _unsubscribe();
 
   @override
   void didPopNext() {
     _subscribe();
     _didAutoSpeak = false;
+    _maybeSpeakFirst();
   }
 
   void _subscribe() {
@@ -79,10 +75,6 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
     _intentSub?.cancel();
     _intentSub = null;
   }
-
-  // ------------------------------------------------
-  // INIT
-  // ------------------------------------------------
 
   @override
   void initState() {
@@ -100,10 +92,6 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
     if (mounted) setState(() {});
   }
 
-  // ------------------------------------------------
-  // Magnet Intent Handler
-  // ------------------------------------------------
-
   void _handleIntent(AppIntent intent) {
     if (selectedIndex == -1 || _items.isEmpty) return;
 
@@ -112,7 +100,6 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
         setState(() {
           selectedIndex = (selectedIndex + 1) % _items.length;
         });
-
         ttsService.speak(_items[selectedIndex].label);
         break;
 
@@ -128,9 +115,21 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
     }
   }
 
-  // ------------------------------------------------
-  // BUILD
-  // ------------------------------------------------
+  void _maybeSpeakFirst() {
+    if (lastNavigationWasMagnet &&
+        !_didAutoSpeak &&
+        selectedIndex != -1 &&
+        _items.isNotEmpty) {
+      _didAutoSpeak = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => selectedIndex = 0);
+        ttsService.speak(_items[0].label);
+        lastNavigationWasMagnet = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,35 +137,21 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final DashWidgets widgets = DashWidgets();
+    final widgets = DashWidgets();
 
-    if (isSplitScreen) {
-      widgets.showLabel = false;
-      widgets.showIcons = true;
-    } else {
-      widgets.showIcons = showIcons;
-      widgets.showLabel = showLabel;
-    }
-
-    // -----------------------------------
-    // Build DashAction list
-    // -----------------------------------
+    widgets.showIcons = isSplitScreen ? true : showIcons;
+    widgets.showLabel = isSplitScreen ? false : showLabel;
 
     _items = [
       DashAction(
         label: 'Phone',
         icons: [Icons.phone_rounded],
         action: () {
-          Navigator.pushNamed(
-            context,
-            isSplitScreen
-                ? (!hasFavContacts
-                      ? Constants.kPathCallLog
-                      : Constants.kPathCallNav)
-                : (hasFavContacts
-                      ? Constants.kPathCallFav
-                      : Constants.kPathCallLog),
-          );
+          if (lastNavigationWasMagnet) {
+            Navigator.pushNamed(context, Constants.kPathCallNav);
+          } else {
+            Navigator.pushNamed(context, Constants.kPathCallLog);
+          }
         },
       ),
       DashAction(
@@ -192,20 +177,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
       ),
     ];
 
-    // -----------------------------------
-    // SAFE auto-speak after first build
-    // -----------------------------------
-
-    if (!_didAutoSpeak && selectedIndex != -1 && _items.isNotEmpty) {
-      _didAutoSpeak = true;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-
-        setState(() => selectedIndex = 0);
-        ttsService.speak(_items[0].label);
-      });
-    }
+    _maybeSpeakFirst();
 
     return Scaffold(
       backgroundColor: ConfigProvider.getBackgroundColor,

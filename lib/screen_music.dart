@@ -1,3 +1,5 @@
+// FULL MUSIC FILE (magnet-aware)
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,14 +31,8 @@ class _MusicScreenState extends SplitScreenState<MusicScreen> with RouteAware {
 
   StreamSubscription<AppIntent>? _intentSub;
 
-  // NEVER use late here
   List<DashAction> _items = [];
-
   bool _didAutoSpeak = false;
-
-  // ------------------------------------------------
-  // RouteAware lifecycle
-  // ------------------------------------------------
 
   @override
   void didChangeDependencies() {
@@ -47,24 +43,21 @@ class _MusicScreenState extends SplitScreenState<MusicScreen> with RouteAware {
   @override
   void dispose() {
     routeObserver.unsubscribe(this);
-    _unsubscribe();
+    _intentSub?.cancel();
     super.dispose();
   }
 
   @override
-  void didPush() {
-    _subscribe();
-  }
+  void didPush() => _subscribe();
 
   @override
-  void didPushNext() {
-    _unsubscribe();
-  }
+  void didPushNext() => _unsubscribe();
 
   @override
   void didPopNext() {
     _subscribe();
-    _didAutoSpeak = false; // allow auto speak again
+    _didAutoSpeak = false;
+    _maybeSpeakFirst();
   }
 
   void _subscribe() {
@@ -76,25 +69,51 @@ class _MusicScreenState extends SplitScreenState<MusicScreen> with RouteAware {
     _intentSub = null;
   }
 
-  // ------------------------------------------------
-  // BUILD
-  // ------------------------------------------------
+  void _handleIntent(AppIntent intent) {
+    if (selectedIndex == -1 || _items.isEmpty) return;
+
+    switch (intent) {
+      case AppIntent.next:
+        setState(() {
+          selectedIndex = (selectedIndex + 1) % _items.length;
+        });
+        ttsService.stop();
+        ttsService.speak(_items[selectedIndex].label);
+        break;
+
+      case AppIntent.select:
+        _items[selectedIndex].action();
+        break;
+
+      case AppIntent.back:
+        Navigator.pop(context);
+        break;
+    }
+  }
+
+  void _maybeSpeakFirst() {
+    if (lastNavigationWasMagnet &&
+        !_didAutoSpeak &&
+        selectedIndex != -1 &&
+        _items.isNotEmpty) {
+      _didAutoSpeak = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => selectedIndex = 0);
+        ttsService.stop();
+        ttsService.speak(_items[0].label);
+        lastNavigationWasMagnet = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final DashWidgets widgets = DashWidgets();
+    final widgets = DashWidgets();
 
-    if (isSplitScreen) {
-      widgets.showLabel = false;
-      widgets.showIcons = true;
-    } else {
-      widgets.showIcons = showIcons;
-      widgets.showLabel = showLabel;
-    }
-
-    // -----------------------------------
-    // DashAction list (single source)
-    // -----------------------------------
+    widgets.showIcons = isSplitScreen ? true : showIcons;
+    widgets.showLabel = isSplitScreen ? false : showLabel;
 
     _items = [
       DashAction(
@@ -119,21 +138,7 @@ class _MusicScreenState extends SplitScreenState<MusicScreen> with RouteAware {
       ),
     ];
 
-    // -----------------------------------
-    // SAFE auto speak AFTER build
-    // -----------------------------------
-
-    if (!_didAutoSpeak && selectedIndex != -1 && _items.isNotEmpty) {
-      _didAutoSpeak = true;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-
-        setState(() => selectedIndex = 0);
-        ttsService.stop();
-        ttsService.speak(_items[0].label);
-      });
-    }
+    _maybeSpeakFirst();
 
     return Scaffold(
       backgroundColor: ConfigProvider.getBackgroundColor,
@@ -152,32 +157,5 @@ class _MusicScreenState extends SplitScreenState<MusicScreen> with RouteAware {
         ),
       ),
     );
-  }
-
-  // ------------------------------------------------
-  // Magnet Intent Handler
-  // ------------------------------------------------
-
-  void _handleIntent(AppIntent intent) {
-    if (selectedIndex == -1 || _items.isEmpty) return;
-
-    switch (intent) {
-      case AppIntent.next:
-        setState(() {
-          selectedIndex = (selectedIndex + 1) % _items.length;
-        });
-
-        ttsService.stop();
-        ttsService.speak(_items[selectedIndex].label);
-        break;
-
-      case AppIntent.select:
-        _items[selectedIndex].action();
-        break;
-
-      case AppIntent.back:
-        Navigator.pop(context);
-        break;
-    }
   }
 }

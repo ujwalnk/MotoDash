@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:statemachine/statemachine.dart' as machine;
+
+import 'package:moto_dash/service/global_services.dart';
 
 enum AppIntent { next, select, back }
 
@@ -16,13 +17,13 @@ class MagnetIntentService {
   // SAMPLING CONTROL
   // ==========================
 
-  static const Duration _slowSampling = Duration(milliseconds: 100); // 10 Hz
-  static const Duration _fastSampling = Duration(milliseconds: 33); // ~30 Hz
+  static const Duration _slowSampling = Duration(milliseconds: 100);
+  static const Duration _fastSampling = Duration(milliseconds: 33);
 
-  Duration _currentSampling = _slowSampling;
+  Duration? _currentSampling; // 🔥 FIXED: was causing sensor not to start
 
   void _startSampling(Duration period) {
-    if (_currentSampling == period) return;
+    if (_currentSampling == period && _sub != null) return;
 
     _sub?.cancel();
     _currentSampling = period;
@@ -49,7 +50,7 @@ class MagnetIntentService {
   Timer? _activeTimer;
 
   // ==========================
-  // MACHINES
+  // FSM
   // ==========================
 
   final machine.Machine<String> _outerM = machine.Machine<String>();
@@ -88,7 +89,7 @@ class MagnetIntentService {
     _stateActive = _innerM.newState("active");
 
     _stateActive.onEntry(() {
-      _startSampling(_fastSampling); // FAST when active
+      _startSampling(_fastSampling);
 
       _count++;
       _lastActiveTime = DateTime.now();
@@ -114,7 +115,7 @@ class MagnetIntentService {
     });
 
     _stateIdle.onEntry(() {
-      _startSampling(_slowSampling); // 🔥 SLOW when idle
+      _startSampling(_slowSampling);
     });
   }
 
@@ -123,7 +124,7 @@ class MagnetIntentService {
   // ==========================
 
   void start() {
-    _startSampling(_slowSampling); // start slow
+    _startSampling(_slowSampling);
   }
 
   void stop() {
@@ -163,10 +164,6 @@ class MagnetIntentService {
     final enterThreshold = _baseline + _enterDelta;
     final exitThreshold = _baseline + _exitDelta;
 
-    debugPrint(
-      "Mag: $magnitude | Base: ${_baseline.toStringAsFixed(1)} | Enter: ${enterThreshold.toStringAsFixed(1)} | Exit: ${exitThreshold.toStringAsFixed(1)} | Outer: ${_outerM.current}",
-    );
-
     if (magnitude > enterThreshold) {
       if (_outerM.current == _stateFar) {
         _stateNear.enter();
@@ -183,6 +180,8 @@ class MagnetIntentService {
   // ==========================
 
   void _emitIntentFromCount(int count) {
+    lastNavigationWasMagnet = true;
+
     if (count == 1) {
       _intentController.add(AppIntent.next);
     } else if (count == 2) {

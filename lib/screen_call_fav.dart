@@ -30,11 +30,15 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
   int selectedIndex = ConfigProvider.getEnableMagnetGestures ? 0 : -1;
 
   StreamSubscription<AppIntent>? _intentSub;
-  late List<VoidCallback> _actions;
 
-  // -----------------------------
-  // RouteAware lifecycle
-  // -----------------------------
+  List<VoidCallback> _actions = [];
+  List<String> _labels = [];
+
+  bool _didAutoSpeak = false;
+
+  // ------------------------------------------------
+  // RouteAware
+  // ------------------------------------------------
 
   @override
   void didChangeDependencies() {
@@ -53,10 +57,14 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
   void didPush() => _subscribe();
 
   @override
-  void didPopNext() => _subscribe();
+  void didPushNext() => _unsubscribe();
 
   @override
-  void didPushNext() => _unsubscribe();
+  void didPopNext() {
+    _subscribe();
+    _didAutoSpeak = false;
+    _maybeSpeakFirst();
+  }
 
   void _subscribe() {
     _intentSub = magnetService.intents.listen(_handleIntent);
@@ -67,7 +75,9 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
     _intentSub = null;
   }
 
-  // -----------------------------
+  // ------------------------------------------------
+  // INIT
+  // ------------------------------------------------
 
   @override
   void initState() {
@@ -84,6 +94,10 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
     loading = false;
     if (mounted) setState(() {});
   }
+
+  // ------------------------------------------------
+  // BUILD
+  // ------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -104,109 +118,100 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
       );
     }
 
-    // -----------------------------
-    // Build Actions Dynamically
-    // -----------------------------
-
     _actions = [];
+    _labels = [];
 
-    // Favorite contacts
     final int visibleContacts = isSplitScreen
-        ? (names.length.clamp(0, 4))
+        ? names.length.clamp(0, 4)
         : names.length;
+
+    // -----------------------------
+    // Favorite Contacts
+    // -----------------------------
 
     for (int i = 0; i < visibleContacts; i++) {
       final int index = i;
+
+      final label = isSplitScreen
+          ? names[i].substring(0, names[i].length > 10 ? 10 : names[i].length)
+          : names[i];
+
+      _labels.add(label);
+
       _actions.add(() async {
         await FlutterPhoneDirectCaller.callNumber(numbers[index]);
       });
     }
 
-    // Call Log button (only when NOT split screen)
+    // -----------------------------
+    // Call Log button
+    // -----------------------------
+
     if (!isSplitScreen) {
+      _labels.add("Call Log");
       _actions.add(() {
         Navigator.pushNamed(context, Constants.kPathCallLog);
       });
     }
 
-    // Return button
+    // -----------------------------
+    // Return
+    // -----------------------------
+
+    _labels.add("Return");
     _actions.add(() {
       Navigator.pop(context);
     });
 
     final int itemCount = _actions.length;
 
-    // Safety: clamp selectedIndex if list shrinks
     if (selectedIndex >= itemCount) {
       selectedIndex = itemCount - 1;
     }
+
+    _maybeSpeakFirst();
 
     return Scaffold(
       backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(10),
-        child: widgets.dashView(isSplitScreen, [
-          // -------------------------------
-          // FAVORITE CONTACTS
-          // -------------------------------
-          for (int i = 0; i < visibleContacts; i++)
-            widgets.dashCardFunc(
-              isSplitScreen
-                  ? names[i].substring(
-                      0,
-                      names[i].length > 10 ? 10 : names[i].length,
-                    )
-                  : names[i],
-              [Icons.person_rounded],
+        child: widgets.dashView(
+          isSplitScreen,
+          List.generate(itemCount, (i) {
+            return widgets.dashCardFunc(
+              _labels[i],
+              i < visibleContacts
+                  ? [Icons.person_rounded]
+                  : i == itemCount - 1
+                  ? [Icons.undo_rounded]
+                  : [Icons.history_rounded],
               _actions[i],
               context,
               itemCount,
               isSelected: selectedIndex == i,
-            ),
-
-          // -------------------------------
-          // CALL LOG (if applicable)
-          // -------------------------------
-          if (!isSplitScreen)
-            widgets.dashCardFunc(
-              'Call Log',
-              [Icons.history_rounded],
-              _actions[visibleContacts],
-              context,
-              itemCount,
-              isSelected: selectedIndex == visibleContacts,
-            ),
-
-          // -------------------------------
-          // RETURN BUTTON
-          // -------------------------------
-          widgets.dashCardFunc(
-            'Return',
-            [Icons.undo_rounded],
-            _actions[itemCount - 1],
-            context,
-            itemCount,
-            isSelected: selectedIndex == itemCount - 1,
-            overrideShowIcons: true,
-            overrideShowLabel: false,
-          ),
-        ]),
+              overrideShowIcons: i == itemCount - 1,
+              overrideShowLabel: i == itemCount - 1 ? false : null,
+            );
+          }),
+        ),
       ),
     );
   }
 
-  // -----------------------------
-  // Magnet Intent Handler
-  // -----------------------------
+  // ------------------------------------------------
+  // Magnet Handler
+  // ------------------------------------------------
 
   void _handleIntent(AppIntent intent) {
-    if (_actions.isEmpty) return;
+    if (_actions.isEmpty || selectedIndex == -1) return;
 
     switch (intent) {
       case AppIntent.next:
         setState(() {
           selectedIndex = (selectedIndex + 1) % _actions.length;
         });
+
+        ttsService.speak(_labels[selectedIndex]);
         break;
 
       case AppIntent.select:
@@ -216,6 +221,28 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
       case AppIntent.back:
         Navigator.pop(context);
         break;
+    }
+  }
+
+  // ------------------------------------------------
+  // Auto speak if magnet navigation
+  // ------------------------------------------------
+
+  void _maybeSpeakFirst() {
+    if (lastNavigationWasMagnet &&
+        !_didAutoSpeak &&
+        selectedIndex != -1 &&
+        _labels.isNotEmpty) {
+      _didAutoSpeak = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        setState(() => selectedIndex = 0);
+        ttsService.speak(_labels[0]);
+
+        lastNavigationWasMagnet = false;
+      });
     }
   }
 }

@@ -34,7 +34,8 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen>
 
   StreamSubscription<AppIntent>? _intentSub;
 
-  late List<DashAction> _items;
+  List<DashAction> _items = [];
+  bool _didAutoSpeak = false;
 
   // ------------------------------------------------
   // RouteAware
@@ -61,13 +62,9 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen>
 
   @override
   void didPopNext() {
-    if (selectedIndex != -1) {
-      setState(() => selectedIndex = 0);
-      if (_items.isNotEmpty) {
-        ttsService.speak(_items[0].label);
-      }
-    }
     _subscribe();
+    _didAutoSpeak = false;
+    _maybeSpeakFirst();
   }
 
   void _subscribe() {
@@ -114,7 +111,7 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen>
   }
 
   // ------------------------------------------------
-  // UI
+  // BUILD
   // ------------------------------------------------
 
   @override
@@ -137,10 +134,6 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen>
     }
 
     final visibleCalls = isSplitScreen ? lastCalls.take(3).toList() : lastCalls;
-
-    // ------------------------------------------------
-    // Build DashActions
-    // ------------------------------------------------
 
     _items = [];
 
@@ -168,7 +161,6 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen>
       );
     }
 
-    // Return button
     _items.add(
       DashAction(
         label: 'Return',
@@ -180,6 +172,8 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen>
     if (selectedIndex >= _items.length) {
       selectedIndex = _items.length - 1;
     }
+
+    _maybeSpeakFirst();
 
     return Scaffold(
       backgroundColor: ConfigProvider.getBackgroundColor,
@@ -223,6 +217,28 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen>
       case AppIntent.back:
         Navigator.pop(context);
         break;
+    }
+  }
+
+  // ------------------------------------------------
+  // Auto speak only if last nav was magnet
+  // ------------------------------------------------
+
+  void _maybeSpeakFirst() {
+    if (lastNavigationWasMagnet &&
+        !_didAutoSpeak &&
+        selectedIndex != -1 &&
+        _items.isNotEmpty) {
+      _didAutoSpeak = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        setState(() => selectedIndex = 0);
+        ttsService.speak(_items[0].label);
+
+        lastNavigationWasMagnet = false;
+      });
     }
   }
 

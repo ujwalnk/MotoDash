@@ -28,9 +28,7 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
 
   StreamSubscription<AppIntent>? _intentSub;
 
-  // Never use late
   List<DashAction> _items = [];
-
   bool _didAutoSpeak = false;
 
   // ------------------------------------------------
@@ -51,19 +49,16 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
   }
 
   @override
-  void didPush() {
-    _subscribe();
-  }
+  void didPush() => _subscribe();
 
   @override
-  void didPushNext() {
-    _unsubscribe();
-  }
+  void didPushNext() => _unsubscribe();
 
   @override
   void didPopNext() {
     _subscribe();
-    _didAutoSpeak = false; // allow auto speak again
+    _didAutoSpeak = false;
+    _maybeSpeakFirst();
   }
 
   void _subscribe() {
@@ -85,10 +80,6 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
 
     widgets.showLabel = isSplitScreen ? false : showLabel;
     widgets.showIcons = isSplitScreen ? true : showIcons;
-
-    // -----------------------------------
-    // DashAction list
-    // -----------------------------------
 
     _items = [
       DashAction(
@@ -126,20 +117,7 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
       ),
     ];
 
-    // -----------------------------------
-    // Safe auto-speak after first build
-    // -----------------------------------
-
-    if (!_didAutoSpeak && selectedIndex != -1 && _items.isNotEmpty) {
-      _didAutoSpeak = true;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-
-        setState(() => selectedIndex = 0);
-        ttsService.speak(_items[0].label);
-      });
-    }
+    _maybeSpeakFirst();
 
     return Scaffold(
       backgroundColor: ConfigProvider.getBackgroundColor,
@@ -183,6 +161,28 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
       case AppIntent.back:
         Navigator.pop(context);
         break;
+    }
+  }
+
+  // ------------------------------------------------
+  // Auto speak if navigation was via magnet
+  // ------------------------------------------------
+
+  void _maybeSpeakFirst() {
+    if (lastNavigationWasMagnet &&
+        !_didAutoSpeak &&
+        selectedIndex != -1 &&
+        _items.isNotEmpty) {
+      _didAutoSpeak = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        setState(() => selectedIndex = 0);
+        ttsService.speak(_items[0].label);
+
+        lastNavigationWasMagnet = false;
+      });
     }
   }
 }
