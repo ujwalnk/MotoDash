@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:statemachine/statemachine.dart' as machine;
 
@@ -10,6 +11,24 @@ class MagnetIntentService {
   Stream<AppIntent> get intents => _intentController.stream;
 
   StreamSubscription<MagnetometerEvent>? _sub;
+
+  // ==========================
+  // SAMPLING CONTROL
+  // ==========================
+
+  static const Duration _slowSampling = Duration(milliseconds: 100); // 10 Hz
+  static const Duration _fastSampling = Duration(milliseconds: 33); // ~30 Hz
+
+  Duration _currentSampling = _slowSampling;
+
+  void _startSampling(Duration period) {
+    if (_currentSampling == period) return;
+
+    _sub?.cancel();
+    _currentSampling = period;
+
+    _sub = magnetometerEventStream(samplingPeriod: period).listen(_onData);
+  }
 
   // ==========================
   // BASELINE
@@ -54,12 +73,10 @@ class MagnetIntentService {
     _stateNear = _outerM.newState("near");
     _stateBias = _outerM.newState("bias");
 
-    // Enter NEAR → activate inner
     _stateNear.onEntry(() {
       _stateActive.enter();
     });
 
-    // Enter BIAS → cancel tap + reset count
     _stateBias.onEntry(() {
       _activeTimer?.cancel();
       _count = 0;
@@ -71,6 +88,8 @@ class MagnetIntentService {
     _stateActive = _innerM.newState("active");
 
     _stateActive.onEntry(() {
+      _startSampling(_fastSampling); // FAST when active
+
       _count++;
       _lastActiveTime = DateTime.now();
 
@@ -82,12 +101,9 @@ class MagnetIntentService {
         if (diff >= const Duration(seconds: 1)) {
           timer.cancel();
 
-          // 🔥 KEY LOGIC
           if (_outerM.current == _stateNear) {
-            // Still near → environmental bias
             _stateBias.enter();
           } else if (_outerM.current == _stateFar) {
-            // Legit tap
             _emitIntentFromCount(_count);
           }
 
@@ -98,7 +114,7 @@ class MagnetIntentService {
     });
 
     _stateIdle.onEntry(() {
-      // nothing extra
+      _startSampling(_slowSampling); // 🔥 SLOW when idle
     });
   }
 
@@ -107,9 +123,7 @@ class MagnetIntentService {
   // ==========================
 
   void start() {
-    _sub = magnetometerEventStream(
-      samplingPeriod: const Duration(milliseconds: 25),
-    ).listen(_onData);
+    _startSampling(_slowSampling); // start slow
   }
 
   void stop() {
@@ -139,8 +153,7 @@ class MagnetIntentService {
       return;
     }
 
-    // -------- BASELINE UPDATE --------
-
+    // Baseline update
     if (_outerM.current == _stateFar) {
       _baseline = (_baseline * 0.998) + (magnitude * 0.002);
     } else if (_outerM.current == _stateBias) {
@@ -150,18 +163,12 @@ class MagnetIntentService {
     final enterThreshold = _baseline + _enterDelta;
     final exitThreshold = _baseline + _exitDelta;
 
-    print(
-      "Mag: ${magnitude.toStringAsFixed(1)} | "
-      "Base: ${_baseline.toStringAsFixed(1)} | "
-      "Enter: ${enterThreshold.toStringAsFixed(1)} | "
-      "Exit: ${exitThreshold.toStringAsFixed(1)} | "
-      "Outer: ${_outerM.current}",
+    debugPrint(
+      "Mag: $magnitude | Base: ${_baseline.toStringAsFixed(1)} | Enter: ${enterThreshold.toStringAsFixed(1)} | Exit: ${exitThreshold.toStringAsFixed(1)} | Outer: ${_outerM.current}",
     );
 
-    // -------- TRANSITIONS --------
-
     if (magnitude > enterThreshold) {
-      if (_outerM.current != _stateNear) {
+      if (_outerM.current == _stateFar) {
         _stateNear.enter();
       }
     } else if (magnitude < exitThreshold) {
