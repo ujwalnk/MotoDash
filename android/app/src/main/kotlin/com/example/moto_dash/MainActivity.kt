@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
-// import android.os.build
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -38,20 +37,29 @@ class MainActivity : FlutterActivity() {
                     }
                 }
                 "togglePlayPause" -> {
-    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
-    result.success(true)
-}
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+                    result.success(true)
+                }
 
-"nextTrack" -> {
-    sendMediaKey(KeyEvent.KEYCODE_MEDIA_NEXT)
-    result.success(true)
-}
+                "nextTrack" -> {
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_NEXT)
+                    result.success(true)
+                }
 
-"previousTrack" -> {
-    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
-    result.success(true)
-}
+                "previousTrack" -> {
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
+                    result.success(true)
+                }
 
+                "pauseMedia" -> {
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PAUSE)
+                    result.success(true)
+                }
+
+                "resumeMedia" -> {
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY)
+                    result.success(true)
+                }
 
                 "getSplitScreenState" -> {
                     result.success(isSplitScreen)

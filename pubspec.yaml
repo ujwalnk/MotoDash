@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  audio_session: ^0.2.2
   # To store the settings
   shared_preferences: ^2.5.3
   # To keep screen awake & contorl brightness
