@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show MethodChannel;
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
+import 'package:moto_dash/commons/dash_action.dart';
 
 class DashWidgets {
   Color? backgroundColor = ConfigProvider.getBackgroundColor;
@@ -102,6 +103,22 @@ class DashWidgets {
           ),
         );
       },
+    );
+  }
+
+  Widget dashCardAction(
+    DashAction action,
+    BuildContext context,
+    int itemCount, {
+    bool isSelected = false,
+  }) {
+    return dashCardFunc(
+      action.label,
+      action.icons,
+      action.action,
+      context,
+      itemCount,
+      isSelected: isSelected,
     );
   }
 

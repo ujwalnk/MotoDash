@@ -19,6 +19,10 @@ class TtsService {
     await _tts.speak(text);
   }
 
+  Future<void> stop() async {
+    await _tts.stop();
+  }
+
   void setEnabled(bool value) {
     _enabled = value;
   }

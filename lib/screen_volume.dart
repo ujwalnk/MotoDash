@@ -4,8 +4,10 @@ import 'package:volume_controller/volume_controller.dart';
 
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
+import 'package:moto_dash/commons/dash_action.dart';
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:moto_dash/commons/split_screen_observer.dart';
+
 import 'package:moto_dash/service/global_services.dart';
 import 'package:moto_dash/service/magent_intent_detector.dart';
 import 'package:moto_dash/main.dart';
@@ -25,11 +27,15 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
   int selectedIndex = ConfigProvider.getEnableMagnetGestures ? 0 : -1;
 
   StreamSubscription<AppIntent>? _intentSub;
-  late List<VoidCallback> _actions;
 
-  // -----------------------------
+  // Never use late
+  List<DashAction> _items = [];
+
+  bool _didAutoSpeak = false;
+
+  // ------------------------------------------------
   // RouteAware lifecycle
-  // -----------------------------
+  // ------------------------------------------------
 
   @override
   void didChangeDependencies() {
@@ -45,13 +51,20 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
   }
 
   @override
-  void didPush() => _subscribe();
+  void didPush() {
+    _subscribe();
+  }
 
   @override
-  void didPopNext() => _subscribe();
+  void didPushNext() {
+    _unsubscribe();
+  }
 
   @override
-  void didPushNext() => _unsubscribe();
+  void didPopNext() {
+    _subscribe();
+    _didAutoSpeak = false; // allow auto speak again
+  }
 
   void _subscribe() {
     _intentSub = magnetService.intents.listen(_handleIntent);
@@ -62,93 +75,109 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
     _intentSub = null;
   }
 
-  // -----------------------------
+  // ------------------------------------------------
+  // BUILD
+  // ------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
-    DashWidgets widgets = DashWidgets();
-    const int itemCount = 4;
+    final DashWidgets widgets = DashWidgets();
 
     widgets.showLabel = isSplitScreen ? false : showLabel;
     widgets.showIcons = isSplitScreen ? true : showIcons;
 
-    // Single source of truth for actions
-    _actions = [
-      () async {
-        final current = await VolumeController.instance.getVolume();
-        await VolumeController.instance.setVolume(
-          (current + 0.1).clamp(0.0, 1.0),
-        );
-      },
-      () async {
-        final current = await VolumeController.instance.getVolume();
-        await VolumeController.instance.setVolume(
-          (current - 0.1).clamp(0.0, 1.0),
-        );
-      },
-      () async {
-        final isMuted = await VolumeController.instance.isMuted();
-        await VolumeController.instance.setMute(!isMuted);
-      },
-      () => Navigator.pop(context),
+    // -----------------------------------
+    // DashAction list
+    // -----------------------------------
+
+    _items = [
+      DashAction(
+        label: 'Increase Volume',
+        icons: [Icons.add_rounded],
+        action: () async {
+          final current = await VolumeController.instance.getVolume();
+          await VolumeController.instance.setVolume(
+            (current + 0.1).clamp(0.0, 1.0),
+          );
+        },
+      ),
+      DashAction(
+        label: 'Decrease Volume',
+        icons: [Icons.remove_rounded],
+        action: () async {
+          final current = await VolumeController.instance.getVolume();
+          await VolumeController.instance.setVolume(
+            (current - 0.1).clamp(0.0, 1.0),
+          );
+        },
+      ),
+      DashAction(
+        label: 'Mute / Unmute',
+        icons: [Icons.volume_off_rounded],
+        action: () async {
+          final isMuted = await VolumeController.instance.isMuted();
+          await VolumeController.instance.setMute(!isMuted);
+        },
+      ),
+      DashAction(
+        label: 'Return',
+        icons: [Icons.undo_rounded],
+        action: () => Navigator.pop(context),
+      ),
     ];
+
+    // -----------------------------------
+    // Safe auto-speak after first build
+    // -----------------------------------
+
+    if (!_didAutoSpeak && selectedIndex != -1 && _items.isNotEmpty) {
+      _didAutoSpeak = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        setState(() => selectedIndex = 0);
+        ttsService.speak(_items[0].label);
+      });
+    }
 
     return Scaffold(
       backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-        child: widgets.dashView(isSplitScreen, [
-          widgets.dashCardFunc(
-            'Increase Volume',
-            [Icons.add_rounded],
-            _actions[0],
-            context,
-            itemCount,
-            isSelected: selectedIndex == 0,
-          ),
-          widgets.dashCardFunc(
-            'Decrease Volume',
-            [Icons.remove_rounded],
-            _actions[1],
-            context,
-            itemCount,
-            isSelected: selectedIndex == 1,
-          ),
-          widgets.dashCardFunc(
-            'Mute / Unmute',
-            [Icons.volume_off_rounded],
-            _actions[2],
-            context,
-            itemCount,
-            isSelected: selectedIndex == 2,
-          ),
-          widgets.dashCardFunc(
-            'Return',
-            [Icons.undo_rounded],
-            _actions[3],
-            context,
-            itemCount,
-            isSelected: selectedIndex == 3,
-          ),
-        ]),
+        child: widgets.dashView(
+          isSplitScreen,
+          List.generate(_items.length, (index) {
+            return widgets.dashCardAction(
+              _items[index],
+              context,
+              _items.length,
+              isSelected: selectedIndex == index,
+            );
+          }),
+        ),
       ),
     );
   }
 
-  // -----------------------------
+  // ------------------------------------------------
   // Magnet Intent Handler
-  // -----------------------------
+  // ------------------------------------------------
 
   void _handleIntent(AppIntent intent) {
+    if (selectedIndex == -1 || _items.isEmpty) return;
+
     switch (intent) {
       case AppIntent.next:
         setState(() {
-          selectedIndex = (selectedIndex + 1) % _actions.length;
+          selectedIndex = (selectedIndex + 1) % _items.length;
         });
+
+        ttsService.speak(_items[selectedIndex].label);
         break;
 
       case AppIntent.select:
-        _actions[selectedIndex]();
+        _items[selectedIndex].action();
         break;
 
       case AppIntent.back:

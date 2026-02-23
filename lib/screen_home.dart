@@ -4,12 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
-import 'package:moto_dash/commons/list_builder.dart';
+import 'package:moto_dash/commons/dash_action.dart';
 import 'package:moto_dash/commons/split_screen_observer.dart';
+import 'package:moto_dash/commons/list_builder.dart';
+
 import 'package:moto_dash/service/assistant_launcher.dart';
 import 'package:moto_dash/service/global_services.dart';
 import 'package:moto_dash/service/magent_intent_detector.dart';
-import 'package:moto_dash/main.dart'; // for routeObserver
+
+import 'package:moto_dash/main.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,15 +24,23 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
   bool showIcons = ConfigProvider.getShowIcons(Constants.kPathHome);
   bool showLabel = ConfigProvider.getShowLabel(Constants.kPathHome);
+
   bool loading = true;
-  bool showVolumeTip = true;
   bool hasFavContacts = false;
   bool showSettingsButton = true;
 
   int selectedIndex = ConfigProvider.getEnableMagnetGestures ? 0 : -1;
 
   StreamSubscription<AppIntent>? _intentSub;
-  late List<VoidCallback> _actions;
+
+  // NEVER late
+  List<DashAction> _items = [];
+
+  bool _didAutoSpeak = false;
+
+  // ------------------------------------------------
+  // RouteAware
+  // ------------------------------------------------
 
   @override
   void didChangeDependencies() {
@@ -44,24 +55,21 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
     super.dispose();
   }
 
-  // -----------------------------
-  // RouteAware lifecycle
-  // -----------------------------
-
   @override
-  void didPush() => _subscribe();
-
-  @override
-  void didPopNext() {
-    // Reset the index
-    if (selectedIndex != -1) {
-      setState(() => selectedIndex = 0);
-    }
+  void didPush() {
     _subscribe();
   }
 
   @override
-  void didPushNext() => _unsubscribe();
+  void didPushNext() {
+    _unsubscribe();
+  }
+
+  @override
+  void didPopNext() {
+    _subscribe();
+    _didAutoSpeak = false;
+  }
 
   void _subscribe() {
     _intentSub = magnetService.intents.listen(_handleIntent);
@@ -72,25 +80,19 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
     _intentSub = null;
   }
 
-  // -----------------------------
+  // ------------------------------------------------
+  // INIT
+  // ------------------------------------------------
 
   @override
   void initState() {
-    // _subscribe();
     super.initState();
     _loadSettings();
-
-    Future.delayed(const Duration(seconds: 10), () {
-      if (mounted) {
-        // setState(() => showSettingsButton = false);
-      }
-    });
   }
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
-    showVolumeTip = prefs.getBool("show_volume_tip") ?? true;
     hasFavContacts =
         prefs.getStringList("fav_contact_names")?.isNotEmpty ?? false;
 
@@ -98,9 +100,45 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
     if (mounted) setState(() {});
   }
 
+  // ------------------------------------------------
+  // Magnet Intent Handler
+  // ------------------------------------------------
+
+  void _handleIntent(AppIntent intent) {
+    if (selectedIndex == -1 || _items.isEmpty) return;
+
+    switch (intent) {
+      case AppIntent.next:
+        setState(() {
+          selectedIndex = (selectedIndex + 1) % _items.length;
+        });
+
+        ttsService.speak(_items[selectedIndex].label);
+        break;
+
+      case AppIntent.select:
+        _items[selectedIndex].action();
+        break;
+
+      case AppIntent.back:
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        break;
+    }
+  }
+
+  // ------------------------------------------------
+  // BUILD
+  // ------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
-    DashWidgets widgets = DashWidgets();
+    if (loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    final DashWidgets widgets = DashWidgets();
 
     if (isSplitScreen) {
       widgets.showLabel = false;
@@ -110,98 +148,81 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
       widgets.showLabel = showLabel;
     }
 
-    if (loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    // -----------------------------------
+    // Build DashAction list
+    // -----------------------------------
 
-    _actions = [
-      () {
-        Navigator.pushNamed(
-          context,
-          isSplitScreen
-              ? (!hasFavContacts
-                    ? Constants.kPathCallLog
-                    : Constants.kPathCallNav)
-              : (hasFavContacts
-                    ? Constants.kPathCallFav
-                    : Constants.kPathCallLog),
-        );
-      },
-      () => Navigator.pushNamed(context, Constants.kPathMusic),
-      () => AssistantLauncher.launch(),
+    _items = [
+      DashAction(
+        label: 'Phone',
+        icons: [Icons.phone_rounded],
+        action: () {
+          Navigator.pushNamed(
+            context,
+            isSplitScreen
+                ? (!hasFavContacts
+                      ? Constants.kPathCallLog
+                      : Constants.kPathCallNav)
+                : (hasFavContacts
+                      ? Constants.kPathCallFav
+                      : Constants.kPathCallLog),
+          );
+        },
+      ),
+      DashAction(
+        label: 'Music',
+        icons: [Icons.music_note_rounded],
+        action: () => Navigator.pushNamed(context, Constants.kPathMusic),
+      ),
+      DashAction(
+        label: 'Assistant',
+        icons: [Icons.assistant_rounded],
+        action: () => AssistantLauncher.launch(),
+      ),
       if (showSettingsButton)
-        () => Navigator.pushNamed(context, Constants.kPathSettings),
-      () => Navigator.pushNamed(context, Constants.kPathVolume),
+        DashAction(
+          label: 'Settings',
+          icons: [Icons.settings_rounded],
+          action: () => Navigator.pushNamed(context, Constants.kPathSettings),
+        ),
+      DashAction(
+        label: 'Volume',
+        icons: [Icons.volume_up_rounded],
+        action: () => Navigator.pushNamed(context, Constants.kPathVolume),
+      ),
     ];
+
+    // -----------------------------------
+    // SAFE auto-speak after first build
+    // -----------------------------------
+
+    if (!_didAutoSpeak && selectedIndex != -1 && _items.isNotEmpty) {
+      _didAutoSpeak = true;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        setState(() => selectedIndex = 0);
+        ttsService.speak(_items[0].label);
+      });
+    }
 
     return Scaffold(
       backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-        child: widgets.dashView(isSplitScreen, [
-          widgets.dashCardFunc(
-            'Phone',
-            [Icons.phone_rounded],
-            _actions[0],
-            context,
-            _actions.length,
-            isSelected: selectedIndex == 0,
-          ),
-          widgets.dashCardFunc(
-            'Music',
-            [Icons.music_note_rounded],
-            _actions[1],
-            context,
-            _actions.length,
-            isSelected: selectedIndex == 1,
-          ),
-          widgets.dashCardFunc(
-            'Assistant',
-            [Icons.assistant_rounded],
-            _actions[2],
-            context,
-            _actions.length,
-            isSelected: selectedIndex == 2,
-          ),
-          if (showSettingsButton)
-            widgets.dashCardFunc(
-              'Settings',
-              [Icons.settings_rounded],
-              _actions[3],
+        child: widgets.dashView(
+          isSplitScreen,
+          List.generate(_items.length, (index) {
+            return widgets.dashCardAction(
+              _items[index],
               context,
-              _actions.length,
-              isSelected: selectedIndex == 3,
-            ),
-          widgets.dashCardFunc(
-            'Volume',
-            [Icons.volume_up_rounded],
-            showSettingsButton ? _actions[4] : _actions[3],
-            context,
-            _actions.length,
-            isSelected: selectedIndex == 3,
-          ),
-        ]),
+              _items.length,
+              isSelected: selectedIndex == index,
+            );
+          }),
+        ),
       ),
     );
-  }
-
-  void _handleIntent(AppIntent intent) {
-    switch (intent) {
-      case AppIntent.next:
-        setState(() {
-          selectedIndex = (selectedIndex + 1) % _actions.length;
-        });
-        break;
-
-      case AppIntent.select:
-        _actions[selectedIndex]();
-        break;
-
-      case AppIntent.back:
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
-        }
-        break;
-    }
   }
 }

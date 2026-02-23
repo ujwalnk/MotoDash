@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
 enum AppIntent { next, select, back }
@@ -11,22 +10,31 @@ class MagnetIntentService {
 
   StreamSubscription<MagnetometerEvent>? _sub;
 
+  // ==========================
+  // TAP LOGIC (UNCHANGED CORE)
+  // ==========================
+
   int _count = 0;
   DateTime _lastActiveTime = DateTime.now();
-
   Timer? _activeCheckTimer;
 
   bool _isNear = false;
 
   // ==========================
-  // BASELINE LEARNING
+  // BASELINE
   // ==========================
 
   double _baseline = 0;
   bool _baselineInitialized = false;
 
-  static const double _enterDelta = 35; // µT above baseline
-  static const double _exitDelta = 15; // µT above baseline
+  static const double _enterDelta = 35;
+  static const double _exitDelta = 15;
+
+  // ==========================
+  // BIAS MODE
+  // ==========================
+
+  bool _biasMode = false;
 
   // ==========================
   // START / STOP
@@ -57,45 +65,61 @@ class MagnetIntentService {
       event.x * event.x + event.y * event.y + event.z * event.z,
     );
 
-    // ---- Initialize baseline ----
     if (!_baselineInitialized) {
       _baseline = magnitude;
       _baselineInitialized = true;
       return;
     }
 
-    // ---- Update baseline only when magnet is FAR ----
+    // -------------------------
+    // Baseline Update
+    // -------------------------
+
     if (!_isNear) {
-      _baseline = _baseline * 0.998 + magnitude * 0.002;
+      _baseline = (_baseline * 0.998) + (magnitude * 0.002);
+    } else if (_biasMode) {
+      // Adapt to environmental magnetic bias
+      _baseline = (_baseline * 0.99) + (magnitude * 0.01);
     }
 
     final enterThreshold = _baseline + _enterDelta;
     final exitThreshold = _baseline + _exitDelta;
 
-    debugPrint(
-      "Mag: ${magnitude.toStringAsFixed(1)} | "
-      "Base: ${_baseline.toStringAsFixed(1)} | "
-      "Enter: ${enterThreshold.toStringAsFixed(1)}",
-    );
+    // print(
+    //   "Mag: ${magnitude.toStringAsFixed(1)} | "
+    //   "Base: ${_baseline.toStringAsFixed(1)} | "
+    //   "Enter: ${enterThreshold.toStringAsFixed(1)} | "
+    //   "Exit: ${exitThreshold.toStringAsFixed(1)} | "
+    //   "Near: $_isNear | Bias: $_biasMode",
+    // );
+
+    // ==========================
+    // NEAR DETECTION
+    // ==========================
 
     if (magnitude > enterThreshold) {
       if (!_isNear) {
         _isNear = true;
-        // debugPrint("Outer State: Near");
+        _biasMode = false; // reset bias on fresh near
         _onEnterActive();
       }
-    } else if (magnitude < exitThreshold) {
-      _isNear = false;
-      // debugPrint("Outer State: Far");
+    }
+    // ==========================
+    // FAR DETECTION
+    // ==========================
+    else if (magnitude < exitThreshold) {
+      if (_isNear) {
+        _isNear = false;
+        _biasMode = false;
+      }
     }
   }
 
   // ==========================
-  // INNER LOGIC
+  // TAP GROUPING (KEY CHANGE)
   // ==========================
 
   void _onEnterActive() {
-    // debugPrint("Inner State: Active");
     _count++;
     _lastActiveTime = DateTime.now();
 
@@ -108,7 +132,16 @@ class MagnetIntentService {
 
       if (diff >= const Duration(seconds: 1)) {
         timer.cancel();
-        _emitIntentFromCount(_count);
+
+        // IMPORTANT CHANGE:
+        // Only emit if magnet is NOT still near
+        if (!_isNear) {
+          _emitIntentFromCount(_count);
+        } else {
+          // Magnet still near at timeout → bias
+          _biasMode = true;
+        }
+
         _count = 0;
       }
     });
