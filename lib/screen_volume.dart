@@ -19,14 +19,10 @@ class VolumeScreen extends StatefulWidget {
 
 class _VolumeScreenState extends SplitScreenState<VolumeScreen>
     with RouteAware {
-  Color backgroundColor = ConfigProvider.getBackgroundColor;
-  Color fontColor = ConfigProvider.getFontColor;
-  Color borderColor = ConfigProvider.getBorderColor;
-
   bool showIcons = ConfigProvider.getShowIcons(Constants.kPathVolume);
   bool showLabel = ConfigProvider.getShowLabel(Constants.kPathVolume);
 
-  int selectedIndex = 0;
+  int selectedIndex = ConfigProvider.getEnableMagnetGestures ? 0 : -1;
 
   StreamSubscription<AppIntent>? _intentSub;
   late List<VoidCallback> _actions;
@@ -73,10 +69,6 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
     DashWidgets widgets = DashWidgets();
     const int itemCount = 4;
 
-    widgets.backgroundColor = backgroundColor;
-    widgets.fontColor = fontColor;
-    widgets.borderColor = borderColor;
-
     widgets.showLabel = isSplitScreen ? false : showLabel;
     widgets.showIcons = isSplitScreen ? true : showIcons;
 
@@ -102,7 +94,7 @@ class _VolumeScreenState extends SplitScreenState<VolumeScreen>
     ];
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
         child: widgets.dashView(isSplitScreen, [

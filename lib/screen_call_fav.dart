@@ -20,10 +20,6 @@ class FavContactsScreen extends StatefulWidget {
 
 class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
     with RouteAware {
-  final Color backgroundColor = ConfigProvider.getBackgroundColor;
-  final Color fontColor = ConfigProvider.getFontColor;
-  final Color borderColor = ConfigProvider.getBorderColor;
-
   final bool showIcons = ConfigProvider.getShowIcons(Constants.kPathCallFav);
   final bool showLabel = ConfigProvider.getShowLabel(Constants.kPathCallFav);
 
@@ -31,7 +27,7 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
   List<String> numbers = [];
 
   bool loading = true;
-  int selectedIndex = 0;
+  int selectedIndex = ConfigProvider.getEnableMagnetGestures ? 0 : -1;
 
   StreamSubscription<AppIntent>? _intentSub;
   late List<VoidCallback> _actions;
@@ -93,10 +89,6 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
   Widget build(BuildContext context) {
     DashWidgets widgets = DashWidgets();
 
-    widgets.backgroundColor = backgroundColor;
-    widgets.fontColor = fontColor;
-    widgets.borderColor = borderColor;
-
     if (isSplitScreen) {
       widgets.showLabel = true;
       widgets.showIcons = false;
@@ -107,7 +99,7 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
 
     if (loading) {
       return Scaffold(
-        backgroundColor: backgroundColor,
+        backgroundColor: ConfigProvider.getBackgroundColor,
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -150,7 +142,7 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
     }
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: widgets.dashView(isSplitScreen, [

@@ -4,9 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:moto_dash/service/contact_picker.dart';
 import 'package:moto_dash/service/rgb_color_picker.dart';
 
@@ -43,13 +41,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // General settings
   Color fontColor = Colors.white;
   Color backgroundColor = Colors.black;
-  Color BorderColor = Colors.grey;
+  Color borderColor = Colors.grey;
   final fontSizeController = TextEditingController();
 
   // Brightness
   double brightness = 50;
 
-  static const Color settingsScreenFontColor = Color(0xFFF2F2F7);
+  static const Color scaffoldBg = Color(0xFF121212);
+  static const Color cardBg = Color(0xFF1E1E1E);
+  static const Color textColor = Colors.white;
 
   @override
   void initState() {
@@ -81,7 +81,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       fontSizeController.text = ConfigProvider.getFontSize.toString();
 
       backgroundColor = ConfigProvider.getBackgroundColor;
-      BorderColor = ConfigProvider.getBorderColor;
+      borderColor = ConfigProvider.getBorderColor;
       fontColor = ConfigProvider.getFontColor;
 
       favouriteContactNames =
@@ -106,8 +106,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool(Constants.kKeyVolumeShowIcons, volumeShowIcons);
     await prefs.setBool(Constants.kKeyVolumeShowLabel, volumeShowLabel);
 
-    // await prefs.setString("phone_favourite_contacts", favouriteContacts);
-
     await prefs.setDouble(Constants.kKeyBrightness, brightness);
 
     await prefs.setBool("keep_screen_blank", keepScreenBlank);
@@ -118,55 +116,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
       Constants.kKeyBackgroundColor,
       backgroundColor.toARGB32(),
     );
-    await prefs.setInt(Constants.kKeyBorderColor, BorderColor.toARGB32());
-    await prefs.setString(Constants.kKeyFontSize, fontSizeController.text);
+    await prefs.setInt(Constants.kKeyBorderColor, borderColor.toARGB32());
+
+    await prefs.setDouble(
+      Constants.kKeyFontSize,
+      double.parse(fontSizeController.text),
+    );
+
     await prefs.setBool(
       Constants.kKeyEnableMagnetGestures,
       magnetGesturesEnabled,
     );
   }
 
-  // ------------------------------------------------------------
-  // UI WIDGETS
-  // ------------------------------------------------------------
-
-  Widget sectionHeader(String title) {
+  Widget _settingsCard({
+    required String title,
+    required List<Widget> children,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(top: 24, bottom: 8),
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: settingsScreenFontColor,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Card(
+        color: cardBg,
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: textColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...children,
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Future<void> showRgbPicker({
-    required Color currentColor,
-    required ValueChanged<Color> onColorSelected,
-  }) async {
-    await showDialog(
-      context: context,
-      builder: (_) => HexWheelColorPickerDialog(
-        color: currentColor,
-        onChanged: (c) {
-          onColorSelected(c);
-        },
       ),
     );
   }
 
   Widget checkboxTile(String title, bool value, Function(bool) onChanged) {
     return CheckboxListTile(
-      title: Text(title, style: TextStyle(color: settingsScreenFontColor)),
+      title: Text(title, style: TextStyle(color: textColor)),
       value: value,
       onChanged: (v) => onChanged(v!),
-      activeColor: settingsScreenFontColor,
-      checkColor: Colors.black,
       contentPadding: EdgeInsets.zero,
+      activeColor: Colors.blueGrey,
+      checkColor: Colors.black,
+      controlAffinity: ListTileControlAffinity.trailing,
     );
   }
 
@@ -180,15 +183,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: TextField(
         controller: controller,
         keyboardType: inputType,
-        style: const TextStyle(color: settingsScreenFontColor),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(color: settingsScreenFontColor),
+        style: const TextStyle(color: textColor),
+        decoration: const InputDecoration(
+          labelStyle: TextStyle(color: textColor),
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: settingsScreenFontColor),
+            borderSide: BorderSide(color: Colors.white54),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: settingsScreenFontColor),
+            borderSide: BorderSide(color: Colors.blueGrey),
           ),
         ),
       ),
@@ -206,19 +208,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(top: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(color: settingsScreenFontColor),
+          border: Border.all(color: Colors.white54),
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(
-          display,
-          style: TextStyle(
-            color: value.isEmpty
-                ? settingsScreenFontColor
-                : settingsScreenFontColor,
-            fontSize: 16,
-          ),
-        ),
+        child: Text(display, style: const TextStyle(color: textColor)),
       ),
     );
   }
@@ -229,24 +224,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required ValueChanged<Color> onColorSelected,
   }) {
     return GestureDetector(
-      onTap: () =>
-          showRgbPicker(currentColor: color, onColorSelected: onColorSelected),
+      onTap: () async {
+        await showDialog(
+          context: context,
+          builder: (_) => HexWheelColorPickerDialog(
+            color: color,
+            onChanged: onColorSelected,
+          ),
+        );
+      },
       child: Container(
         margin: const EdgeInsets.only(top: 12),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(color: settingsScreenFontColor),
+          border: Border.all(color: Colors.white54),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: TextStyle(color: settingsScreenFontColor)),
+            Text(label, style: const TextStyle(color: textColor)),
             Container(
               width: 28,
               height: 28,
               decoration: BoxDecoration(
                 color: color,
-                border: Border.all(color: settingsScreenFontColor),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.white),
               ),
             ),
           ],
@@ -261,147 +265,154 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1C1C1E),
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1C1C1E),
-        title: Text(
-          "Settings",
-          style: TextStyle(color: settingsScreenFontColor),
-        ),
+        backgroundColor: scaffoldBg,
+        foregroundColor: textColor,
+        title: const Text("Settings"),
+        centerTitle: true,
         actions: [
           TextButton(
             onPressed: () async {
               await saveSettings();
-
               if (!context.mounted) return;
               Navigator.pop(context);
             },
-            child: Text(
-              "Save",
-              style: TextStyle(color: settingsScreenFontColor),
-            ),
+            child: const Text("Save", style: TextStyle(color: Colors.blueGrey)),
           ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // HOME
-          sectionHeader("Home Screen"),
-          checkboxTile(
-            "Show Icons",
-            homeShowIcons,
-            (v) => setState(() => homeShowIcons = v),
+          _settingsCard(
+            title: "Home Screen",
+            children: [
+              checkboxTile(
+                "Show Icons",
+                homeShowIcons,
+                (v) => setState(() => homeShowIcons = v),
+              ),
+              checkboxTile(
+                "Show Label",
+                homeShowLabel,
+                (v) => setState(() => homeShowLabel = v),
+              ),
+            ],
           ),
-          checkboxTile(
-            "Show Label",
-            homeShowLabel,
-            (v) => setState(() => homeShowLabel = v),
+          _settingsCard(
+            title: "Music Screen",
+            children: [
+              checkboxTile(
+                "Show Icons",
+                musicShowIcons,
+                (v) => setState(() => musicShowIcons = v),
+              ),
+              checkboxTile(
+                "Show Label",
+                musicShowLabel,
+                (v) => setState(() => musicShowLabel = v),
+              ),
+            ],
           ),
-
-          // MUSIC
-          sectionHeader("Music Screen"),
-          checkboxTile(
-            "Show Icons",
-            musicShowIcons,
-            (v) => setState(() => musicShowIcons = v),
+          _settingsCard(
+            title: "Volume Screen",
+            children: [
+              checkboxTile(
+                "Show Icons",
+                volumeShowIcons,
+                (v) => setState(() => volumeShowIcons = v),
+              ),
+              checkboxTile(
+                "Show Label",
+                volumeShowLabel,
+                (v) => setState(() => volumeShowLabel = v),
+              ),
+            ],
           ),
-          checkboxTile(
-            "Show Label",
-            musicShowLabel,
-            (v) => setState(() => musicShowLabel = v),
+          _settingsCard(
+            title: "Phone Favourite Contacts",
+            children: [
+              tappableField(
+                label: "Pick Favourite Contacts",
+                value: favouriteContactNames,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const FavouriteContactsScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-
-          // VOLUME
-          sectionHeader("Volume Screen"),
-          checkboxTile(
-            "Show Icons",
-            volumeShowIcons,
-            (v) => setState(() => volumeShowIcons = v),
+          _settingsCard(
+            title: "Screen Brightness (0 for auto)",
+            children: [
+              Slider(
+                value: brightness,
+                min: 0,
+                max: 100,
+                divisions: 100,
+                onChanged: (v) => setState(() => brightness = v),
+              ),
+              Text(
+                "${brightness.toInt()}%",
+                style: const TextStyle(color: textColor),
+              ),
+            ],
           ),
-          checkboxTile(
-            "Show Label",
-            volumeShowLabel,
-            (v) => setState(() => volumeShowLabel = v),
-          ),
-
-          // PHONE
-          sectionHeader("Phone Favourite Contacts"),
-          tappableField(
-            label: "Pick Favourite Contacts",
-            value: favouriteContactNames,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const FavouriteContactsScreen(),
+          _settingsCard(
+            title: "Blank Screen Settings",
+            children: [
+              checkboxTile(
+                "Keep screen blank & wake on single tap",
+                keepScreenBlank,
+                (v) => setState(() => keepScreenBlank = v),
+              ),
+              if (keepScreenBlank)
+                textField(
+                  "Blank Time (Minutes)",
+                  blankTimeController,
+                  inputType: TextInputType.number,
                 ),
-              );
-            },
+            ],
           ),
-
-          // BRIGHTNESS
-          sectionHeader("Screen Brightness (O for auto)"),
-          Slider(
-            value: brightness,
-            min: 0,
-            max: 100,
-            divisions: 100,
-            onChanged: (v) => setState(() => brightness = v),
+          _settingsCard(
+            title: "General Settings",
+            children: [
+              textField(
+                "Font Size",
+                fontSizeController,
+                inputType: TextInputType.number,
+              ),
+              colorTile(
+                label: "Font Color",
+                color: fontColor,
+                onColorSelected: (c) => setState(() => fontColor = c),
+              ),
+              colorTile(
+                label: "Background Color",
+                color: backgroundColor,
+                onColorSelected: (c) => setState(() => backgroundColor = c),
+              ),
+              colorTile(
+                label: "Border Color",
+                color: borderColor,
+                onColorSelected: (c) => setState(() => borderColor = c),
+              ),
+            ],
           ),
-          Text(
-            "${brightness.toInt()}%",
-            style: TextStyle(color: settingsScreenFontColor),
-          ),
-
-          // BLANK SCREEN
-          sectionHeader("Blank Screen Settings"),
-          checkboxTile(
-            "Keep screen blank & wake on single tap",
-            keepScreenBlank,
-            (v) => setState(() => keepScreenBlank = v),
-          ),
-          if (keepScreenBlank)
-            textField(
-              "Blank Time (Minutes)",
-              blankTimeController,
-              inputType: TextInputType.number,
-            ),
-
-          // GENERAL
-          sectionHeader("General Settings"),
-          // textField("Font Color (Hex)", fontColorController),
-          // textField("Background Color (Hex)", backgroundColorController),
-          // textField("Option Border Color (Hex)", optionBorderColorController),
-          textField(
-            "Font Size",
-            fontSizeController,
-            inputType: TextInputType.number,
-          ),
-          colorTile(
-            label: "Font Color",
-            color: fontColor,
-            onColorSelected: (c) => setState(() => fontColor = c),
-          ),
-
-          colorTile(
-            label: "Background Color",
-            color: backgroundColor,
-            onColorSelected: (c) => setState(() => backgroundColor = c),
-          ),
-
-          colorTile(
-            label: "Option Border Color",
-            color: BorderColor,
-            onColorSelected: (c) => setState(() => BorderColor = c),
-          ),
-
-          // Experimental Settings
-          sectionHeader("Experimental Settings"),
-          checkboxTile(
-            "Enable Magnet Gestures",
-            magnetGesturesEnabled,
-            (v) => setState(() => magnetGesturesEnabled = v),
+          _settingsCard(
+            title: "Experimental Settings",
+            children: [
+              checkboxTile(
+                "Enable Magnet Gestures",
+                magnetGesturesEnabled,
+                (v) => setState(() => magnetGesturesEnabled = v),
+              ),
+            ],
           ),
         ],
       ),

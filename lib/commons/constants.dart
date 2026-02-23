@@ -19,7 +19,7 @@ class Constants {
   static const String kKeyVolumeShowIcons = 'volume_show_icons';
   static const String kKeyVolumeShowLabel = 'volume_show_label';
 
-  static const String kKeyFontSize = 'kfont_size';
+  static const String kKeyFontSize = 'font_size';
   static const String kKeyShowVolumeTip = 'show_volume_tip';
   static const String kKeyFavContactNames = 'fav_contact_names';
   static const String kKeyEnableMagnetGestures = "magnetic_gestures";

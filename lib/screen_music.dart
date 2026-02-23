@@ -18,16 +18,12 @@ class MusicScreen extends StatefulWidget {
 }
 
 class _MusicScreenState extends SplitScreenState<MusicScreen> with RouteAware {
-  Color backgroundColor = ConfigProvider.getBackgroundColor;
-  Color fontColor = ConfigProvider.getFontColor;
-  Color borderColor = ConfigProvider.getBorderColor;
-
   bool showIcons = ConfigProvider.getShowIcons(Constants.kPathMusic);
   bool showLabel = ConfigProvider.getShowLabel(Constants.kPathMusic);
 
   static const MethodChannel _channel = MethodChannel('assistant.launcher');
 
-  int selectedIndex = 0;
+  int selectedIndex = ConfigProvider.getEnableMagnetGestures ? 0 : -1;
 
   StreamSubscription<AppIntent>? _intentSub;
   late List<VoidCallback> _actions;
@@ -68,10 +64,6 @@ class _MusicScreenState extends SplitScreenState<MusicScreen> with RouteAware {
     DashWidgets widgets = DashWidgets();
     const itemCount = 4;
 
-    widgets.backgroundColor = backgroundColor;
-    widgets.fontColor = fontColor;
-    widgets.borderColor = borderColor;
-
     if (isSplitScreen) {
       widgets.showLabel = false;
       widgets.showIcons = true;
@@ -88,7 +80,7 @@ class _MusicScreenState extends SplitScreenState<MusicScreen> with RouteAware {
     ];
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
         child: widgets.dashView(isSplitScreen, [

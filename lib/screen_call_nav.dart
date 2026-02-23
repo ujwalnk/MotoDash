@@ -12,10 +12,6 @@ class CallNavScreen extends StatefulWidget {
 }
 
 class _CallNavScreenState extends State<CallNavScreen> {
-  final Color backgroundColor = ConfigProvider.getBackgroundColor;
-  final Color fontColor = ConfigProvider.getFontColor;
-  final Color borderColor = ConfigProvider.getBorderColor;
-
   final bool showIcons = ConfigProvider.getShowIcons(Constants.kPathCallNav);
   final bool showLabel = ConfigProvider.getShowLabel(Constants.kPathCallNav);
 
@@ -46,9 +42,6 @@ class _CallNavScreenState extends State<CallNavScreen> {
   Widget build(BuildContext context) {
     DashWidgets widgets = DashWidgets();
 
-    widgets.backgroundColor = backgroundColor;
-    widgets.fontColor = fontColor;
-    widgets.borderColor = borderColor;
     widgets.showIcons = showIcons;
     widgets.showLabel = false;
 
@@ -62,7 +55,7 @@ class _CallNavScreenState extends State<CallNavScreen> {
     }
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
         child: widgets.dashView(true, [

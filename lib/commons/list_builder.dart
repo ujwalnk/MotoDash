@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show MethodChannel;
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
 
 class DashWidgets {
-  Color? backgroundColor;
-  Color? fontColor;
-  Color? borderColor;
+  Color? backgroundColor = ConfigProvider.getBackgroundColor;
+  Color? fontColor = ConfigProvider.getFontColor;
+  Color? borderColor = ConfigProvider.getBorderColor;
 
   bool showIcons = true;
   bool showLabel = true;

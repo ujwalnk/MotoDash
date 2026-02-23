@@ -22,17 +22,13 @@ class CallLogScreen extends StatefulWidget {
 
 class _CallLogScreenState extends SplitScreenState<CallLogScreen>
     with RouteAware {
-  Color backgroundColor = ConfigProvider.getBackgroundColor;
-  Color fontColor = ConfigProvider.getFontColor;
-  Color borderColor = ConfigProvider.getBorderColor;
-
   bool showIcons = ConfigProvider.getShowIcons(Constants.kPathCallLog);
   bool showLabel = ConfigProvider.getShowLabel(Constants.kPathCallLog);
 
   bool loading = true;
   List<CallLogEntry> lastCalls = [];
 
-  int selectedIndex = 0;
+  int selectedIndex = ConfigProvider.getEnableMagnetGestures ? 0 : -1;
 
   StreamSubscription<AppIntent>? _intentSub;
   late List<VoidCallback> _actions;
@@ -121,10 +117,6 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen>
   Widget build(BuildContext context) {
     DashWidgets widgets = DashWidgets();
 
-    widgets.backgroundColor = backgroundColor;
-    widgets.fontColor = fontColor;
-    widgets.borderColor = borderColor;
-
     if (isSplitScreen) {
       widgets.showLabel = true;
       widgets.showIcons = false;
@@ -173,7 +165,7 @@ class _CallLogScreenState extends SplitScreenState<CallLogScreen>
     }
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
         child: widgets.dashView(isSplitScreen, [

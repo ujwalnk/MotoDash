@@ -1,7 +1,7 @@
 name: moto_dash
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+version: 0.3.0
 
 environment:
   sdk: ^3.9.2
@@ -28,6 +28,7 @@ dependencies:
   sensors_plus: ^7.0.0
   google_fonts: ^8.0.2
   statemachine: ^3.4.0
+  flutter_tts: ^4.2.5
 
 dev_dependencies:
   flutter_test:
@@ -36,10 +37,12 @@ dev_dependencies:
   # For app icon generation
   flutter_launcher_icons: ^0.13.1
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/app_icon.png"
+  adaptive_icon_background: "assets/icon_background.png"
+  adaptive_icon_foreground: "assets/app_icon.png"
 
 flutter:
   uses-material-design: true

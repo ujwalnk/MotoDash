@@ -19,10 +19,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
-  Color backgroundColor = ConfigProvider.getBackgroundColor;
-  Color fontColor = ConfigProvider.getFontColor;
-  Color borderColor = ConfigProvider.getBorderColor;
-
   bool showIcons = ConfigProvider.getShowIcons(Constants.kPathHome);
   bool showLabel = ConfigProvider.getShowLabel(Constants.kPathHome);
   bool loading = true;
@@ -30,7 +26,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
   bool hasFavContacts = false;
   bool showSettingsButton = true;
 
-  int selectedIndex = 0;
+  int selectedIndex = ConfigProvider.getEnableMagnetGestures ? 0 : -1;
 
   StreamSubscription<AppIntent>? _intentSub;
   late List<VoidCallback> _actions;
@@ -58,7 +54,9 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
   @override
   void didPopNext() {
     // Reset the index
-    // setState(() => selectedIndex = 0);
+    if (selectedIndex != -1) {
+      setState(() => selectedIndex = 0);
+    }
     _subscribe();
   }
 
@@ -84,7 +82,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
 
     Future.delayed(const Duration(seconds: 10), () {
       if (mounted) {
-        setState(() => showSettingsButton = false);
+        // setState(() => showSettingsButton = false);
       }
     });
   }
@@ -103,10 +101,6 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
   @override
   Widget build(BuildContext context) {
     DashWidgets widgets = DashWidgets();
-
-    widgets.backgroundColor = backgroundColor;
-    widgets.fontColor = fontColor;
-    widgets.borderColor = borderColor;
 
     if (isSplitScreen) {
       widgets.showLabel = false;
@@ -141,7 +135,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
     ];
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
         child: widgets.dashView(isSplitScreen, [
@@ -184,7 +178,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
             showSettingsButton ? _actions[4] : _actions[3],
             context,
             _actions.length,
-            isSelected: selectedIndex == (showSettingsButton ? 4 : 3),
+            isSelected: selectedIndex == 3,
           ),
         ]),
       ),
