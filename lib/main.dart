@@ -133,6 +133,10 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
 
         initialRoute: Constants.kPathHome,
         theme: ThemeData(
+          // Font
+          fontFamily: 'AtkinsonHyperlegible',
+
+          // Page Transition
           pageTransitionsTheme: const PageTransitionsTheme(
             builders: {
               TargetPlatform.android: NoTransitionsBuilder(),

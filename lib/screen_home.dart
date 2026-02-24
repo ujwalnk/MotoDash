@@ -80,6 +80,17 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
   void initState() {
     super.initState();
     _loadSettings();
+
+    hideSettings();
+  }
+
+  void hideSettings() async {
+    await Future.delayed(const Duration(seconds: 10));
+    if (mounted) {
+      setState(() {
+        showSettingsButton = false;
+      });
+    }
   }
 
   Future<void> _loadSettings() async {
