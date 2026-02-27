@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MotoDash technical specifications — Dual FSM architecture, magnet mode internals, design decisions explained." />
+  <title>Specifications — MotoDash v0.3</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    (function() {
+      var stored = localStorage.getItem('motodash-theme');
+      if (stored) {
+        document.documentElement.setAttribute('data-theme', stored);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- DISCLAIMER MODAL -->
+  <div id="disclaimer-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-box">
+      <h2 id="modal-title" class="modal-title">Before you proceed</h2>
+      <ul class="modal-list">
+        <li>You agree to the <strong>GNU GPL v3</strong> license.</li>
+        <li>This software is provided <strong>without warranty</strong>.</li>
+        <li>The developer is not responsible for misuse.</li>
+        <li>This app does not encourage reckless driving.</li>
+        <li>Users are responsible for operating vehicles safely.</li>
+      </ul>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="modal-confirm">I Understand</button>
+        <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a href="/" class="logo" aria-label="MotoDash home">
+        <span class="logo-name">MotoDash</span>
+        <span class="logo-version">v0.3</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="/#features">Features</a>
+        <a href="/#modes">Modes</a>
+        <a href="specifications.html" aria-current="page">Specs</a>
+        <a href="faq.html">FAQ</a>
+      </nav>
+      <div class="header-actions">
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn btn-primary btn-sm cta-download" data-type="download">Download APK</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="page-hero-label">Architecture</div>
+        <h1>Technical Specifications</h1>
+        <p>A breakdown of MotoDash's internal architecture, design decisions, and the reasoning behind them. Written for engineers and technically curious riders.</p>
+      </div>
+    </section>
+
+    <div class="container">
+      <article class="page-content">
+
+        <!-- WHY STATE MACHINES -->
+        <h2>Why deterministic state machines while riding</h2>
+        <p>
+          Riding creates conditions that are genuinely hostile to non-deterministic UI behavior. Vibration, gloves, reduced attention bandwidth, and variable lighting mean that any ambiguity in interaction logic translates directly into missed or double-triggered actions. A system where the same input always produces the same output — regardless of timing edge cases or previous state — is categorically safer in this context.
+        </p>
+        <p>
+          MotoDash uses finite state machines (FSMs) rather than ad-hoc event handlers precisely because FSMs make every possible state explicit. There are no hidden transitions, no ambiguous race conditions, no side effects that accumulate over time. Each state is defined. Each transition has a condition. That's the contract.
+        </p>
+        <p>
+          Predictability also reduces cognitive load. If a rider knows exactly what three magnet taps will do — always — they don't have to think about it. Automaticity is the goal. Thinking about your tools while riding is a cost you can't afford.
+        </p>
+
+        <!-- DUAL FSM ARCHITECTURE -->
+        <h2>Dual FSM architecture — Magnet Mode</h2>
+        <p>
+          Magnet Mode uses two coordinated state machines. The Outer FSM tracks proximity context: how close the magnet ring is to the phone. The Inner FSM tracks gesture timing: whether a tap sequence is in progress, and when to commit it.
+        </p>
+
+        <h3>Outer FSM — Proximity and bias</h3>
+        <p>
+          The Outer FSM has three primary states: <strong>far</strong>, <strong>near</strong>, and <strong>bias</strong>. The magnetometer reads a continuous flux value. When that value crosses the "near" threshold, the outer state transitions from far → near and signals the inner FSM to begin listening. When the flux drops back below the "far" threshold (with hysteresis margin), it transitions back. Bias mode activates when the magnet has been held stationary and near for too long — a clear indicator of phone placement in a tank bag or pocket rather than intentional gesture.
+        </p>
+
+        <div class="mermaid-wrap">
+          <div class="diagram-label">Diagram 1 — Outer FSM</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> far
+    far --> near : flux ≥ near_threshold
+    near --> far : flux ≤ far_threshold
+    near --> bias : static duration > bias_timeout
+    bias --> far : flux drops below threshold
+    bias --> near : gesture detected (reset)
+          </div>
+        </div>
+
+        <h3>Inner FSM — Tap grouping</h3>
+        <p>
+          The Inner FSM activates when the Outer FSM enters the <strong>near</strong> state. It is responsible for collecting individual tap events into an intentional gesture. Once the inter-tap timeout expires without a new tap, the inner FSM commits the accumulated count and transitions back to idle. This results in clean 1-tap / 2-tap / 3+-tap mapping.
+        </p>
+
+        <div class="mermaid-wrap">
+          <div class="diagram-label">Diagram 2 — Inner FSM</div>
+          <div class="mermaid">
+stateDiagram-v2
+    [*] --> idle
+    idle --> active : outer FSM enters "near"
+    active --> active : tap detected (count++)
+    active --> commit : inter-tap timeout expires
+    commit --> idle : action dispatched
+    idle --> idle : outer FSM exits (ignored)
+
+    note right of commit
+        count=1 → next
+        count=2 → select
+        count≥3 → back
+    end note
+          </div>
+        </div>
+
+        <!-- BIAS MODE -->
+        <h2>Why bias mode exists</h2>
+        <p>
+          A static magnet near the phone — such as a magnetic mount, a tank bag clasp, or a handlebar mount with a magnetic component — would continuously register as "near" without bias protection. This would cause constant false positives and make the mode unusable in most real-world riding setups.
+        </p>
+        <p>
+          Bias mode detects that the signal has been stable and near for a duration exceeding a configurable threshold (far beyond what any intentional gesture would take). Once in bias state, the system treats that baseline as environmental noise and ignores it. A genuine gesture — characterized by a sharp flux change — resets the bias and resumes listening.
+        </p>
+
+        <!-- HYSTERESIS -->
+        <h2>Why hysteresis prevents false positives</h2>
+        <p>
+          Without hysteresis, a signal hovering near the near/far threshold would cause rapid state oscillation — flickering between near and far dozens of times per second. Each flicker could trigger spurious actions. Hysteresis solves this by requiring a larger signal drop to transition far before the transition back to near can occur again. The two thresholds create a deadband that dampens noise.
+        </p>
+
+        <!-- ADAPTIVE BASELINE -->
+        <h2>Why adaptive baseline adaptation is needed</h2>
+        <p>
+          Phone magnetometers are affected by environmental fields: passing near a car, engine vibration, speaker magnets, and changes in riding posture all shift the ambient flux reading. A fixed threshold calibrated at rest will drift out of range within minutes on an actual ride.
+        </p>
+        <p>
+          The adaptive baseline continuously adjusts the reference floor of the flux reading. It tracks the median value over a rolling window of samples when the inner FSM is idle, and recalibrates thresholds relative to that updated floor. This means the system self-corrects without user intervention.
+        </p>
+
+        <!-- SAMPLING RATE -->
+        <h2>Why sampling rate changes</h2>
+        <p>
+          When the Outer FSM is in the <strong>far</strong> state, the magnetometer is polled at a lower rate. There's nothing meaningful to detect, and high-frequency polling drains the battery. When the FSM transitions to <strong>near</strong>, sampling rate increases to capture fine-grained tap timing. This adaptive rate is the primary mechanism for keeping battery consumption acceptable in active ride conditions.
+        </p>
+
+        <!-- TTS -->
+        <h2>Why TTS responds only to magnet-triggered navigation</h2>
+        <p>
+          Text-to-speech feedback is only spoken when a navigation action was triggered by a magnet gesture — never by touch. This is intentional. When you tap the screen, you have confirmed visual attention on the device. TTS would add noise without value. When a gesture is made via the magnetic ring without looking at the screen, TTS becomes essential: it closes the feedback loop and confirms what happened.
+        </p>
+        <p>
+          MotoDash implements this via a global flag that is set on any magnet-originated action. The TTS subsystem checks this flag before speaking. Touch actions never set the flag. This design avoids an explicit mode-check throughout the codebase.
+        </p>
+
+        <!-- DISTRIBUTION -->
+        <h2>Why not on the Play Store</h2>
+        <p>
+          Play Store distribution requires compliance with policies around permission usage, background operation, and UI behavior that would require removing or fundamentally compromising core features. MotoDash uses permissions for magnetometer access, audio routing, and full-screen overlay that fall into restricted categories under current Play policies.
+        </p>
+        <p>
+          Distributing as a direct APK means the developer retains full control over the interaction model. The GPL v3 license ensures the source is always auditable. Installing from a direct APK requires enabling unknown sources on Android — this is a deliberate friction point that selects for technically capable users who can assess what they're installing.
+        </p>
+
+        <!-- SETTINGS -->
+        <h2>Why settings require restart</h2>
+        <p>
+          Settings in MotoDash are applied at initialization time rather than dynamically. This is a deliberate tradeoff: applying settings dynamically would require the app to handle every possible runtime reconfiguration path, introducing complexity and potential for race conditions in a system designed for predictability. Applying them at launch guarantees a known, clean state every time.
+        </p>
+
+        <h3>Why settings are hidden after 10 seconds</h3>
+        <p>
+          The settings menu is visible only during the first 10 seconds after launch. After that window, it is hidden. This design choice keeps the in-ride interface clean and prevents accidental settings modification while riding. Settings are a launch-time concern, not a ride-time concern. The 10-second window is long enough to adjust before mounting.
+        </p>
+
+        <!-- OLED -->
+        <h2>OLED and display considerations</h2>
+        <p>
+          OLED displays consume power proportional to pixel brightness. A pure black pixel draws near-zero power because that pixel is simply off. MotoDash's dark theme uses <code>#000000</code> backgrounds rather than dark grey to take full advantage of this on OLED panels.
+        </p>
+        <p>
+          The built-in screensaver reduces burn-in risk by blanking or dimming the display during periods of inactivity on a ride. OLED panels are susceptible to burn-in when static UI elements are displayed at high brightness for extended periods.
+        </p>
+        <p>
+          Regarding accent color: red pixels on OLED activate only the red sub-pixel. Green and blue sub-pixels in white or colored pixels consume more power. Red also shows less long-term degradation than blue, which decays faster. Red is the recommended accent color for both battery efficiency and panel longevity.
+        </p>
+
+        <!-- OFFLINE -->
+        <h2>Why offline-first design matters</h2>
+        <p>
+          A riding utility that requires network connectivity is unreliable by definition. Tunnels, rural areas, signal blackouts, and SIM failover all create gaps where a network-dependent app either stalls or silently stops functioning. An offline-first design means the app works identically regardless of signal — there's no degraded mode, no loading state, no latency.
+        </p>
+
+        <!-- TELEMETRY -->
+        <h2>Why zero telemetry</h2>
+        <p>
+          Telemetry is a liability in the context of a riding utility. It requires network permission, which conflicts with the offline-first model. It requires consent management. It introduces latency spikes when the telemetry endpoint is unreachable. And it transmits data about how a user interacts with their phone while riding — which is categorically sensitive.
+        </p>
+        <p>
+          MotoDash sends nothing. No crash reports. No usage analytics. No session data. The GPL v3 license ensures this can be independently verified from source.
+        </p>
+
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <div class="logo">
+          <span class="logo-name">MotoDash</span>
+          <span class="logo-version">v0.3</span>
+        </div>
+        <p class="footer-desc">Free, open-source Android riding utility.<br />GNU GPL v3. No warranty provided.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="/">Home</a>
+        <a href="specifications.html" aria-current="page">Specifications</a>
+        <a href="faq.html">FAQ</a>
+      </nav>
+      <div class="footer-disclaimer">
+        <p>This software is provided without warranty of any kind. The developer is not responsible for misuse. Users are responsible for operating their vehicles safely and in accordance with applicable laws.</p>
+        <p>Licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GNU GPL v3</a>.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <span>MotoDash v0.3 · Open Source · GPL v3</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

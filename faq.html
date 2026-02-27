@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MotoDash FAQ — Common questions about installation, permissions, glove compatibility, OLED support, and settings." />
+  <title>FAQ — MotoDash v0.3</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    (function() {
+      var stored = localStorage.getItem('motodash-theme');
+      if (stored) {
+        document.documentElement.setAttribute('data-theme', stored);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- DISCLAIMER MODAL -->
+  <div id="disclaimer-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-box">
+      <h2 id="modal-title" class="modal-title">Before you proceed</h2>
+      <ul class="modal-list">
+        <li>You agree to the <strong>GNU GPL v3</strong> license.</li>
+        <li>This software is provided <strong>without warranty</strong>.</li>
+        <li>The developer is not responsible for misuse.</li>
+        <li>This app does not encourage reckless driving.</li>
+        <li>Users are responsible for operating vehicles safely.</li>
+      </ul>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="modal-confirm">I Understand</button>
+        <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a href="/" class="logo" aria-label="MotoDash home">
+        <span class="logo-name">MotoDash</span>
+        <span class="logo-version">v0.3</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="/#features">Features</a>
+        <a href="/#modes">Modes</a>
+        <a href="specifications.html">Specs</a>
+        <a href="faq.html" aria-current="page">FAQ</a>
+      </nav>
+      <div class="header-actions">
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn btn-primary btn-sm cta-download" data-type="download">Download APK</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="page-hero-label">Reference</div>
+        <h1>Frequently Asked Questions</h1>
+        <p>Common questions about MotoDash, how it works, and how to use it.</p>
+      </div>
+    </section>
+
+    <div class="container">
+      <div class="page-content">
+
+        <div class="faq-list" role="list">
+
+          <details class="faq-item" role="listitem">
+            <summary class="faq-question">
+              Why is MotoDash not on the Play Store?
+              <span class="faq-arrow" aria-hidden="true">›</span>
+            </summary>
+            <div class="faq-answer">
+              <p>MotoDash requires permissions and interaction behaviors that are restricted under Play Store policies. It is distributed as a direct APK to maintain functionality and design intent.</p>
+              <p>Installing from a direct APK requires enabling "unknown sources" in Android settings. This is a deliberate step — it ensures you understand what you're installing and who it's from. The source is GPL v3 licensed and publicly available for inspection.</p>
+              <p>Permission Required: Read Notifications (for Music Control), <strong>Add here </strong></p>
+            </div>
+          </details>
+
+          <details class="faq-item" role="listitem">
+            <summary class="faq-question">
+              Does it work with gloves?
+              <span class="faq-arrow" aria-hidden="true">›</span>
+            </summary>
+            <div class="faq-answer">
+              <p>Yes. Touch Mode uses touch-down detection and interaction simplification to improve reliability with riding gloves. The UI is designed with large hit targets and minimal gesture complexity.</p>
+              <p>Touch-down logic registers input on contact rather than release, which improves responsiveness with thick gloves where capacitive precision is reduced. All interactive elements are sized well above minimum accessible touch target guidelines.</p>
+            </div>
+          </details>
+
+          <details class="faq-item" role="listitem">
+            <summary class="faq-question">
+              Does it work on OLED and E-ink displays?
+              <span class="faq-arrow" aria-hidden="true">›</span>
+            </summary>
+            <div class="faq-answer">
+              <p>Yes. The interface is optimized for OLED with pure black backgrounds to reduce power usage. E-ink displays should also work. The built-in screensaver is recommended to reduce burn-in risk for OLED displays.</p>
+              <p>On OLED, pure black (#000000) pixels are completely off, drawing near-zero current. The screensaver blanks or dims the display during idle periods on a ride, protecting static UI elements from permanent burn-in.</p>
+            </div>
+          </details>
+
+          <details class="faq-item" role="listitem">
+            <summary class="faq-question">
+              What color saves the most battery?
+              <span class="faq-arrow" aria-hidden="true">›</span>
+            </summary>
+            <div class="faq-answer">
+              <p>On OLED displays, power consumption per pixel depends on which sub-pixels are active and at what intensity.</p>
+              <ul>
+                <li><strong>Red</strong> — consumes the least power. Recommended for long-term efficiency and panel longevity.</li>
+                <li><strong>Green</strong> — slightly more than red, but more susceptible to long-term sub-pixel degradation.</li>
+                <li><strong>Blue</strong> — higher consumption than red or green. Blue sub-pixels also degrade faster.</li>
+                <li><strong>White</strong> — all three sub-pixels active. Consumes the most power.</li>
+              </ul>
+              <p>Red is the recommended accent for MotoDash on OLED & LTPO for both battery and longevity reasons. This is the default accent color.</p>
+            </div>
+          </details>
+
+          <details class="faq-item" role="listitem">
+            <summary class="faq-question">
+              Where is the Settings menu?
+              <span class="faq-arrow" aria-hidden="true">›</span>
+            </summary>
+            <div class="faq-answer">
+              <p>The Settings menu appears only during the first 10 seconds on the main screen on launching the app. Post which, it is hidden to keep the interface clean and ride-focused.</p>
+              <p>To access Settings again, fully close the app and relaunch it. Any settings change requires a restart for performance stability. Settings are applied at initialization time — this ensures the app always starts from a known, clean configuration state rather than handling dynamic reconfiguration at runtime.</p>
+            </div>
+          </details>
+        <details class="faq-item" role="listitem">
+            <summary class="faq-question">
+                Settings Changes not applied
+              <span class="faq-arrow" aria-hidden="true">›</span>
+            </summary>
+            <div class="faq-answer">
+              <p>Any settings change requires a restart for performance stability. Settings are applied at initialization time — this ensures the app always starts from a known, clean configuration state rather than handling dynamic reconfiguration at runtime.</p>
+            </div>
+          </details>
+
+        </div>
+
+        <h2>Extending MotoDash</h2>
+        <p>
+          MotoDash is designed as a focused, self-contained utility. However, you can extend its functionality using your device assistant by configuring custom commands on your assistant. Like using Bixby Routines.
+        </p>
+
+        <h2>Something else?</h2>
+        <p>
+          For technical questions not covered here, the <a href="specifications.html">specifications page</a> covers the internal architecture in detail. For deeper questions, the source code is the definitive reference — it is GPL v3 licensed and publicly available on GitHub.
+        </p>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <div class="logo">
+          <span class="logo-name">MotoDash</span>
+          <span class="logo-version">v0.3</span>
+        </div>
+        <p class="footer-desc">Free, open-source Android riding utility.<br />GNU GPL v3. No warranty provided.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="/">Home</a>
+        <a href="specifications.html">Specifications</a>
+        <a href="faq.html" aria-current="page">FAQ</a>
+      </nav>
+      <div class="footer-disclaimer">
+        <p>This software is provided without warranty of any kind. The developer is not responsible for misuse. Users are responsible for operating their vehicles safely and in accordance with applicable laws. This application does not encourage reckless or unsafe riding.</p>
+        <p>Licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GNU GPL v3</a>.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <span>MotoDash v0.3 · Open Source · GPL v3</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

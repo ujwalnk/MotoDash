@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MotoDash v0.3 — Open-source Android riding utility. Offline-first, zero telemetry, glove-friendly. Designed for commuters and touring riders." />
+  <meta name="keywords" content="motorcycle Android dashboard, riding app, open source moto app, android motorcycle utility, glove friendly app" />
+
+  <title>MotoDash v0.3 — Android Riding Utility</title>
+
+  <!-- OpenGraph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="MotoDash v0.3 — Android Riding Utility" />
+  <meta property="og:description" content="Free, open-source Android riding utility. Offline-first. Zero telemetry. Glove-friendly. GPL v3." />
+  <meta property="og:image" content="/assets/og-preview.png" />
+  <meta property="og:url" content="https://motodash.app" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MotoDash v0.3 — Android Riding Utility" />
+  <meta name="twitter:description" content="Free, open-source Android riding utility. Offline-first. Zero telemetry. Glove-friendly. GPL v3." />
+  <meta name="twitter:image" content="/assets/og-preview.png" />
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "MotoDash",
+    "version": "0.3",
+    "operatingSystem": "Android",
+    "applicationCategory": "UtilitiesApplication",
+    "description": "Free, open-source Android riding utility. Offline-first. Zero telemetry. Glove-friendly.",
+    "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    (function() {
+      var stored = localStorage.getItem('motodash-theme');
+      if (stored) {
+        document.documentElement.setAttribute('data-theme', stored);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- DISCLAIMER MODAL -->
+  <div id="disclaimer-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-box">
+      <h2 id="modal-title" class="modal-title">Before you proceed</h2>
+      <ul class="modal-list">
+        <li>You agree to the <strong>GNU GPL v3</strong> license.</li>
+        <li>This software is provided <strong>without warranty</strong>.</li>
+        <li>The developer is not responsible for misuse.</li>
+        <li>This app does not encourage reckless driving.</li>
+        <li>Users are responsible for operating vehicles safely.</li>
+      </ul>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="modal-confirm">I Understand</button>
+        <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="site-header" role="banner">
+    <div class="container header-inner">
+      <a href="/" class="logo" aria-label="MotoDash home">
+        <span class="logo-name">MotoDash</span>
+        <span class="logo-version">v0.3</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#features">Features</a>
+        <a href="#modes">Modes</a>
+        <a href="specifications.html">Specs</a>
+        <a href="faq.html">FAQ</a>
+      </nav>
+      <div class="header-actions">
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <button class="btn btn-primary btn-sm cta-download" data-href="#download" data-type="download">Download APK</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <div class="hero-label">GNU GPL v3 · Android · APK Direct</div>
+          <h1 id="hero-heading" class="hero-heading">
+            A riding interaction<br />system for Android.
+          </h1>
+          <p class="hero-sub">
+            Offline-first. Zero telemetry. Deterministic control.<br />
+            Built for commuters, and touring riders.
+          </p>
+          <div class="hero-cta">
+            <button class="btn btn-primary cta-download" data-type="download">Download APK</button>
+            <button class="btn btn-secondary cta-download" data-type="github">View on GitHub</button>
+            <a href="specifications.html" class="btn btn-ghost">Read Specifications →</a>
+          </div>
+          <div class="hero-tags" aria-label="Key properties">
+            <span class="tag">Offline</span>
+            <span class="tag">Zero telemetry</span>
+            <span class="tag">Glove-friendly</span>
+            <span class="tag">Free</span>
+          </div>
+        </div>
+        <div class="hero-device" aria-hidden="true">
+          <div class="phone-mock phone-mock--hero">
+            <div class="phone-screen phone-screen--placeholder">
+              <div class="screen-ui">
+                <div class="screen-time">09:41</div>
+                <div class="screen-row">
+                  <div class="screen-btn screen-btn--lg">☎</div>
+                  <div class="screen-btn screen-btn--lg">♪</div>
+                </div>
+                <div class="screen-row">
+                  <div class="screen-btn">‹</div>
+                  <div class="screen-btn screen-btn--accent">▶</div>
+                  <div class="screen-btn">›</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRINCIPLE STRIP -->
+    <section class="principles" aria-label="Core principles">
+      <div class="container">
+        <div class="principles-grid">
+          <div class="principle reveal">
+            <span class="principle-icon">◈</span>
+            <span class="principle-label">Deterministic</span>
+          </div>
+          <div class="principle reveal">
+            <span class="principle-icon">◉</span>
+            <span class="principle-label">Predictable</span>
+          </div>
+          <div class="principle reveal">
+            <span class="principle-icon">◎</span>
+            <span class="principle-label">Minimal</span>
+          </div>
+          <div class="principle reveal">
+            <span class="principle-icon">⊛</span>
+            <span class="principle-label">Fast</span>
+          </div>
+          <div class="principle reveal">
+            <span class="principle-icon">◌</span>
+            <span class="principle-label">Offline-first</span>
+          </div>
+          <div class="principle reveal">
+            <span class="principle-icon">◯</span>
+            <span class="principle-label">No telemetry</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="features" aria-labelledby="features-heading">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-label">What it is</div>
+          <h2 id="features-heading">A predictable control layer.</h2>
+          <p class="section-sub">Not Android Auto. Not a launcher. Not cloud-based.</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card reveal">
+            <div class="feature-icon">⊕</div>
+            <h3>Riding interaction system</h3>
+            <p>Designed for deterministic interaction while riding. Every tap has one defined outcome. No ambiguity.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">◈</div>
+            <h3>Glove-friendly UI</h3>
+            <p>Large hit targets. Touch-down detection. Interaction simplification. Built for riding gloves in motion.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">◉</div>
+            <h3>OLED-aware</h3>
+            <p>Pure black backgrounds. Screensaver mode. Red accent recommended for panel longevity and battery efficiency.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">◎</div>
+            <h3>Offline-first</h3>
+            <p>No network dependency. No cloud. No permissions that require external communication. Works without signal.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">⊗</div>
+            <h3>Zero telemetry</h3>
+            <p>No analytics. No crash reporting. No tracking of any kind. GPL v3 license. Source is the documentation.</p>
+          </div>
+          <div class="feature-card reveal">
+            <div class="feature-icon">⊞</div>
+            <h3>Split-screen compatible</h3>
+            <p>Works alongside navigation apps in Android split-screen mode. MotoDash on top, maps on bottom.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODES -->
+    <section id="modes" class="modes" aria-labelledby="modes-heading">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-label">Operation</div>
+          <h2 id="modes-heading">Two modes. Both intentional.</h2>
+        </div>
+        <div class="modes-grid">
+
+          <!-- Touch Mode -->
+          <div class="mode-card reveal" aria-labelledby="touch-mode-heading">
+            <div class="mode-badge">Primary · Stable</div>
+            <h3 id="touch-mode-heading">Touch Mode</h3>
+            <p class="mode-desc">The default operating mode. Designed for reliable interaction with riding gloves at speed.</p>
+            <ul class="mode-list">
+              <li>Large glove-friendly buttons</li>
+              <li>Touch-down logic for glove detection</li>
+              <li>Reduced missed-tap rate</li>
+              <li>Split-screen navigation app support</li>
+            </ul>
+          </div>
+
+          <!-- Magnet Mode -->
+          <div class="mode-card mode-card--beta reveal" aria-labelledby="magnet-mode-heading">
+            <div class="mode-badge mode-badge--beta">BETA</div>
+            <p class="mode-beta-sub">Experimental. Under active refinement.</p>
+            <h3 id="magnet-mode-heading">Magnet Mode</h3>
+            <p class="mode-desc">Magnetometer-based interaction via a magnetic ring. Phone stays in pocket.</p>
+            <ul class="mode-list">
+              <li>1 tap → next</li>
+              <li>2 taps → select</li>
+              <li>3 taps → back</li>
+              <li>TTS audio feedback</li>
+            </ul>
+            <div class="mode-tech">
+              <div class="mode-tech-label">Under the hood</div>
+              <div class="mode-tech-list">
+                <span>Battery-conscious</span>
+                <span>Adaptive sampling</span>
+                <span>Works for any Magnet</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREENSHOTS -->
+    <section id="screenshots" class="screenshots" aria-labelledby="screenshots-heading">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-label">Interface</div>
+          <h2 id="screenshots-heading">No visual noise.</h2>
+        </div>
+
+        <!-- Call flow carousel -->
+        <div class="screen-block reveal">
+          <div class="screen-info">
+            <div class="screen-label">Call Flow</div>
+            <h3>Favourites. Log. Call.</h3>
+            <p>Two-state call flow with large buttons and predictable transitions</p>
+            <div class="carousel-controls" role="group" aria-label="Call flow carousel controls">
+              <button class="carousel-btn" id="call-prev" aria-label="Previous call screen">‹</button>
+              <div class="carousel-dots" id="call-dots" role="tablist" aria-label="Call screens"></div>
+              <button class="carousel-btn" id="call-next" aria-label="Next call screen">›</button>
+            </div>
+          </div>
+          <div class="carousel" id="call-carousel" aria-label="Call flow screens" aria-live="polite">
+            <div class="carousel-track" id="call-track" role="list">
+              <div class="carousel-slide" role="listitem" aria-label="Incoming call screen">
+                <div class="phone-mock">
+                  <div class="phone-screen">
+                    <img src="assets/screen-call-incoming.png" alt="Incoming call screen" loading="lazy" />
+                    <div class="screen-placeholder" aria-hidden="true">
+                      <div class="sp-label">Incoming Call</div>
+                      <div class="sp-name">Alex R.</div>
+                      <div class="sp-actions">
+                        <div class="sp-btn sp-btn--green">Accept</div>
+                        <div class="sp-btn sp-btn--red">Decline</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="carousel-slide" role="listitem" aria-label="Active call screen">
+                <div class="phone-mock">
+                  <div class="phone-screen">
+                    <img src="assets/screen-call-active.png" alt="Active call screen" loading="lazy" />
+                    <div class="screen-placeholder" aria-hidden="true">
+                      <div class="sp-label">Active Call</div>
+                      <div class="sp-name">00:42</div>
+                      <div class="sp-actions">
+                        <div class="sp-btn sp-btn--mute">Mute</div>
+                        <div class="sp-btn sp-btn--red">End</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="carousel-slide" role="listitem" aria-label="Call ended screen">
+                <div class="phone-mock">
+                  <div class="phone-screen">
+                    <img src="assets/screen-call-ended.png" alt="Call ended screen" loading="lazy" />
+                    <div class="screen-placeholder" aria-hidden="true">
+                      <div class="sp-label">Call Ended</div>
+                      <div class="sp-name">Alex R.</div>
+                      <div class="sp-sub">01:23</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Static screens -->
+        <div class="static-screens">
+          <div class="screen-block screen-block--reverse reveal">
+            <div class="screen-info">
+              <div class="screen-label">Music</div>
+              <h3>Track control at a tap.</h3>
+              <p>Previous, play/pause, next. No nested menus.</p>
+            </div>
+            <div class="phone-mock">
+              <div class="phone-screen">
+                <img src="assets/screen-music.png" alt="Music control screen" loading="lazy" />
+                <div class="screen-placeholder" aria-hidden="true">
+                  <div class="sp-label">Music</div>
+                  <div class="sp-name">Track Title</div>
+                  <div class="sp-row">
+                    <div class="sp-btn">‹‹</div>
+                    <div class="sp-btn sp-btn--accent">▶</div>
+                    <div class="sp-btn">››</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen-block reveal">
+            <div class="screen-info">
+              <div class="screen-label">Home</div>
+              <h3>The dashboard.</h3>
+              <p>Core controls. Nothing else.</p>
+            </div>
+            <div class="phone-mock">
+              <div class="phone-screen">
+                <img src="assets/screen-home.png" alt="Home screen" loading="lazy" />
+                <div class="screen-placeholder" aria-hidden="true">
+                  <div class="sp-time">09:41</div>
+                  <div class="sp-row">
+                    <div class="sp-btn">☎</div>
+                    <div class="sp-btn">♪</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen-block screen-block--reverse reveal">
+            <div class="screen-info">
+              <div class="screen-label">Volume</div>
+              <h3>Coarse volume steps.</h3>
+              <p>Large up/down targets. No fine-grained slider. Designed for gloves.</p>
+            </div>
+            <div class="phone-mock">
+              <div class="phone-screen">
+                <img src="assets/screen-volume.png" alt="Volume control screen" loading="lazy" />
+                <div class="screen-placeholder" aria-hidden="true">
+                  <div class="sp-label">Volume</div>
+                  <div class="sp-vol">
+                    <div class="sp-btn sp-btn--xl">＋</div>
+                    <div class="sp-bar"><div class="sp-bar-fill"></div></div>
+                    <div class="sp-btn sp-btn--xl">－</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- DOWNLOAD -->
+    <section id="download" class="download-section" aria-labelledby="download-heading">
+      <div class="container">
+        <div class="download-inner reveal">
+          <div class="section-label">Distribution</div>
+          <h2 id="download-heading">Direct APK. No Play Store.</h2>
+          <p>MotoDash requires permissions and interaction behaviors restricted under Play Store policies. Distributed directly to preserve functionality and design intent.</p>
+          <div class="download-cta">
+            <button class="btn btn-primary btn-lg cta-download" data-type="download">Download APK — v0.3</button>
+            <button class="btn btn-secondary btn-lg cta-download" data-type="github">View Source on GitHub</button>
+          </div>
+          <div class="download-note">GNU GPL v3 · Free · No registration required · No account</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <div class="logo">
+          <span class="logo-name">MotoDash</span>
+          <span class="logo-version">v0.3</span>
+        </div>
+        <p class="footer-desc">Free, open-source Android riding utility.<br />GNU GPL v3. No warranty provided.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="/">Home</a>
+        <a href="specifications.html">Specifications</a>
+        <a href="faq.html">FAQ</a>
+      </nav>
+      <div class="footer-disclaimer">
+        <p>This software is provided without warranty of any kind. The developer is not responsible for misuse. Users are responsible for operating their vehicles safely and in accordance with applicable laws. This application does not encourage reckless or unsafe riding.</p>
+        <p>Licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">GNU GPL v3</a>.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <span>MotoDash v0.3 · Open Source · GPL v3</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
