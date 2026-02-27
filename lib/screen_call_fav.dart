@@ -144,17 +144,6 @@ class _FavContactsScreenState extends SplitScreenState<FavContactsScreen>
     }
 
     // -----------------------------
-    // Call Log button
-    // -----------------------------
-
-    if (!isSplitScreen) {
-      _labels.add("Call Log");
-      _actions.add(() {
-        Navigator.pushNamed(context, Constants.kPathCallLog);
-      });
-    }
-
-    // -----------------------------
     // Return
     // -----------------------------
 

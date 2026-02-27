@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   audio_session: ^0.2.2
+  audioplayers: ^6.1.0
   # To store the settings
   shared_preferences: ^2.5.3
   # To keep screen awake & contorl brightness
@@ -47,6 +48,9 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/beep.mp3
 
   fonts:
     - family: AtkinsonHyperlegible

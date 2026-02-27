@@ -13,6 +13,10 @@ class FavouriteContactsScreen extends StatefulWidget {
 class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
   final FlutterContactPickerPlus _picker = FlutterContactPickerPlus();
 
+  static const Color _kBackgroundColor = Color(0xFF121212);
+  static const Color _kCardColor = Color(0xFF1E1E1E);
+  static const Color _kTextColor = Color(0xFFFFFFFF);
+
   List<String> names = [];
   List<String> numbers = [];
 
@@ -106,8 +110,9 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        foregroundColor: _kTextColor,
         title: const Text("Favourite Contacts"),
-        backgroundColor: Colors.black,
+        backgroundColor: _kBackgroundColor,
         actions: [
           TextButton(
             onPressed: () async {
@@ -115,11 +120,11 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
               if (!context.mounted) return;
               Navigator.pop(context);
             },
-            child: const Text("Done", style: TextStyle(color: Colors.white)),
+            child: const Text("Done", style: TextStyle(color: _kTextColor)),
           ),
         ],
       ),
-      backgroundColor: Colors.black,
+      backgroundColor: _kBackgroundColor,
       floatingActionButton: FloatingActionButton(
         onPressed: pickContact,
         backgroundColor: Colors.white,
@@ -128,9 +133,9 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
       body: names.isEmpty
           ? const Center(
               child: Text(
-                "No favourite contacts yet.\nTap + to add.",
+                "Tap + to add",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+                style: TextStyle(color: _kTextColor, fontSize: 16),
               ),
             )
           : ReorderableListView.builder(
@@ -140,11 +145,11 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
               itemBuilder: (context, index) {
                 return Card(
                   key: ValueKey(index),
-                  color: Colors.grey[900],
+                  color: _kCardColor,
                   child: ListTile(
                     title: Text(
                       names[index],
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      style: const TextStyle(color: _kTextColor, fontSize: 18),
                     ),
                     subtitle: Text(
                       numbers[index],

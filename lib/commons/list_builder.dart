@@ -67,39 +67,39 @@ class DashWidgets {
         final tileWidth = (totalWidth - padding * 2 - spacing) / columns;
         final aspectRatio = tileWidth / tileHeight;
 
-        return Padding(
-          padding: const EdgeInsets.all(padding),
-          child: Column(
-            children: [
-              // Grid part
-              if (gridItems.isNotEmpty)
-                SizedBox(
-                  height:
-                      tileHeight * (totalRows - (isOdd ? 1 : 0)) +
-                      spacing * (totalRows - (isOdd ? 1 : 0) - 1),
-                  child: GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columns,
-                      mainAxisSpacing: spacing,
-                      crossAxisSpacing: spacing,
-                      childAspectRatio: aspectRatio,
+        return SizedBox.expand(
+          child: Padding(
+            padding: const EdgeInsets.all(padding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (gridItems.isNotEmpty)
+                  SizedBox(
+                    height:
+                        tileHeight * (totalRows - (isOdd ? 1 : 0)) +
+                        spacing * (totalRows - (isOdd ? 1 : 0) - 1),
+                    child: GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: columns,
+                        mainAxisSpacing: spacing,
+                        crossAxisSpacing: spacing,
+                        childAspectRatio: aspectRatio,
+                      ),
+                      itemCount: gridItems.length,
+                      itemBuilder: (_, index) => gridItems[index],
                     ),
-                    itemCount: gridItems.length,
-                    itemBuilder: (_, index) => gridItems[index],
                   ),
-                ),
-
-              // Full-width last tile (same height as grid tiles)
-              if (lastItem != null) ...[
-                const SizedBox(height: spacing),
-                SizedBox(
-                  width: double.infinity,
-                  height: tileHeight,
-                  child: lastItem,
-                ),
+                if (lastItem != null) ...[
+                  const SizedBox(height: spacing),
+                  SizedBox(
+                    width: double.infinity,
+                    height: tileHeight,
+                    child: lastItem,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         );
       },

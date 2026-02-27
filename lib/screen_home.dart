@@ -158,11 +158,7 @@ class _HomeScreenState extends SplitScreenState<HomeScreen> with RouteAware {
         label: 'Phone',
         icons: [Icons.phone_rounded],
         action: () {
-          if (lastNavigationWasMagnet) {
-            Navigator.pushNamed(context, Constants.kPathCallNav);
-          } else {
-            Navigator.pushNamed(context, Constants.kPathCallLog);
-          }
+          Navigator.pushNamed(context, Constants.kPathCallNav);
         },
       ),
       DashAction(

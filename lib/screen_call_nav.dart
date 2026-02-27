@@ -106,8 +106,8 @@ class _CallNavScreenState extends SplitScreenState<CallNavScreen>
   Widget build(BuildContext context) {
     DashWidgets widgets = DashWidgets();
 
-    widgets.showIcons = showIcons;
-    widgets.showLabel = false;
+    widgets.showIcons = ConfigProvider.getShowIcons(Constants.kPathCallLog);
+    widgets.showLabel = ConfigProvider.getShowLabel(Constants.kPathCallLog);
 
     if (loading) {
       return const Scaffold(
@@ -135,8 +135,8 @@ class _CallNavScreenState extends SplitScreenState<CallNavScreen>
     return Scaffold(
       backgroundColor: ConfigProvider.getBackgroundColor,
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 20.0, 10.0, 10.0),
-        child: widgets.dashView(true, [
+        padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
+        child: widgets.dashView(isSplitScreen, [
           for (int i = 0; i < itemCount; i++)
             widgets.dashCardFunc(
               _labels[i],

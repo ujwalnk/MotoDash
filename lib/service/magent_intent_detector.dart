@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:moto_dash/service/beep_service.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:statemachine/statemachine.dart' as machine;
 
@@ -12,6 +13,12 @@ class MagnetIntentService {
   Stream<AppIntent> get intents => _intentController.stream;
 
   StreamSubscription<MagnetometerEvent>? _sub;
+
+  // ==========================
+  // TIMEOUT DURATION
+  // ==========================
+
+  static const Duration _timeoutDuration = Duration(seconds: 2);
 
   // ==========================
   // SAMPLING CONTROL
@@ -91,6 +98,9 @@ class MagnetIntentService {
     _stateActive.onEntry(() {
       _startSampling(_fastSampling);
 
+      // Immediate feedback on tap detection
+      BeepService().beep();
+
       _count++;
       _lastActiveTime = DateTime.now();
 
@@ -99,7 +109,7 @@ class MagnetIntentService {
       _activeTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
         final diff = DateTime.now().difference(_lastActiveTime);
 
-        if (diff >= const Duration(seconds: 1)) {
+        if (diff >= _timeoutDuration) {
           timer.cancel();
 
           if (_outerM.current == _stateNear) {
