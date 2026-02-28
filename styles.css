@@ -80,6 +80,18 @@ body {
   transition: background-color var(--transition), color var(--transition);
 }
 
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background-color: var(--accent);
+  /* Placeholder shown when image is missing */
+  min-width: 28px;
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -198,7 +210,8 @@ strong { font-weight: 500; color: var(--text); }
 
 .logo {
   display: flex;
-  align-items: baseline;
+  align-items: center; /* changed from baseline */
+  justify-content: center; /* ensures proper centering when needed */
   gap: 0.4rem;
   text-decoration: none;
   flex-shrink: 0;
@@ -217,6 +230,7 @@ strong { font-weight: 500; color: var(--text); }
   font-size: 0.7rem;
   color: var(--accent);
   font-weight: 400;
+  line-height: 1; /* prevents baseline offset */
 }
 
 .site-nav {
