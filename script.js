@@ -25,11 +25,13 @@
     var modalConfirm = document.getElementById('modal-confirm');
     var modalCancel = document.getElementById('modal-cancel');
     var pendingHref = null;
+    var pendingType = null;
     var focusableSel = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
     var lastFocused = null;
 
-    function openModal(href) {
+    function openModal(href, type) {
         pendingHref = href;
+        pendingType = type;
         lastFocused = document.activeElement;
         modal.removeAttribute('hidden');
         document.body.style.overflow = 'hidden';
@@ -40,7 +42,18 @@
         modal.setAttribute('hidden', '');
         document.body.style.overflow = '';
         pendingHref = null;
+        pendingType = null;
         if (lastFocused) lastFocused.focus();
+    }
+
+    function triggerDownload(href) {
+        var a = document.createElement('a');
+        a.href = href;
+        a.download = '';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
 
     function handleModalKeydown(e) {
@@ -49,7 +62,6 @@
                 closeModal();
                 return;
             }
-            // Focus trap
             if (e.key === 'Tab') {
                 var focusable = Array.from(modal.querySelectorAll(focusableSel));
                 var first = focusable[0];
@@ -73,9 +85,14 @@
 
     if (modalConfirm) {
         modalConfirm.addEventListener('click', function () {
+            var href = pendingHref;
+            var type = pendingType;
             closeModal();
-            if (pendingHref && pendingHref !== '#download') {
-                window.open(pendingHref, '_blank', 'noopener,noreferrer');
+            if (!href) return;
+            if (type === 'download') {
+                triggerDownload(href);
+            } else {
+                window.open(href, '_blank', 'noopener,noreferrer');
             }
         });
     }
@@ -91,13 +108,15 @@
     }
 
     /* ── CTA BUTTONS ── */
-    var downloadUrl = '#'; // Replace with actual APK URL
-    var githubUrl = 'https://github.com/motodash/motodash';
+    // GitHub /releases/latest/download/<filename> resolves to the newest release asset.
+    // Update the filename below to match your actual APK asset name in GitHub Releases.
+    var downloadUrl = 'https://github.com/ujwalnk/Motodash/releases/latest/download/app-release.apk';
+    var githubUrl = 'https://github.com/ujwalnk/Motodash';
 
     function handleCtaClick(e) {
         var type = e.currentTarget.getAttribute('data-type');
         var href = type === 'github' ? githubUrl : downloadUrl;
-        openModal(href);
+        openModal(href, type);
     }
 
     var ctaButtons = document.querySelectorAll('.cta-download');
@@ -118,7 +137,6 @@
         var total = slides.length;
         var current = 0;
 
-        // Create dots
         for (var i = 0; i < total; i++) {
             var dot = document.createElement('button');
             dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
@@ -139,11 +157,6 @@
                 d.classList.toggle('active', active);
                 d.setAttribute('aria-selected', active ? 'true' : 'false');
             });
-            // Update carousel aria-label
-            var carousel = document.getElementById(trackId.replace('-track', '-carousel'));
-            if (carousel) {
-                carousel.setAttribute('aria-label', 'Slide ' + (current + 1) + ' of ' + total);
-            }
         }
 
         if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); });
@@ -155,7 +168,6 @@
             });
         });
 
-        // Keyboard navigation on carousel
         var carouselEl = document.getElementById(trackId.replace('-track', '-carousel'));
         if (carouselEl) {
             carouselEl.addEventListener('keydown', function (e) {
@@ -185,7 +197,6 @@
             revealObserver.observe(el);
         });
     } else {
-        // Show all immediately
         document.querySelectorAll('.reveal').forEach(function (el) {
             el.classList.add('visible');
         });
