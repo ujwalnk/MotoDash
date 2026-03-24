@@ -2,7 +2,6 @@
 // Created: 2026, Mar 22
 
 import 'package:flutter/material.dart';
-import 'package:moto_dash/commons/dash_action.dart';
 
 enum CurrentPage {
   homePage,
@@ -33,21 +32,20 @@ class NavigationGraph extends ChangeNotifier {
     notifyListeners();
   }
 
-  static final dashActionReturn = DashAction(
-    label: 'Return',
-    icons: [Icons.undo_rounded],
-    action: () {
-      // TODO: Implement Back Funcationality here
-    },
-  );
-
   void pop() {
-    if (!canPop) return;
+    debugPrint("At pop");
+    if (!canPop) {
+      debugPrint("Unable to Pop");
+      return;
+    }
     if (_page == CurrentPage.callFavPage || _page == CurrentPage.callLogPage) {
       _page = CurrentPage.callNavPage;
+      debugPrint("Going back to callNav");
     } else {
       _page = CurrentPage.homePage;
+      debugPrint("Going back to home");
     }
+    debugPrint("Popped!");
     notifyListeners();
   }
 }

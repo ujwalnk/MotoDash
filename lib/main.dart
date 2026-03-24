@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screen_root.dart';
+import 'package:moto_dash/screen_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -101,7 +102,10 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
         debugShowCheckedModeBanner: false,
         home: const RootScreen(),
         theme: ThemeData(fontFamily: 'AtkinsonHyperlegible'),
-        routes: {Constants.kPathSettings: (_) => const SettingsScreen()},
+        routes: {
+          Constants.kPathSettings: (_) => const SettingsScreen(),
+          Constants.kPathScreenSaver: (_) => const ScreenSaver(),
+        },
       ),
     );
   }

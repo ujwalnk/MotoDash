@@ -2,14 +2,16 @@
 // Created: 2026, Mar 22
 // Description: Root screen for MotoDash
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/config_provider.dart' show ConfigProvider;
+import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:moto_dash/menu_actions.dart' show menuActions;
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart'
     show SharedPreferences;
 
@@ -29,65 +31,99 @@ class _RootScreenState extends State<RootScreen> {
 
   double fontSize = ConfigProvider.getFontSize;
 
+  Timer? _screenSaverTimer;
+
   @override
   void initState() {
     super.initState();
     _loadSettings();
   }
 
+  void _resetScreenSaverTimer() {
+    _screenSaverTimer?.cancel();
+
+    // TODO: Use the screesaver timer from [ConfigProvider] here
+    _screenSaverTimer = Timer(const Duration(seconds: 15), () {
+      debugPrint("Screensaver triggered");
+
+      if (!mounted) return;
+
+      // Prevent duplicate push
+      if (ModalRoute.of(context)?.settings.name == Constants.kPathScreenSaver) {
+        return;
+      }
+
+      Navigator.pushNamed(context, Constants.kPathScreenSaver);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final navigator = NavigationGraph.instance;
-    final widgets = DashWidgets();
+    // FIXME: Take care of the page jumping, fix using animation - AnimatedSwitcher
+    return AnimatedBuilder(
+      animation: NavigationGraph.instance,
+      builder: (context, _) {
+        // Reset the screen timer
+        _resetScreenSaverTimer();
 
-    // Set Widget properties
-    widgets.backgroundColor = backgroundColor;
-    widgets.fontColor = fontColor;
-    widgets.borderColor = borderColor;
+        final navigator = NavigationGraph.instance;
+        final widgets = DashWidgets();
 
-    final builder = menuActions[navigator.page];
+        widgets.backgroundColor = backgroundColor;
+        widgets.fontColor = fontColor;
+        widgets.borderColor = borderColor;
 
-    if (builder == null) {
-      return const Scaffold(body: Center(child: Text("No page found")));
-    }
+        final builder = menuActions[navigator.page];
 
-    return FutureBuilder<List<DashAction>>(
-      future: builder(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+        if (builder == null) {
+          return const Scaffold(body: Center(child: Text("No page found")));
         }
 
-        // Safer to store the snapshot data, than reuse
-        final items = snapshot.data as List<DashAction>;
+        return FutureBuilder<List<DashAction>>(
+          future: builder(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
 
-        return Scaffold(
-          backgroundColor: backgroundColor,
-          body: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-            // TODO: later add split screen support
-            child: widgets.dashView(false, [
-              ...items
-                  .map(
-                    (item) =>
-                        widgets.dashCardAction(item, context, items.length),
-                  )
-                  .toList(),
-              if (navigator.canPop)
-                // If popable screen, add back Button at the end
-                widgets.dashCardAction(
-                  DashAction(
-                    label: "Back",
-                    icons: [Icons.undo_rounded],
-                    action: () => NavigationGraph.instance.pop(),
+            final items = snapshot.data!;
+
+            debugPrint(
+              "Is Popable ${navigator.page} Screen: ${navigator.canPop}",
+            );
+
+            return Scaffold(
+              backgroundColor: backgroundColor,
+              body: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
+                child: widgets.dashView(false, [
+                  ...items.map(
+                    (item) => widgets.dashCardAction(
+                      item,
+                      context,
+                      items.length + (navigator.canPop ? 1 : 0),
+                    ),
                   ),
-                  context,
 
-                  // Count Correction for back button
-                  navigator.canPop ? items.length + 1 : items.length,
-                ),
-            ]),
-          ),
+                  if (navigator.canPop)
+                    widgets.dashCardAction(
+                      DashAction(
+                        label: "Back",
+                        icons: [Icons.undo_rounded],
+                        action: () {
+                          debugPrint("Calling pop");
+                          navigator.pop();
+                        },
+                      ),
+                      context,
+                      items.length + 1,
+                    ),
+                ]),
+              ),
+            );
+          },
         );
       },
     );

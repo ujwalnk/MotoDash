@@ -6,7 +6,6 @@ import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 
 Future<List<DashAction>> buildCallNavActions() async {
   return [
-    DashAction(label: "Favorites", icons: [Icons.star_rounded], action: () {}),
     DashAction(
       label: "Call Log",
       icons: [Icons.history_rounded],
@@ -17,12 +16,6 @@ Future<List<DashAction>> buildCallNavActions() async {
       label: "Favorites",
       icons: [Icons.star_rounded],
       // TODO: Navigate to Favourites
-      action: () {},
-    ),
-    DashAction(
-      label: "Return",
-      icons: [Icons.undo_rounded],
-      // TODO: Navigate back
       action: () {},
     ),
   ];
