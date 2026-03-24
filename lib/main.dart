@@ -7,6 +7,7 @@ import 'package:flutter_media_controller/flutter_media_controller.dart';
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screen_root.dart';
 import 'package:moto_dash/screen_saver.dart';
+import 'package:moto_dash/service/magnet_navigation_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -51,13 +52,14 @@ void main() async {
   VolumeController.instance.showSystemUI = true;
 
   // Start global magnet service once
-  if (ConfigProvider.getEnableMagnetGestures) {
-    debugPrint("Started Magnet Intent Detection");
-    magnetService.start();
-    // magnetService.setEnabled(true);
-  } else {
-    // magnetService.setEnabled(false);
-  }
+  // if (ConfigProvider.getEnableMagnetGestures) {
+  debugPrint("Started Magnet Intent Detection");
+  magnetService.start();
+  MagnetNavigationController.instance.start();
+  // magnetService.setEnabled(true);
+  // } else {
+  // magnetService.setEnabled(false);
+  // }
 
   runApp(const MotoDash());
 }

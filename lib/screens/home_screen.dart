@@ -25,7 +25,7 @@ Future<List<DashAction>> buildHomeActions() async {
     DashAction(
       label: 'Volume',
       icons: [Icons.volume_up_rounded],
-      action: () => NavigationGraph.instance.goTo(CurrentPage.musicPage),
+      action: () => NavigationGraph.instance.goTo(CurrentPage.volumePage),
       // () => Navigator.pushNamed(context, Constants.kPathVolume),
     ),
   ];
