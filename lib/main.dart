@@ -8,6 +8,7 @@ import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screen_root.dart';
 import 'package:moto_dash/screen_saver.dart';
 import 'package:moto_dash/service/magnet_navigation_controller.dart';
+import 'package:moto_dash/service/magnet_task_handler.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +16,7 @@ import 'package:screen_brightness/screen_brightness.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
@@ -23,6 +25,23 @@ import 'package:moto_dash/service/global_services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterForegroundTask.init(
+    androidNotificationOptions: AndroidNotificationOptions(
+      channelId: 'moto_dash_service',
+      channelName: 'MotoDash Service',
+      channelDescription: 'Magnet gesture navigation',
+      channelImportance: NotificationChannelImportance.LOW,
+      priority: NotificationPriority.LOW,
+    ),
+    iosNotificationOptions: const IOSNotificationOptions(),
+    foregroundTaskOptions: ForegroundTaskOptions(
+      eventAction: ForegroundTaskEventAction.repeat(5000),
+      autoRunOnBoot: false,
+    ),
+  );
+
+  await FlutterForegroundTask.requestNotificationPermission();
 
   final prefs = await SharedPreferences.getInstance();
   await ConfigProvider.init();
@@ -53,7 +72,7 @@ void main() async {
 
   // Start global magnet service once
   // if (ConfigProvider.getEnableMagnetGestures) {
-  debugPrint("Started Magnet Intent Detection");
+  // debugPrint("Started Magnet Intent Detection");
   magnetService.start();
   MagnetNavigationController.instance.start();
   // magnetService.setEnabled(true);
@@ -61,8 +80,22 @@ void main() async {
   // magnetService.setEnabled(false);
   // }
 
+  FlutterForegroundTask.setTaskHandler(MagnetTaskHandler());
+  FlutterForegroundTask.initCommunicationPort();
+
+  await FlutterForegroundTask.startService(
+    notificationTitle: 'MotoDash - Ride Safe',
+    notificationText: 'Magnet gestures active',
+    notificationButtons: [
+      const NotificationButton(id: 'settings', text: 'Settings'),
+      const NotificationButton(id: 'exit', text: 'Exit'),
+    ],
+  );
+
   runApp(const MotoDash());
 }
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MotoDash extends StatefulWidget {
   const MotoDash({super.key});
@@ -77,10 +110,20 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WakelockPlus.enable();
+
+    FlutterForegroundTask.addTaskDataCallback(_onTaskData);
+  }
+
+  void _onTaskData(dynamic data) {
+    if (data is Map && data['action'] == 'settings') {
+      navigatorKey.currentState?.pushNamed(Constants.kPathSettings);
+    }
   }
 
   @override
   void dispose() {
+    FlutterForegroundTask.removeTaskDataCallback(_onTaskData);
+
     WidgetsBinding.instance.removeObserver(this);
     WakelockPlus.disable();
     magnetService.stop();
@@ -101,6 +144,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     return ChangeNotifierProvider(
       create: (_) => NavigationGraph.instance,
       child: MaterialApp(
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         home: const RootScreen(),
         theme: ThemeData(fontFamily: 'AtkinsonHyperlegible'),

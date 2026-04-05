@@ -7,3 +7,6 @@ final TtsService ttsService = TtsService();
 /// Set to true whenever a navigation was triggered via magnet.
 /// Screens will read this to decide whether to auto-speak.
 bool lastNavigationWasMagnet = false;
+
+/// Set to true when Settings Page needs to be opened
+bool openSettingsRequested = false;
