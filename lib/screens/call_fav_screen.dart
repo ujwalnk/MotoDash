@@ -17,14 +17,16 @@ Future<List<DashAction>> buildCallFavActions() async {
       (i) => DashAction(
         label: favorites.keys.elementAt(i),
         icons: [],
+        // Direct phone calls require an Activity Intent and cannot be
+        // executed from the service isolate.
+        requiresActivity: true,
         action: () async {
           await FlutterPhoneDirectCaller.callNumber(
             favorites.values.elementAt(i),
           );
         },
       ),
-    ),
-    DashAction(action: () {}, icons: [Icons.undo_rounded], label: 'Return'),
+    )
   ];
 }
 

@@ -30,6 +30,7 @@ class _ScreenSaverState extends State<ScreenSaver>
   static const double radius = 10.0;
 
   bool _running = false;
+  bool _stopped = false;
 
   @override
   void initState() {
@@ -83,16 +84,21 @@ class _ScreenSaverState extends State<ScreenSaver>
     if (_running) return;
     _running = true;
 
-    while (mounted) {
+    while (mounted && !_stopped) {
       await Future.delayed(_moveInterval);
-      if (!mounted) break;
+      if (!mounted || _stopped) break;
       await _animateMove();
     }
   }
 
   Future<void> _animateMove() async {
+    if (_stopped) return;
+
     await _fadeController.forward();
+    if (_stopped) return;
+
     _setRandomPosition();
+
     await _fadeController.reverse();
   }
 
@@ -126,7 +132,10 @@ class _ScreenSaverState extends State<ScreenSaver>
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (details) => Navigator.of(context).pop(),
+      onTapDown: (details) {
+        _stopped = true;
+        Navigator.of(context).pop();
+      },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Stack(

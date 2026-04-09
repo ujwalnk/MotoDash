@@ -1,5 +1,9 @@
+// Author: Ujwal N K
+// Created: 2026, Mar 22
+
 import 'dart:async';
 
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:moto_dash/navigation_graph.dart';
 import 'package:moto_dash/menu_actions.dart';
 import 'package:moto_dash/commons/dash_action.dart';
@@ -41,10 +45,7 @@ class MagnetNavigationController {
     final List<DashAction> items = await builder();
     final int total = items.length + (navigator.canPop ? 1 : 0);
 
-    // Safety
-    if (_selectedIndex >= total) {
-      _selectedIndex = 0;
-    }
+    if (_selectedIndex >= total) _selectedIndex = 0;
 
     switch (intent) {
       case AppIntent.next:
@@ -55,32 +56,29 @@ class MagnetNavigationController {
       case AppIntent.select:
         final oldPage = navigator.page;
 
-        _performAction(items, navigator);
+        await _performAction(items, navigator);
 
+        // Only check for page change if the action was local (not proxied).
+        // Proxied actions foreground the app and are handled by the main
+        // isolate — navigation state does not change in this isolate.
         final newPage = navigator.page;
 
         if (oldPage != newPage) {
-          // Page changed → reset
           _selectedIndex = 0;
-
           final newBuilder = menuActions[newPage];
           if (newBuilder != null) {
             final newItems = await newBuilder();
             _speak(newItems, navigator);
           }
         } else {
-          // Same page → stay on same item
           _speak(items, navigator);
         }
         break;
 
       case AppIntent.back:
         navigator.pop();
-
-        // Reset index
         _selectedIndex = 0;
 
-        // Speak first item of new page
         final newBuilder = menuActions[navigator.page];
         if (newBuilder != null) {
           final newItems = await newBuilder();
@@ -94,11 +92,32 @@ class MagnetNavigationController {
   // ACTION EXECUTION
   // -------------------------
 
-  void _performAction(List<DashAction> items, NavigationGraph navigator) {
-    if (_selectedIndex < items.length) {
-      items[_selectedIndex].action();
-    } else {
+  Future<void> _performAction(
+    List<DashAction> items,
+    NavigationGraph navigator,
+  ) async {
+    // Selected index is past the item list — treat as Back
+    if (_selectedIndex >= items.length) {
       navigator.pop();
+      return;
+    }
+
+    final action = items[_selectedIndex];
+
+    if (action.requiresActivity) {
+      // This action needs an Android Activity (dialer, assistant, etc.).
+      // Tell the main isolate the page and index, then bring the app to
+      // foreground so the Activity is ready to receive the platform channel call.
+      FlutterForegroundTask.sendDataToMain({
+        'action': 'execute_action',
+        'page': navigator.page.name,
+        'index': _selectedIndex,
+      });
+      FlutterForegroundTask.launchApp();
+    } else {
+      // Volume, navigation, and other pure-Dart/system-service actions
+      // execute directly — no Activity needed
+      action.action();
     }
   }
 

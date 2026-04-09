@@ -4,10 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
-import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
+import 'package:moto_dash/menu_actions.dart';
+import 'package:moto_dash/navigation_graph.dart';
 import 'package:moto_dash/screen_root.dart';
 import 'package:moto_dash/screen_saver.dart';
-import 'package:moto_dash/service/magnet_navigation_controller.dart';
 import 'package:moto_dash/service/magnet_task_handler.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +21,6 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/screen_settings.dart';
-import 'package:moto_dash/service/global_services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,15 +69,8 @@ void main() async {
 
   VolumeController.instance.showSystemUI = true;
 
-  // Start global magnet service once
-  // if (ConfigProvider.getEnableMagnetGestures) {
-  // debugPrint("Started Magnet Intent Detection");
-  magnetService.start();
-  MagnetNavigationController.instance.start();
-  // magnetService.setEnabled(true);
-  // } else {
-  // magnetService.setEnabled(false);
-  // }
+  // Sensor and navigation logic now live entirely in the service isolate.
+  // Do NOT start magnetService or MagnetNavigationController here.
 
   FlutterForegroundTask.setTaskHandler(MagnetTaskHandler());
   FlutterForegroundTask.initCommunicationPort();
@@ -110,23 +102,16 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WakelockPlus.enable();
-
     FlutterForegroundTask.addTaskDataCallback(_onTaskData);
-  }
-
-  void _onTaskData(dynamic data) {
-    if (data is Map && data['action'] == 'settings') {
-      navigatorKey.currentState?.pushNamed(Constants.kPathSettings);
-    }
   }
 
   @override
   void dispose() {
     FlutterForegroundTask.removeTaskDataCallback(_onTaskData);
-
     WidgetsBinding.instance.removeObserver(this);
     WakelockPlus.disable();
-    magnetService.stop();
+    // Do NOT stop magnetService or MagnetNavigationController here.
+    // The service isolate owns them and must outlive the Activity.
     super.dispose();
   }
 
@@ -136,6 +121,56 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
       WakelockPlus.enable();
     } else if (state == AppLifecycleState.paused) {
       WakelockPlus.disable();
+    }
+  }
+
+  Future<void> _onTaskData(dynamic data) async {
+    if (data is! Map) return;
+
+    switch (data['action']) {
+
+      // Service mirrors its NavigationGraph here so the UI shows the correct
+      // page the moment the screen turns on — no catch-up needed.
+      case 'page_changed':
+        final pageName = data['page'] as String?;
+        if (pageName == null) return;
+        final page = CurrentPage.values.firstWhere(
+          (e) => e.name == pageName,
+          orElse: () => CurrentPage.homePage,
+        );
+        NavigationGraph.instance.syncPage(page);
+        break;
+
+      // Service needs the Activity to run this action (call, assistant).
+      // launchApp() has already been called before this message was sent,
+      // so the Activity is foregrounded and platform channels work normally.
+      case 'execute_action':
+        final pageName = data['page'] as String?;
+        final index = data['index'] as int?;
+        if (pageName == null || index == null) return;
+
+        final page = CurrentPage.values.firstWhere(
+          (e) => e.name == pageName,
+          orElse: () => CurrentPage.homePage,
+        );
+        final builder = menuActions[page];
+        if (builder == null) return;
+
+        final items = await builder();
+        if (index < items.length) items[index].action();
+        break;
+
+      // Notification button: Settings
+      case 'settings':
+        navigatorKey.currentState?.pushNamed(Constants.kPathSettings);
+        break;
+
+      // Notification button: Exit — stop service then kill the process
+      case 'exit':
+        await FlutterForegroundTask.stopService();
+        WakelockPlus.disable();
+        SystemNavigator.pop();
+        break;
     }
   }
 

@@ -9,27 +9,22 @@ import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:permission_handler/permission_handler.dart';
 
 Future<List<DashAction>> buildCallLogActions() async {
-  // Get the Call logs from the device
   final callLogs = await _loadCallLogs();
 
   return [
-    // Genereate the Call Logs as DashIcons
     ...List.generate(
       callLogs!.length,
       (i) => DashAction(
-        // Add the name or format the number
         label: callLogs[i].name ?? _formatPhoneNumber(callLogs[i]),
-
-        // Add the call icon - missed / incoming / outgoing
         icons: [_callIcon(callLogs[i].callType)],
-
-        // Directly call using the phone native caller
+        // Direct phone calls require an Activity Intent and cannot be
+        // executed from the service isolate.
+        requiresActivity: true,
         action: () async {
           await FlutterPhoneDirectCaller.callNumber(callLogs[i].number!);
         },
       ),
-    ),
-    DashAction(action: () {}, icons: [Icons.undo_rounded], label: 'Return'),
+    )
   ];
 }
 
@@ -38,12 +33,10 @@ Future<List<CallLogEntry>?> _loadCallLogs() async {
     Iterable<CallLogEntry> entries = await CallLog.query();
     final list = entries.toList();
 
-    // Sort the call log by time
     list.sort((a, b) => (b.timestamp ?? 0).compareTo(a.timestamp ?? 0));
 
     final Map<String, CallLogEntry> uniqueMap = {};
 
-    // Add only the last 5 unique call logs
     for (var entry in list) {
       final identifier = entry.name ?? entry.number ?? '';
       if (identifier.isNotEmpty && !uniqueMap.containsKey(identifier)) {

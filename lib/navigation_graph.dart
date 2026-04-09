@@ -13,7 +13,7 @@ enum CurrentPage {
 }
 
 class NavigationGraph extends ChangeNotifier {
-  NavigationGraph._(); // private constructor
+  NavigationGraph._();
 
   static final NavigationGraph instance = NavigationGraph._();
 
@@ -26,6 +26,7 @@ class NavigationGraph extends ChangeNotifier {
   // Getter - can pop?
   bool get canPop => _page != CurrentPage.homePage;
 
+  // Full navigation with logic — used by the service isolate only.
   Future<void> goTo(CurrentPage page) async {
     debugPrint("Current Page: $_page -> $page");
     _page = page;
@@ -46,6 +47,16 @@ class NavigationGraph extends ChangeNotifier {
       debugPrint("Going back to home");
     }
     debugPrint("Popped!");
+    notifyListeners();
+  }
+
+  // Dumb mirror — used by the main isolate only.
+  // Reflects whatever page the service isolate reports via IPC.
+  // No navigation logic runs here; this is purely a display sync.
+  void syncPage(CurrentPage page) {
+    if (_page == page) return;
+    debugPrint("[main] syncPage: $_page -> $page");
+    _page = page;
     notifyListeners();
   }
 }
