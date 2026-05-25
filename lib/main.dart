@@ -8,7 +8,6 @@ import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screen_root.dart';
 import 'package:moto_dash/screen_saver.dart';
 import 'package:moto_dash/service/magnet_navigation_controller.dart';
-import 'package:moto_dash/service/magnet_task_handler.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -26,23 +25,6 @@ import 'package:moto_dash/service/global_services.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  FlutterForegroundTask.init(
-    androidNotificationOptions: AndroidNotificationOptions(
-      channelId: 'moto_dash_service',
-      channelName: 'MotoDash Service',
-      channelDescription: 'Magnet gesture navigation',
-      channelImportance: NotificationChannelImportance.LOW,
-      priority: NotificationPriority.LOW,
-    ),
-    iosNotificationOptions: const IOSNotificationOptions(),
-    foregroundTaskOptions: ForegroundTaskOptions(
-      eventAction: ForegroundTaskEventAction.repeat(5000),
-      autoRunOnBoot: false,
-    ),
-  );
-
-  await FlutterForegroundTask.requestNotificationPermission();
-
   final prefs = await SharedPreferences.getInstance();
   await ConfigProvider.init();
 
@@ -51,8 +33,10 @@ void main() async {
     await prefs.setBool(Constants.kKeyIsFirstRun, false);
   }
 
+  // Hide navigation & status bar
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
+  // Override system brightness
   if (prefs.getDouble("brightness") != null &&
       prefs.getDouble("brightness") != 0) {
     await ScreenBrightness.instance.setApplicationScreenBrightness(
@@ -71,17 +55,11 @@ void main() async {
   VolumeController.instance.showSystemUI = true;
 
   // Start global magnet service once
-  // if (ConfigProvider.getEnableMagnetGestures) {
-  // debugPrint("Started Magnet Intent Detection");
-  magnetService.start();
-  MagnetNavigationController.instance.start();
-  // magnetService.setEnabled(true);
-  // } else {
-  // magnetService.setEnabled(false);
-  // }
-
-  FlutterForegroundTask.setTaskHandler(MagnetTaskHandler());
-  FlutterForegroundTask.initCommunicationPort();
+  if (ConfigProvider.getEnableMagnetGestures) {
+    debugPrint("Started Magnet Intent Detection");
+    magnetService.start();
+    MagnetNavigationController.instance.start();
+  }
 
   await FlutterForegroundTask.startService(
     notificationTitle: 'MotoDash - Ride Safe',
