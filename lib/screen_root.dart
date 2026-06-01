@@ -11,9 +11,7 @@ import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:moto_dash/menu_actions.dart' show menuActions;
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
-
-import 'package:shared_preferences/shared_preferences.dart'
-    show SharedPreferences;
+import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
 class RootScreen extends StatefulWidget {
   const RootScreen({super.key});
@@ -83,16 +81,12 @@ class _RootScreenState extends State<RootScreen> {
           future: builder(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
+              return const Scaffold(body: Center(child: CircularProgressIndicator()));
             }
 
             final items = snapshot.data!;
 
-            debugPrint(
-              "Is Popable ${navigator.page} Screen: ${navigator.canPop}",
-            );
+            debugPrint("Is Popable ${navigator.page} Screen: ${navigator.canPop}");
 
             return Scaffold(
               backgroundColor: backgroundColor,
@@ -100,11 +94,7 @@ class _RootScreenState extends State<RootScreen> {
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
                 child: widgets.dashView(false, [
                   ...items.map(
-                    (item) => widgets.dashCardAction(
-                      item,
-                      context,
-                      items.length + (navigator.canPop ? 1 : 0),
-                    ),
+                    (item) => widgets.dashCardAction(item, context, items.length + (navigator.canPop ? 1 : 0)),
                   ),
 
                   if (navigator.canPop)

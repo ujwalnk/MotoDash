@@ -31,6 +31,24 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions.add("default")
+
+    // 2. Define the flavors using Kotlin DSL syntax
+    productFlavors {
+        create("demo") {
+            dimension = "default"
+            applicationIdSuffix = ".demo"
+            // Syntax for adding string resources in Kotlin DSL
+            resValue("string", "app_name", "My App (Demo)")
+        }
+
+        create("actual") {
+            dimension = "default"
+            // Keeps the base applicationId without changes
+            resValue("string", "app_name", "My App")
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

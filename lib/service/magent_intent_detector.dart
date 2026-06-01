@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'dart:math';
+
+import 'package:flutter/material.dart';
 import 'package:moto_dash/service/beep_service.dart';
+import 'package:moto_dash/service/global_services.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:statemachine/statemachine.dart' as machine;
-
-import 'package:moto_dash/service/global_services.dart';
 
 enum AppIntent { next, select, back }
 
 class MagnetIntentService {
   final _intentController = StreamController<AppIntent>.broadcast();
+
   Stream<AppIntent> get intents => _intentController.stream;
 
   StreamSubscription<MagnetometerEvent>? _sub;
@@ -134,7 +136,12 @@ class MagnetIntentService {
   // ==========================
 
   void start() {
+    debugPrint("Starting service");
     _startSampling(_slowSampling);
+    // _startSampling(_fastSampling);
+    // _stateFar.enter();
+    // _stateIdle.enter();
+    // debugPrint("Service started");
   }
 
   void stop() {
@@ -152,9 +159,7 @@ class MagnetIntentService {
   // ==========================
 
   void _onData(MagnetometerEvent event) {
-    final magnitude = sqrt(
-      event.x * event.x + event.y * event.y + event.z * event.z,
-    );
+    final magnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
 
     if (!_baselineInitialized) {
       _baseline = magnitude;

@@ -17,6 +17,7 @@ dependencies:
   screen_brightness: ^2.1.7
   wakelock_plus: ^1.4.0
   # For media control
+  flutter_local_notifications: ^21.0.0
   flutter_media_controller: ^1.0.0
   # For volume control
   volume_controller: ^3.4.0
