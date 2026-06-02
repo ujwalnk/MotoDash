@@ -1,11 +1,10 @@
 // Author: Ujwal N K
 // Created On: 05 Feb, 2026
-// All Option Defaults are defined here to consistantly maintain a list.
+// All configuration defaults are defined here to maintain a consistent list.
 
-import 'package:flutter/material.dart' show Color, Colors, debugPrint;
+import 'package:flutter/material.dart' show Color, Colors;
 import 'package:moto_dash/commons/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart'
-    show SharedPreferences;
+import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
 class ConfigProvider {
   static SharedPreferences? prefs;
@@ -14,62 +13,21 @@ class ConfigProvider {
     prefs = await SharedPreferences.getInstance();
   }
 
-  static bool get getIsFirstRun {
-    return prefs?.getBool(Constants.kKeyIsFirstRun) ?? true;
-  }
+  static bool get getIsFirstRun => prefs?.getBool(Constants.kKeyIsFirstRun) ?? true;
 
-  static Color get getBackgroundColor {
-    return Color(
-      prefs?.getInt(Constants.kKeyBackgroundColor) ?? Colors.black.toARGB32(),
-    );
-  }
+  // Get colors
+  static Color get getBackgroundColor => Color(prefs?.getInt(Constants.kKeyBackgroundColor) ?? Colors.black.toARGB32());
+  static Color get getBorderColor => Color(prefs?.getInt(Constants.kKeyBorderColor) ?? Colors.white.toARGB32());
+  static Color get getFontColor => Color(prefs?.getInt(Constants.kKeyFontColor) ?? Colors.white.toARGB32());
 
-  static Color get getFontColor {
-    return Color(
-      prefs?.getInt(Constants.kKeyFontColor) ?? Colors.white.toARGB32(),
-    );
-  }
+  /// Get menu style (icon, label / abbreviated)
+  static bool get getShowIcons => prefs?.getBool(Constants.kKeyShowMenuIcons) ?? true;
+  static bool get getShowLabel => prefs?.getBool(Constants.kKeyShowMenuLabel) ?? true;
+  static bool get getShowLabelAbbreviated => prefs?.getBool(Constants.kKeyShowMenuLabelAbbreviated) ?? true;
 
-  static Color get getBorderColor {
-    return Color(
-      prefs?.getInt(Constants.kKeyBorderColor) ?? Colors.white.toARGB32(),
-    );
-  }
+  static double get getFontSize => prefs?.getDouble(Constants.kKeyFontSize) ?? 16;
 
-  static bool getShowIcons(String path) {
-    switch (path) {
-      case Constants.kPathHome:
-        return prefs?.getBool(Constants.kKeyHomeShowIcons) ?? true;
-      case Constants.kPathMusic:
-        return prefs?.getBool(Constants.kKeyMusicShowIcons) ?? true;
-      case Constants.kPathVolume:
-        return prefs?.getBool(Constants.kKeyVolumeShowIcons) ?? true;
-      default:
-        return true;
-    }
-  }
+  static bool get getEnableMagnetGestures => prefs?.getBool(Constants.kKeyEnableMagnetGestures) ?? false;
 
-  static bool getShowLabel(String path) {
-    switch (path) {
-      case Constants.kPathHome:
-        return prefs?.getBool(Constants.kKeyHomeShowLabel) ?? true;
-      case Constants.kPathMusic:
-        return prefs?.getBool(Constants.kKeyMusicShowLabel) ?? true;
-      case Constants.kPathVolume:
-        return prefs?.getBool(Constants.kKeyVolumeShowLabel) ?? true;
-      default:
-        return true;
-    }
-  }
-
-  static double get getFontSize {
-    return prefs?.getDouble(Constants.kKeyFontSize) ?? 16;
-  }
-
-  static bool get getEnableMagnetGestures {
-    debugPrint(
-      "Magnet Gestures: ${prefs!.getBool(Constants.kKeyEnableMagnetGestures)}",
-    );
-    return prefs?.getBool(Constants.kKeyEnableMagnetGestures) ?? false;
-  }
+  // TODO: Add screen timeout, keep_screen_blank, favourite contacts & brightness
 }

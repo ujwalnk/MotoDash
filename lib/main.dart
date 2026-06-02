@@ -24,25 +24,48 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-/// Handle notification interaction
+// Holds a pending action when the navigator isn't ready yet
+String? _pendingNotificationAction;
+
+void _handlePendingNotificationAction() {
+  final actionId = _pendingNotificationAction;
+  if (actionId == null) return;
+
+  final navigator = navigatorKey.currentState;
+  if (navigator == null) return; // Will be retried on next resume/frame
+
+  _pendingNotificationAction = null; // Clear only after we know we can handle it
+
+  if (actionId == 'action_settings') {
+    debugPrint("Opening Settings");
+    navigator.pushNamed(Constants.kPathSettings);
+    showMotoDashNotification();
+  } else if (actionId == 'action_exit') {
+    magnetService.stop();
+    SystemNavigator.pop();
+  }
+}
+
+/// Called when app is in foreground or background (but NOT terminated)
 @pragma('vm:entry-point')
 void onDidReceiveNotificationResponse(NotificationResponse response) {
   final actionId = response.actionId;
+  if (actionId == null) return;
 
-  // Route based on which button was pressed on the notification
-  // Handle Settings Button Click
-  if (actionId == 'action_settings') {
-    print("Opening Settings");
-    navigatorKey.currentState?.pushNamed(Constants.kPathSettings);
-  }
-  // Handle Exit Button Click
-  else if (actionId == 'action_exit') {
-    // Stop the magnet services to prevent memory leaks or rogue background loops
-    magnetService.stop();
+  debugPrint("Notification action received: $actionId");
+  _pendingNotificationAction = actionId;
+  _handlePendingNotificationAction();
+}
 
-    // Gracefully pop the top-level Flutter activity and close the app
-    SystemNavigator.pop();
-  }
+/// Called when app is fully terminated and user taps a notification action
+@pragma('vm:entry-point')
+void onDidReceiveBackgroundNotificationResponse(NotificationResponse response) {
+  final actionId = response.actionId;
+  if (actionId == null) return;
+
+  debugPrint("Background notification action received: $actionId");
+  _pendingNotificationAction = actionId;
+  // Navigator won't be ready here — _MotoDashState.initState will retry
 }
 
 Future<void> showMotoDashNotification() async {
@@ -50,11 +73,13 @@ Future<void> showMotoDashNotification() async {
     'moto_dash_channel',
     'Moto Dash Navigation',
     channelDescription: 'Quick navigation controls for Moto Dash',
-    importance: Importance.max,
-    priority: Priority.high,
+    importance: Importance.low,
+    priority: Priority.low,
+    ongoing: true,
+    autoCancel: false,
     actions: [
-      AndroidNotificationAction('action_settings', 'Settings'),
-      AndroidNotificationAction('action_exit', 'Exit'),
+      AndroidNotificationAction('action_settings', 'Settings', showsUserInterface: true),
+      AndroidNotificationAction('action_exit', 'Exit', showsUserInterface: true),
     ],
   );
 
@@ -62,7 +87,6 @@ Future<void> showMotoDashNotification() async {
 
   const NotificationDetails platformDetails = NotificationDetails(android: androidDetails, iOS: iosDetails);
 
-  // To this:
   await flutterLocalNotificationsPlugin.show(
     id: 0,
     title: 'MotoDash',
@@ -98,24 +122,17 @@ void main() async {
 
   VolumeController.instance.showSystemUI = true;
 
-  // Start global magnet service once
-  // if (ConfigProvider.getEnableMagnetGestures) {
   debugPrint("Started Magnet Intent Detection");
   magnetService.start();
   MagnetNavigationController.instance.start();
-  // magnetService.setEnabled(true);
-  // } else {
-  // magnetService.setEnabled(false);
-  // }
 
-  // Ensure you have an icon named 'ic_launcher' in android/app/src/main/res/mipmap...
   const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings(
     '@mipmap/ic_launcher',
   );
 
   final List<DarwinNotificationCategory> darwinNotificationCategories = [
     DarwinNotificationCategory(
-      'moto_dash_actions', // Category ID
+      'moto_dash_actions',
       actions: [
         DarwinNotificationAction.plain('action_settings', 'Settings'),
         DarwinNotificationAction.plain('action_exit', 'Exit'),
@@ -138,6 +155,7 @@ void main() async {
   await flutterLocalNotificationsPlugin.initialize(
     settings: initializationSettings,
     onDidReceiveNotificationResponse: onDidReceiveNotificationResponse,
+    onDidReceiveBackgroundNotificationResponse: onDidReceiveBackgroundNotificationResponse,
   );
 
   await showMotoDashNotification();
@@ -158,6 +176,11 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WakelockPlus.enable();
+
+    // Retry after the first frame — navigator is guaranteed to be mounted by then
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handlePendingNotificationAction();
+    });
   }
 
   @override
@@ -172,6 +195,8 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       WakelockPlus.enable();
+      // Retry in case an action arrived while the app was paused
+      _handlePendingNotificationAction();
     } else if (state == AppLifecycleState.paused) {
       WakelockPlus.disable();
     }

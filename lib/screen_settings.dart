@@ -4,9 +4,9 @@
 import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:moto_dash/service/contact_picker.dart';
 import 'package:moto_dash/service/rgb_color_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -17,16 +17,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   // Home screen
-  bool homeShowIcons = false;
-  bool homeShowLabel = false;
-
-  // Music screen
-  bool musicShowIcons = false;
-  bool musicShowLabel = false;
-
-  // Volume screen
-  bool volumeShowIcons = false;
-  bool volumeShowLabel = false;
+  bool menuIcon = true;
+  bool menuLabel = true;
+  bool menuAbbreviated = false;
 
   // Magnetic Gestures
   bool magnetGesturesEnabled = false;
@@ -45,7 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final fontSizeController = TextEditingController();
 
   // Brightness
-  double brightness = 50;
+  double brightness = 0;
 
   static const Color scaffoldBg = Color(0xFF121212);
   static const Color cardBg = Color(0xFF1E1E1E);
@@ -64,16 +57,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
 
     setState(() {
-      homeShowIcons = ConfigProvider.getShowIcons(Constants.kPathHome);
-      homeShowLabel = ConfigProvider.getShowLabel(Constants.kPathHome);
+      menuIcon = ConfigProvider.getShowIcons;
+      menuLabel = ConfigProvider.getShowLabel;
+      menuAbbreviated = ConfigProvider.getShowLabelAbbreviated;
 
-      musicShowIcons = ConfigProvider.getShowIcons(Constants.kPathMusic);
-      musicShowLabel = ConfigProvider.getShowLabel(Constants.kPathMusic);
-
-      volumeShowIcons = ConfigProvider.getShowIcons(Constants.kPathVolume);
-      volumeShowLabel = ConfigProvider.getShowLabel(Constants.kPathVolume);
-
-      brightness = prefs.getDouble(Constants.kKeyBrightness) ?? 50.0;
+      brightness = prefs.getDouble(Constants.kKeyBrightness) ?? 0.0;
 
       keepScreenBlank = prefs.getBool("keep_screen_blank") ?? false;
       blankTimeController.text = prefs.getString("blank_time_minutes") ?? "";
@@ -84,8 +72,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       borderColor = ConfigProvider.getBorderColor;
       fontColor = ConfigProvider.getFontColor;
 
-      favouriteContactNames =
-          prefs.getStringList(Constants.kKeyFavContactNames)?.join(", ") ?? "";
+      favouriteContactNames = prefs.getStringList(Constants.kKeyFavContactNames)?.join(", ") ?? "";
 
       magnetGesturesEnabled = ConfigProvider.getEnableMagnetGestures;
     });
@@ -97,14 +84,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setBool(Constants.kKeyHomeShowIcons, homeShowIcons);
-    await prefs.setBool(Constants.kKeyHomeShowLabel, homeShowLabel);
-
-    await prefs.setBool(Constants.kKeyMusicShowIcons, musicShowIcons);
-    await prefs.setBool(Constants.kKeyMusicShowLabel, musicShowLabel);
-
-    await prefs.setBool(Constants.kKeyVolumeShowIcons, volumeShowIcons);
-    await prefs.setBool(Constants.kKeyVolumeShowLabel, volumeShowLabel);
+    await prefs.setBool(Constants.kKeyShowMenuIcons, menuIcon);
+    await prefs.setBool(Constants.kKeyShowMenuLabel, menuLabel);
+    await prefs.setBool(Constants.kKeyShowMenuLabel, menuAbbreviated);
 
     await prefs.setDouble(Constants.kKeyBrightness, brightness);
 
@@ -112,27 +94,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setString("blank_time_minutes", blankTimeController.text);
 
     await prefs.setInt(Constants.kKeyFontColor, fontColor.toARGB32());
-    await prefs.setInt(
-      Constants.kKeyBackgroundColor,
-      backgroundColor.toARGB32(),
-    );
+    await prefs.setInt(Constants.kKeyBackgroundColor, backgroundColor.toARGB32());
     await prefs.setInt(Constants.kKeyBorderColor, borderColor.toARGB32());
 
-    await prefs.setDouble(
-      Constants.kKeyFontSize,
-      double.parse(fontSizeController.text),
-    );
+    await prefs.setDouble(Constants.kKeyFontSize, double.parse(fontSizeController.text));
 
-    await prefs.setBool(
-      Constants.kKeyEnableMagnetGestures,
-      magnetGesturesEnabled,
-    );
+    await prefs.setBool(Constants.kKeyEnableMagnetGestures, magnetGesturesEnabled);
   }
 
-  Widget _settingsCard({
-    required String title,
-    required List<Widget> children,
-  }) {
+  Widget _settingsCard({required String title, required List<Widget> children}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Card(
@@ -146,11 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  color: textColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: const TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               ...children,
@@ -173,11 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget textField(
-    String label,
-    TextEditingController controller, {
-    TextInputType inputType = TextInputType.text,
-  }) {
+  Widget textField(String label, TextEditingController controller, {TextInputType inputType = TextInputType.text}) {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: TextField(
@@ -186,22 +148,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: const TextStyle(color: textColor),
         decoration: const InputDecoration(
           labelStyle: TextStyle(color: textColor),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white54),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blueGrey),
-          ),
+          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white54)),
+          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blueGrey)),
         ),
       ),
     );
   }
 
-  Widget tappableField({
-    required String label,
-    required String value,
-    required VoidCallback onTap,
-  }) {
+  Widget tappableField({required String label, required String value, required VoidCallback onTap}) {
     final display = value.isEmpty ? label : value;
 
     return GestureDetector(
@@ -218,19 +172,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget colorTile({
-    required String label,
-    required Color color,
-    required ValueChanged<Color> onColorSelected,
-  }) {
+  Widget colorTile({required String label, required Color color, required ValueChanged<Color> onColorSelected}) {
     return GestureDetector(
       onTap: () async {
         await showDialog(
           context: context,
-          builder: (_) => HexWheelColorPickerDialog(
-            color: color,
-            onChanged: onColorSelected,
-          ),
+          builder: (_) => HexWheelColorPickerDialog(color: color, onChanged: onColorSelected),
         );
       },
       child: Container(
@@ -286,47 +233,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           _settingsCard(
-            title: "Home Screen",
+            title: "Menu",
             children: [
-              checkboxTile(
-                "Show Icons",
-                homeShowIcons,
-                (v) => setState(() => homeShowIcons = v),
-              ),
+              checkboxTile("Show Icon", menuIcon, (v) => setState(() => menuIcon = v)),
               checkboxTile(
                 "Show Label",
-                homeShowLabel,
-                (v) => setState(() => homeShowLabel = v),
-              ),
-            ],
-          ),
-          _settingsCard(
-            title: "Music Screen",
-            children: [
-              checkboxTile(
-                "Show Icons",
-                musicShowIcons,
-                (v) => setState(() => musicShowIcons = v),
+                menuLabel,
+                (v) => setState(() {
+                  menuLabel = v;
+                  if (v == false) menuAbbreviated = false;
+                }),
               ),
               checkboxTile(
-                "Show Label",
-                musicShowLabel,
-                (v) => setState(() => musicShowLabel = v),
-              ),
-            ],
-          ),
-          _settingsCard(
-            title: "Volume Screen",
-            children: [
-              checkboxTile(
-                "Show Icons",
-                volumeShowIcons,
-                (v) => setState(() => volumeShowIcons = v),
-              ),
-              checkboxTile(
-                "Show Label",
-                volumeShowLabel,
-                (v) => setState(() => volumeShowLabel = v),
+                "Abbreviated Label",
+                menuAbbreviated,
+                (v) => setState(() {
+                  menuAbbreviated = v;
+                  menuLabel = false;
+                }),
               ),
             ],
           ),
@@ -337,12 +261,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 label: "Pick Favourite Contacts",
                 value: favouriteContactNames,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const FavouriteContactsScreen(),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const FavouriteContactsScreen()));
                 },
               ),
             ],
@@ -357,10 +276,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 divisions: 100,
                 onChanged: (v) => setState(() => brightness = v),
               ),
-              Text(
-                "${brightness.toInt()}%",
-                style: const TextStyle(color: textColor),
-              ),
+              Text("${brightness.toInt()}%", style: const TextStyle(color: textColor)),
             ],
           ),
           _settingsCard(
@@ -372,26 +288,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 (v) => setState(() => keepScreenBlank = v),
               ),
               if (keepScreenBlank)
-                textField(
-                  "Blank Time (Minutes)",
-                  blankTimeController,
-                  inputType: TextInputType.number,
-                ),
+                textField("Blank Time (Minutes)", blankTimeController, inputType: TextInputType.number),
             ],
           ),
           _settingsCard(
             title: "General Settings",
             children: [
-              textField(
-                "Font Size",
-                fontSizeController,
-                inputType: TextInputType.number,
-              ),
-              colorTile(
-                label: "Font Color",
-                color: fontColor,
-                onColorSelected: (c) => setState(() => fontColor = c),
-              ),
+              textField("Font Size", fontSizeController, inputType: TextInputType.number),
+              colorTile(label: "Font Color", color: fontColor, onColorSelected: (c) => setState(() => fontColor = c)),
               colorTile(
                 label: "Background Color",
                 color: backgroundColor,

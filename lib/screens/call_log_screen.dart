@@ -29,7 +29,6 @@ Future<List<DashAction>> buildCallLogActions() async {
         },
       ),
     ),
-    DashAction(action: () {}, icons: [Icons.undo_rounded], label: 'Return'),
   ];
 }
 

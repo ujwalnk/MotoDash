@@ -1,13 +1,9 @@
 // Author: Ujwal N K
 // Created: 2026, Mar 22
 
-import 'package:flutter/material.dart' show Icons;
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
-import 'package:moto_dash/service/caller.dart'
-    as FlutterPhoneDirectCaller
-    show callNumber;
-import 'package:shared_preferences/shared_preferences.dart'
-    show SharedPreferences;
+import 'package:moto_dash/service/caller.dart' as FlutterPhoneDirectCaller show callNumber;
+import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
 Future<List<DashAction>> buildCallFavActions() async {
   final favorites = await _getFavorites();
@@ -18,13 +14,10 @@ Future<List<DashAction>> buildCallFavActions() async {
         label: favorites.keys.elementAt(i),
         icons: [],
         action: () async {
-          await FlutterPhoneDirectCaller.callNumber(
-            favorites.values.elementAt(i),
-          );
+          await FlutterPhoneDirectCaller.callNumber(favorites.values.elementAt(i));
         },
       ),
     ),
-    DashAction(action: () {}, icons: [Icons.undo_rounded], label: 'Return'),
   ];
 }
 
