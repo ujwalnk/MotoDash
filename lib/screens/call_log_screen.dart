@@ -27,6 +27,8 @@ Future<List<DashAction>> buildCallLogActions() async {
         action: () async {
           await FlutterPhoneDirectCaller.callNumber(callLogs[i].number!);
         },
+
+        canMask: false,
       ),
     ),
   ];

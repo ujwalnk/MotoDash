@@ -9,17 +9,14 @@ class DashWidgets {
   Color? fontColor = ConfigProvider.getFontColor;
   Color? borderColor = ConfigProvider.getBorderColor;
 
-  bool showIcons = true;
-  bool showLabel = true;
+  bool showIcons = ConfigProvider.getShowIcons;
+  bool showLabel = ConfigProvider.getShowLabel;
+  bool showMasked = ConfigProvider.getShowLabelMasked;
 
   bool isSplitScreen = false;
 
   Future<void> init() async {
-    isSplitScreen =
-        await MethodChannel(
-          'assistant.launcher',
-        ).invokeMethod<bool>('getSplitScreenState') ??
-        false;
+    isSplitScreen = await MethodChannel('assistant.launcher').invokeMethod<bool>('getSplitScreenState') ?? false;
   }
 
   Widget dashView(bool isSplitScreen, List<Widget> children) {
@@ -30,18 +27,13 @@ class DashWidgets {
     }
   }
 
-  ListView dashListView(List<Widget> children) => ListView(
-    padding: const EdgeInsets.all(10),
-    physics: const NeverScrollableScrollPhysics(),
-    children: children,
-  );
+  ListView dashListView(List<Widget> children) =>
+      ListView(padding: EdgeInsets.zero, physics: const NeverScrollableScrollPhysics(), children: children);
 
   Widget dashGridView(List<Widget> children) {
     final bool isOdd = children.length.isOdd;
 
-    final List<Widget> gridItems = isOdd
-        ? children.sublist(0, children.length - 1)
-        : children;
+    final List<Widget> gridItems = isOdd ? children.sublist(0, children.length - 1) : children;
 
     final Widget? lastItem = isOdd ? children.last : null;
 
@@ -59,8 +51,7 @@ class DashWidgets {
         final totalRows = (totalItems / columns).ceil();
 
         // Available height after padding & spacing
-        final usableHeight =
-            totalHeight - padding * 2 - spacing * (totalRows - 1);
+        final usableHeight = totalHeight - padding * 2 - spacing * (totalRows - 1);
 
         // ONE canonical tile height
         final tileHeight = usableHeight / totalRows;
@@ -75,9 +66,7 @@ class DashWidgets {
               children: [
                 if (gridItems.isNotEmpty)
                   SizedBox(
-                    height:
-                        tileHeight * (totalRows - (isOdd ? 1 : 0)) +
-                        spacing * (totalRows - (isOdd ? 1 : 0) - 1),
+                    height: tileHeight * (totalRows - (isOdd ? 1 : 0)) + spacing * (totalRows - (isOdd ? 1 : 0) - 1),
                     child: GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -92,11 +81,7 @@ class DashWidgets {
                   ),
                 if (lastItem != null) ...[
                   const SizedBox(height: spacing),
-                  SizedBox(
-                    width: double.infinity,
-                    height: tileHeight,
-                    child: lastItem,
-                  ),
+                  SizedBox(width: double.infinity, height: tileHeight, child: lastItem),
                 ],
               ],
             ),
@@ -106,20 +91,8 @@ class DashWidgets {
     );
   }
 
-  Widget dashCardAction(
-    DashAction action,
-    BuildContext context,
-    int itemCount, {
-    bool isSelected = false,
-  }) {
-    return dashCardFunc(
-      action.label,
-      action.icons,
-      action.action,
-      context,
-      itemCount,
-      isSelected: isSelected,
-    );
+  Widget dashCardAction(DashAction action, BuildContext context, int itemCount, {bool isSelected = false}) {
+    return dashCardFunc(action.label, action.icons, action.action, context, itemCount, isSelected: isSelected);
   }
 
   Widget dashCardRoute(
@@ -141,15 +114,12 @@ class DashWidgets {
         }
       },
       child: SizedBox(
-        height: screenHeight / (itemCount) - 10,
+        height: (screenHeight - 30 - (itemCount - 1) * 10) / itemCount,
         child: Card(
           color: backgroundColor ?? Colors.black,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(
-              color: (borderColor ?? Colors.grey),
-              width: isSelected ? 3 : 1,
-            ),
+            side: BorderSide(color: (borderColor ?? Colors.grey), width: isSelected ? 3 : 1),
           ),
           child: Center(child: dashListTile(icons, title, null, null)),
         ),
@@ -174,38 +144,22 @@ class DashWidgets {
         onTap();
       },
       child: SizedBox(
-        height: screenHeight / (itemCount) - 10,
+        height: (screenHeight - 30 - (itemCount - 1) * 10) / itemCount,
         child: Card(
           color: backgroundColor ?? Colors.black,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(
-              color: (borderColor ?? Colors.grey),
-              width: isSelected ? 3 : 1,
-            ),
+            side: BorderSide(color: (borderColor ?? Colors.grey), width: isSelected ? 3 : 1),
           ),
-          child: Center(
-            child: dashListTile(
-              icons,
-              title,
-              overrideShowIcons,
-              overrideShowLabel,
-            ),
-          ),
+          child: Center(child: dashListTile(icons, title, overrideShowIcons, overrideShowLabel)),
         ),
       ),
     );
   }
 
-  ListTile dashListTile(
-    List<IconData> icons,
-    String title,
-    bool? overrideShowIcons,
-    bool? overrideShowLabel,
-  ) {
+  ListTile dashListTile(List<IconData> icons, String title, bool? overrideShowIcons, bool? overrideShowLabel) {
     // Resolve final behavior
     final bool showIconsFinal = overrideShowIcons ?? showIcons;
-
     final bool showLabelFinal = overrideShowLabel ?? showLabel;
 
     return ListTile(
@@ -214,16 +168,11 @@ class DashWidgets {
         mainAxisAlignment: MainAxisAlignment.center, // Center the row
         children: [
           if (showIconsFinal)
-            for (IconData icon in icons)
-              Icon(
-                icon,
-                color: fontColor ?? Colors.white,
-                size: 40,
-              ), // Show icon if enabled
+            for (IconData icon in icons) Icon(icon, color: fontColor ?? Colors.white, size: 40), // Show icon if enabled
           SizedBox(width: 8.0), // Space between icon and text
           if (showLabelFinal)
             Text(
-              title,
+              showMasked ? title.substring(0, 1) : title, // FIXME: Get the canMask attribute here
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               softWrap: false,

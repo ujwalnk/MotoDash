@@ -59,7 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       menuIcon = ConfigProvider.getShowIcons;
       menuLabel = ConfigProvider.getShowLabel;
-      menuAbbreviated = ConfigProvider.getShowLabelAbbreviated;
+      menuAbbreviated = ConfigProvider.getShowLabelMasked;
 
       brightness = prefs.getDouble(Constants.kKeyBrightness) ?? 0.0;
 
@@ -245,11 +245,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 }),
               ),
               checkboxTile(
-                "Abbreviated Label",
+                "Mask Menus",
                 menuAbbreviated,
                 (v) => setState(() {
                   menuAbbreviated = v;
                   menuLabel = false;
+                  menuIcon = false;
                 }),
               ),
             ],

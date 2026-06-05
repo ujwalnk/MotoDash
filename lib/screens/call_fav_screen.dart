@@ -16,6 +16,7 @@ Future<List<DashAction>> buildCallFavActions() async {
         action: () async {
           await FlutterPhoneDirectCaller.callNumber(favorites.values.elementAt(i));
         },
+        canMask: false, // TODO: Check later is this should be masked too
       ),
     ),
   ];

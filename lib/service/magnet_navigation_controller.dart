@@ -1,16 +1,15 @@
 import 'dart:async';
 
-import 'package:moto_dash/navigation_graph.dart';
-import 'package:moto_dash/menu_actions.dart';
 import 'package:moto_dash/commons/dash_action.dart';
+import 'package:moto_dash/menu_actions.dart';
+import 'package:moto_dash/navigation_graph.dart';
 import 'package:moto_dash/service/global_services.dart';
 import 'package:moto_dash/service/magent_intent_detector.dart';
 
 class MagnetNavigationController {
   MagnetNavigationController._();
 
-  static final MagnetNavigationController instance =
-      MagnetNavigationController._();
+  static final MagnetNavigationController instance = MagnetNavigationController._();
 
   StreamSubscription<AppIntent>? _sub;
 
@@ -68,9 +67,6 @@ class MagnetNavigationController {
             final newItems = await newBuilder();
             _speak(newItems, navigator);
           }
-        } else {
-          // Same page → stay on same item
-          _speak(items, navigator);
         }
         break;
 

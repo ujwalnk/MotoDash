@@ -40,14 +40,10 @@ class _RootScreenState extends State<RootScreen> {
   void _resetScreenSaverTimer() {
     _screenSaverTimer?.cancel();
 
-    // TODO: Use the screesaver timer from [ConfigProvider] here
+    // TODO: Use the screensaver timer from [ConfigProvider] here
     _screenSaverTimer = Timer(const Duration(seconds: 15), () {
-      debugPrint("Screensaver triggered");
-
-      if (!mounted) return;
-
       // Prevent duplicate push
-      if (ModalRoute.of(context)?.settings.name == Constants.kPathScreenSaver) {
+      if (!mounted && ModalRoute.of(context)?.settings.name == Constants.kPathScreenSaver) {
         return;
       }
 
@@ -86,8 +82,6 @@ class _RootScreenState extends State<RootScreen> {
 
             final items = snapshot.data!;
 
-            debugPrint("Is Popable ${navigator.page} Screen: ${navigator.canPop}");
-
             return Scaffold(
               backgroundColor: backgroundColor,
               body: Padding(
@@ -99,14 +93,7 @@ class _RootScreenState extends State<RootScreen> {
 
                   if (navigator.canPop)
                     widgets.dashCardAction(
-                      DashAction(
-                        label: "Back",
-                        icons: [Icons.undo_rounded],
-                        action: () {
-                          debugPrint("Calling pop");
-                          navigator.pop();
-                        },
-                      ),
+                      DashAction(label: "Back", icons: [Icons.undo_rounded], action: () => navigator.pop()),
                       context,
                       items.length + 1,
                     ),
