@@ -1,31 +1,33 @@
 package com.example.moto_dash
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.media.session.MediaSessionManager
-import android.media.session.PlaybackState
+import android.media.AudioManager
+import android.telecom.TelecomManager
+import android.view.KeyEvent
+import androidx.core.app.ActivityCompat
+import android.content.pm.PackageManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import android.media.AudioManager
-import android.view.KeyEvent
-
 
 class MainActivity : FlutterActivity() {
 
-    private val CHANNEL = "assistant.launcher"
-    private var isSplitScreen: Boolean = false;
+    private val ASSISTANT_CHANNEL = "assistant.launcher"
+    private val CALL_CHANNEL = "phone.call"
+
+    private var isSplitScreen: Boolean = false
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
+        // --- Assistant & Media Channel ---
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            CHANNEL
+            ASSISTANT_CHANNEL
         ).setMethodCallHandler { call, result ->
-
             when (call.method) {
-
                 "launchAssistant" -> {
                     try {
                         val intent = Intent(Intent.ACTION_VOICE_COMMAND)
@@ -36,33 +38,66 @@ class MainActivity : FlutterActivity() {
                         result.error("ERR", e.message, null)
                     }
                 }
+
                 "togglePlayPause" -> {
-                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
-                    result.success(true)
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE); result.success(true)
                 }
 
                 "nextTrack" -> {
-                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_NEXT)
-                    result.success(true)
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_NEXT); result.success(true)
                 }
 
                 "previousTrack" -> {
-                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
-                    result.success(true)
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PREVIOUS); result.success(true)
                 }
 
                 "pauseMedia" -> {
-                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PAUSE)
-                    result.success(true)
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PAUSE); result.success(true)
                 }
 
                 "resumeMedia" -> {
-                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY)
+                    sendMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY); result.success(true)
+                }
+
+                "getSplitScreenState" -> result.success(isSplitScreen)
+                else -> result.notImplemented()
+            }
+        }
+
+        // --- Phone Call Channel ---
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            CALL_CHANNEL
+        ).setMethodCallHandler { call, result ->
+            val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+            when (call.method) {
+                "endCall" -> {
+                    val telecom = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ANSWER_PHONE_CALLS)
+                        == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        telecom.endCall()
+                        result.success(true)
+                    } else {
+                        result.error("PERMISSION_DENIED", "ANSWER_PHONE_CALLS permission not granted", null)
+                    }
+                }
+
+                "setMute" -> {
+                    val muted = call.argument<Boolean>("muted") ?: false
+                    audio.isMicrophoneMute = muted
+                    // Also set the in-call stream mute
+                    audio.adjustStreamVolume(
+                        AudioManager.STREAM_VOICE_CALL,
+                        if (muted) AudioManager.ADJUST_MUTE else AudioManager.ADJUST_UNMUTE,
+                        0
+                    )
                     result.success(true)
                 }
 
-                "getSplitScreenState" -> {
-                    result.success(isSplitScreen)
+                "isMuted" -> {
+                    result.success(audio.isMicrophoneMute)
                 }
 
                 else -> result.notImplemented()
@@ -75,19 +110,14 @@ class MainActivity : FlutterActivity() {
         isSplitScreen = isInMultiWindowMode
     }
 
-    private fun sendMediaKey(keyCode: Int) {
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-        val down = KeyEvent(KeyEvent.ACTION_DOWN, keyCode)
-        val up = KeyEvent(KeyEvent.ACTION_UP, keyCode)
-
-        audioManager.dispatchMediaKeyEvent(down)
-        audioManager.dispatchMediaKeyEvent(up)
-    }
-
     override fun onStart() {
         super.onStart()
         isSplitScreen = isInMultiWindowMode
     }
 
+    private fun sendMediaKey(keyCode: Int) {
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
+        audioManager.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
+    }
 }

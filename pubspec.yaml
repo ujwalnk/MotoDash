@@ -32,6 +32,7 @@ dependencies:
   google_fonts: ^8.0.2
   statemachine: ^3.4.0
   flutter_tts: ^4.2.5
+  phone_state: ^3.0.1
   provider: ^6.1.5+1
 
 dev_dependencies:

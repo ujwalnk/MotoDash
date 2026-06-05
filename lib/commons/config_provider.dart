@@ -23,7 +23,7 @@ class ConfigProvider {
   /// Get menu style (icon, label / abbreviated)
   static bool get getShowIcons => prefs?.getBool(Constants.kKeyShowMenuIcons) ?? true;
   static bool get getShowLabel => prefs?.getBool(Constants.kKeyShowMenuLabel) ?? true;
-  static bool get getShowLabelMasked => prefs?.getBool(Constants.kKeyShowMenuLabelAbbreviated) ?? true;
+  static bool get getShowLabelMasked => prefs?.getBool(Constants.kKeyShowMenuMask) ?? true;
 
   static double get getFontSize => prefs?.getDouble(Constants.kKeyFontSize) ?? 16;
 

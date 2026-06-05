@@ -592,6 +592,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  phone_state:
+    dependency: "direct main"
+    description:
+      name: phone_state
+      sha256: "2aa408beedafaca1b8d09a2368c067489492cdc0c252387e905a310450f11701"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
   platform:
     dependency: transitive
     description:

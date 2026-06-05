@@ -1,8 +1,8 @@
 // Author: Ujwal N K
 // Created: 2026, Mar 22
 
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
-import 'package:moto_dash/service/caller.dart' as FlutterPhoneDirectCaller show callNumber;
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
 Future<List<DashAction>> buildCallFavActions() async {
@@ -16,7 +16,7 @@ Future<List<DashAction>> buildCallFavActions() async {
         action: () async {
           await FlutterPhoneDirectCaller.callNumber(favorites.values.elementAt(i));
         },
-        canMask: false, // TODO: Check later is this should be masked too
+        canMask: false,
       ),
     ),
   ];

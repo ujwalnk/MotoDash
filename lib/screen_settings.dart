@@ -19,7 +19,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Home screen
   bool menuIcon = true;
   bool menuLabel = true;
-  bool menuAbbreviated = false;
+  bool menuMask = false;
 
   // Magnetic Gestures
   bool magnetGesturesEnabled = false;
@@ -59,7 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       menuIcon = ConfigProvider.getShowIcons;
       menuLabel = ConfigProvider.getShowLabel;
-      menuAbbreviated = ConfigProvider.getShowLabelMasked;
+      menuMask = ConfigProvider.getShowLabelMasked;
 
       brightness = prefs.getDouble(Constants.kKeyBrightness) ?? 0.0;
 
@@ -86,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     await prefs.setBool(Constants.kKeyShowMenuIcons, menuIcon);
     await prefs.setBool(Constants.kKeyShowMenuLabel, menuLabel);
-    await prefs.setBool(Constants.kKeyShowMenuLabel, menuAbbreviated);
+    await prefs.setBool(Constants.kKeyShowMenuMask, menuMask);
 
     await prefs.setDouble(Constants.kKeyBrightness, brightness);
 
@@ -241,14 +241,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 menuLabel,
                 (v) => setState(() {
                   menuLabel = v;
-                  if (v == false) menuAbbreviated = false;
+                  if (v == false) menuMask = false;
                 }),
               ),
               checkboxTile(
                 "Mask Menus",
-                menuAbbreviated,
+                menuMask,
                 (v) => setState(() {
-                  menuAbbreviated = v;
+                  menuMask = v;
                   menuLabel = false;
                   menuIcon = false;
                 }),

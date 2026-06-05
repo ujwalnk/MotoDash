@@ -3,14 +3,7 @@
 
 import 'package:flutter/material.dart';
 
-enum CurrentPage {
-  homePage,
-  musicPage,
-  callNavPage,
-  callFavPage,
-  callLogPage,
-  volumePage,
-}
+enum CurrentPage { homePage, musicPage, callNavPage, callFavPage, callLogPage, callActPage, volumePage }
 
 class NavigationGraph extends ChangeNotifier {
   NavigationGraph._(); // private constructor

@@ -12,7 +12,7 @@ class Constants {
 
   static const String kKeyShowMenuIcons = 'home_show_icons';
   static const String kKeyShowMenuLabel = 'home_show_label';
-  static const String kKeyShowMenuLabelAbbreviated = 'home_show_label_abbreviated';
+  static const String kKeyShowMenuMask = 'home_show_label_abbreviated';
 
   // static const String kKeyMusicShowIcons = 'music_show_icons';
   // static const String kKeyMusicShowLabel = 'music_show_label';

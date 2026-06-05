@@ -13,7 +13,7 @@ Future<List<DashAction>> buildCallLogActions() async {
   final callLogs = await _loadCallLogs();
 
   return [
-    // Genereate the Call Logs as DashIcons
+    // Generate the Call Logs as DashIcons
     ...List.generate(
       callLogs!.length,
       (i) => DashAction(

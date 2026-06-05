@@ -22,9 +22,8 @@ class DashWidgets {
   Widget dashView(bool isSplitScreen, List<Widget> children) {
     if (isSplitScreen) {
       return dashGridView(children);
-    } else {
-      return dashListView(children);
     }
+    return dashListView(children);
   }
 
   ListView dashListView(List<Widget> children) =>
