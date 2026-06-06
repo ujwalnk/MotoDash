@@ -5,6 +5,7 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
+import '../navigation_graph.dart';
 import '../service/native_bridge.dart';
 
 Future<List<DashAction>> buildCallFavActions() async {
@@ -16,7 +17,10 @@ Future<List<DashAction>> buildCallFavActions() async {
         label: favorites.keys.elementAt(i),
         icons: [],
         action: () async {
+          await CallBridge().startCallService();
           await FlutterPhoneDirectCaller.callNumber(favorites.values.elementAt(i));
+          await Future.delayed(const Duration(milliseconds: 2000)); // TODO: Add this to configuration
+          NavigationGraph.instance.goTo(CurrentPage.callActPage);
           await CallBridge().bringToFront();
         },
         canMask: false,

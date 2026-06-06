@@ -10,7 +10,6 @@ import '../navigation_graph.dart';
 
 Future<List<DashAction>> buildCallActiveActions() async {
   final call = CallBridge();
-  // final muted = await call.isMuted();
 
   return [
     DashAction(
@@ -21,13 +20,5 @@ Future<List<DashAction>> buildCallActiveActions() async {
         NavigationGraph.instance.goTo(CurrentPage.homePage);
       },
     ),
-    // DashAction(
-    //   label: muted ? "Unmute mic" : "Mute mic",
-    //   icons: [muted ? Icons.mic_rounded : Icons.mic_off_rounded],
-    //   action: () async {
-    //     await call.setMute(!muted);
-    //     NavigationGraph.instance.goTo(CurrentPage.callActPage);
-    //   },
-    // ),
   ];
 }
