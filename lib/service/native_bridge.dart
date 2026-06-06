@@ -27,4 +27,24 @@ class CallBridge {
   Future<bool> isMuted() async {
     return await _channel.invokeMethod('isMuted') ?? false;
   }
+
+  Future<void> bringToFront() async {
+    await _channel.invokeMethod('bringToFront');
+  }
+
+  Future<void> startCallService() async {
+    await _channel.invokeMethod('startCallService');
+  }
+
+  Future<void> stopCallService() async {
+    await _channel.invokeMethod('stopCallService');
+  }
+
+  Future<bool> checkOverlayPermission() async {
+    return await _channel.invokeMethod('checkOverlayPermission') ?? false;
+  }
+
+  Future<void> requestOverlayPermission() async {
+    await _channel.invokeMethod('requestOverlayPermission');
+  }
 }

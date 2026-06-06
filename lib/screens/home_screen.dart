@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/dash_action.dart';
 import 'package:moto_dash/navigation_graph.dart';
 import 'package:moto_dash/service/native_bridge.dart' show AssistantBridge;
-import 'package:phone_state/phone_state.dart';
 
 Future<List<DashAction>> buildHomeActions() async {
   return [
@@ -10,13 +9,17 @@ Future<List<DashAction>> buildHomeActions() async {
       label: 'Phone',
       icons: [Icons.phone_rounded],
       action: () {
-        PhoneState.stream.listen((state) {
-          if (state.status == PhoneStateStatus.CALL_STARTED) {
-            NavigationGraph.instance.goTo(CurrentPage.callActPage);
-          } else {
-            NavigationGraph.instance.goTo(CurrentPage.callNavPage);
-          }
-        });
+        debugPrint("Touched Phone");
+        // PhoneState.stream.listen((state) {
+        //   debugPrint("State: $state.status");
+        //   if (state.status == PhoneStateStatus.CALL_STARTED) {
+        //     debugPrint("Going to act page");
+        //     NavigationGraph.instance.goTo(CurrentPage.callActPage);
+        //   } else {
+        NavigationGraph.instance.goTo(CurrentPage.callNavPage);
+        //     debugPrint("Should go to nav");
+        //   }
+        // });
       },
     ),
     DashAction(

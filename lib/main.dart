@@ -7,13 +7,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
-import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
+import 'package:moto_dash/navigation_graph.dart' show NavigationGraph, CurrentPage;
 import 'package:moto_dash/screen_root.dart';
 import 'package:moto_dash/screen_saver.dart';
 import 'package:moto_dash/screen_settings.dart';
 import 'package:moto_dash/service/global_services.dart';
 import 'package:moto_dash/service/magnet_navigation_controller.dart';
+import 'package:moto_dash/service/native_bridge.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:phone_state/phone_state.dart';
 import 'package:provider/provider.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -121,6 +123,12 @@ void main() async {
   }
 
   VolumeController.instance.showSystemUI = true;
+  _initCallStateListener();
+
+  final call = CallBridge();
+  if (!await call.checkOverlayPermission()) {
+    await call.requestOverlayPermission();
+  }
 
   debugPrint("Started Magnet Intent Detection");
   magnetService.start();
@@ -161,6 +169,17 @@ void main() async {
   await showMotoDashNotification();
 
   runApp(const MotoDash());
+}
+
+void _initCallStateListener() {
+  PhoneState.stream.listen((state) {
+    if (state.status == PhoneStateStatus.CALL_ENDED || state.status == PhoneStateStatus.NOTHING) {
+      if (NavigationGraph.instance.page == CurrentPage.callActPage) {
+        NavigationGraph.instance.pop();
+      }
+      CallBridge().stopCallService();
+    }
+  });
 }
 
 class MotoDash extends StatefulWidget {

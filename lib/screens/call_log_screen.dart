@@ -8,6 +8,9 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:permission_handler/permission_handler.dart';
 
+import '../navigation_graph.dart';
+import '../service/native_bridge.dart';
+
 Future<List<DashAction>> buildCallLogActions() async {
   // Get the Call logs from the device
   final callLogs = await _loadCallLogs();
@@ -25,7 +28,11 @@ Future<List<DashAction>> buildCallLogActions() async {
 
         // Directly call using the phone native caller
         action: () async {
+          await CallBridge().startCallService();
           await FlutterPhoneDirectCaller.callNumber(callLogs[i].number!);
+          await Future.delayed(const Duration(milliseconds: 2000)); // TODO: Add this to configuration
+          NavigationGraph.instance.goTo(CurrentPage.callActPage);
+          await CallBridge().bringToFront();
         },
 
         canMask: false,

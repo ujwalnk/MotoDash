@@ -5,6 +5,8 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
+import '../service/native_bridge.dart';
+
 Future<List<DashAction>> buildCallFavActions() async {
   final favorites = await _getFavorites();
   return [
@@ -15,6 +17,7 @@ Future<List<DashAction>> buildCallFavActions() async {
         icons: [],
         action: () async {
           await FlutterPhoneDirectCaller.callNumber(favorites.values.elementAt(i));
+          await CallBridge().bringToFront();
         },
         canMask: false,
       ),

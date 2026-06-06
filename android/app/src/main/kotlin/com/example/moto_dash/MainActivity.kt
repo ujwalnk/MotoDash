@@ -8,6 +8,8 @@ import android.telecom.TelecomManager
 import android.view.KeyEvent
 import androidx.core.app.ActivityCompat
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -98,6 +100,41 @@ class MainActivity : FlutterActivity() {
 
                 "isMuted" -> {
                     result.success(audio.isMicrophoneMute)
+                }
+
+                "startCallService" -> {
+                    val intent = Intent(this, CallManagerService::class.java)
+                    startForegroundService(intent)
+                    result.success(true)
+                }
+
+                "stopCallService" -> {
+                    stopService(Intent(this, CallManagerService::class.java))
+                    result.success(true)
+                }
+
+                "bringToFront" -> {
+                    val intent = Intent(this, MainActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    }
+                    startActivity(intent)
+                    result.success(true)
+                }
+
+                "checkOverlayPermission" -> {
+                    result.success(Settings.canDrawOverlays(this))
+                }
+
+                "requestOverlayPermission" -> {
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:$packageName")
+                    )
+                    startActivity(intent)
+                    result.success(true)
                 }
 
                 else -> result.notImplemented()
