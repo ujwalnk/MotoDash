@@ -2,40 +2,40 @@
 // Created On: 05 Feb, 2026
 // All Constants of the Application
 
-class Constants {
+abstract class AppConfig {
   static const String appName = "MotoDash";
+}
 
-  // Shared Preferences Keys
-  static const String kKeyBackgroundColor = 'background_color';
-  static const String kKeyFontColor = 'font_color';
-  static const String kKeyBorderColor = 'option_border_color';
+abstract class PrefKeys {
+  static const String isFirstRun = "is_first_run";
+  static const String showVolumeTip = 'show_volume_tip';
+  static const String favouriteContactNames = 'favourite_contact_names';
 
-  static const String kKeyShowMenuIcons = 'home_show_icons';
-  static const String kKeyShowMenuLabel = 'home_show_label';
-  static const String kKeyShowMenuMask = 'home_show_label_abbreviated';
+  // Dashboard Domain
+  static const String dashboardBackgroundColor = 'dashboard_background_color';
+  static const String dashboardBorderColor = 'dashboard_border_color';
+  static const String dashboardFontColor = 'dashboard_font_color';
+  static const String dashboardFontSize = 'dashboard_font_size';
+  static const String dashboardIcons = 'dashboard_icons';
+  static const String dashboardLabels = 'dashboard_label';
+  static const String dashboardMask = 'dashboard_mask';
 
-  // static const String kKeyMusicShowIcons = 'music_show_icons';
-  // static const String kKeyMusicShowLabel = 'music_show_label';
-  //
-  // static const String kKeyVolumeShowIcons = 'volume_show_icons';
-  // static const String kKeyVolumeShowLabel = 'volume_show_label';
+  // Display / Screensaver Domain
+  static const String displayBrightness = "display_brightness";
+  static const String displayScreenSaverEnable = "display_screen_saver_enable";
+  static const String displayScreenSaverTimeout = "display_screen_saver_timeout";
+  static const String displayScreenSaverAnimation = "display_screen_saver_animation";
 
-  static const String kKeyFontSize = 'font_size';
-  static const String kKeyShowVolumeTip = 'show_volume_tip';
-  static const String kKeyFavContactNames = 'fav_contact_names';
-  static const String kKeyEnableMagnetGestures = "magnetic_gestures";
+  // Rider Gestures Domain
+  static const String riderGesturesEnable = "rider_gestures_enable";
+  static const String riderGesturesStrength = "rider_gestures_strength";
+  static const String riderGesturesTapDelay = "rider_gestures_tap_delay";
+  static const String riderGesturesTtsOnBtOnly = "rider_gestures_tts_on_bt_only";
+}
 
-  static const String kKeyBrightness = "brightness";
-  static const String kKeyIsFirstRun = "is_first_run";
-
-  // Paths
-  static const kPathHome = "/home";
-  static const kPathCallNav = "/phone_nav";
-  static const kPathCallLog = "/phone_log";
-  static const kPathCallFav = "/phone_fav";
-  static const kPathMusic = "/music";
-  static const kPathVolume = "/volume";
-  static const kPathScreenSaver = "/saver";
-  static const kPathSettings = "/settings";
-  static const kPathMagnetCalibration = "/magnet_calibration";
+abstract class AppRoutes {
+  static const dashboard = "/home";
+  static const screenSaver = "/saver";
+  static const screenSaverBlank = "/saver_blank";
+  static const settings = "/settings";
 }

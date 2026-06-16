@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/service/beep_service.dart';
 import 'package:moto_dash/service/global_services.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -47,8 +47,8 @@ class MagnetIntentService {
   double _baseline = 0;
   bool _baselineInitialized = false;
 
-  static const double _enterDelta = 35;
-  static const double _exitDelta = 15;
+  static final double _enterDelta = ConfigProvider.riderGesturesStrength;
+  static final double _exitDelta = ConfigProvider.riderGesturesStrength * 0.4;
 
   // ==========================
   // TAP GROUPING
@@ -136,12 +136,7 @@ class MagnetIntentService {
   // ==========================
 
   void start() {
-    debugPrint("Starting service");
     _startSampling(_slowSampling);
-    // _startSampling(_fastSampling);
-    // _stateFar.enter();
-    // _stateIdle.enter();
-    // debugPrint("Service started");
   }
 
   void stop() {

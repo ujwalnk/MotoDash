@@ -21,13 +21,13 @@ class RootScreen extends StatefulWidget {
 }
 
 class _RootScreenState extends State<RootScreen> {
-  Color backgroundColor = ConfigProvider.getBackgroundColor;
-  Color fontColor = ConfigProvider.getFontColor;
-  Color borderColor = ConfigProvider.getBorderColor;
+  Color backgroundColor = ConfigProvider.dashboardBackgroundColor;
+  Color fontColor = ConfigProvider.dashboardFontColor;
+  Color borderColor = ConfigProvider.dashboardBorderColor;
 
   bool showVolumeTip = true;
 
-  double fontSize = ConfigProvider.getFontSize;
+  double fontSize = ConfigProvider.dashboardFontSize;
 
   Timer? _screenSaverTimer;
 
@@ -40,14 +40,18 @@ class _RootScreenState extends State<RootScreen> {
   void _resetScreenSaverTimer() {
     _screenSaverTimer?.cancel();
 
+    if (!ConfigProvider.screenSaverAnimation) {
+      Navigator.pushNamed(context, AppRoutes.screenSaverBlank);
+    }
+
     // TODO: Use the screensaver timer from [ConfigProvider] here
-    _screenSaverTimer = Timer(const Duration(seconds: 15), () {
+    _screenSaverTimer = Timer(Duration(seconds: ConfigProvider.screenSaverTimeout.toInt()), () {
       // Prevent duplicate push
-      if (!mounted && ModalRoute.of(context)?.settings.name == Constants.kPathScreenSaver) {
+      if (!mounted && ModalRoute.of(context)?.settings.name == AppRoutes.screenSaver) {
         return;
       }
 
-      Navigator.pushNamed(context, Constants.kPathScreenSaver);
+      Navigator.pushNamed(context, AppRoutes.screenSaver);
     });
   }
 
@@ -57,8 +61,10 @@ class _RootScreenState extends State<RootScreen> {
     return AnimatedBuilder(
       animation: NavigationGraph.instance,
       builder: (context, _) {
-        // Reset the screen timer
-        _resetScreenSaverTimer();
+        if (ConfigProvider.screenSaverEnabled) {
+          // Reset the screen timer
+          _resetScreenSaverTimer();
+        }
 
         final navigator = NavigationGraph.instance;
         final widgets = DashWidgets();

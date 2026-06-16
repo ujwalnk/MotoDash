@@ -7,27 +7,58 @@ import 'package:moto_dash/commons/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
 class ConfigProvider {
-  static SharedPreferences? prefs;
+  static late final SharedPreferences prefs;
 
   static Future<void> init() async {
     prefs = await SharedPreferences.getInstance();
   }
 
-  static bool get getIsFirstRun => prefs?.getBool(Constants.kKeyIsFirstRun) ?? true;
+  static bool get isFirstRun => prefs.getBool(PrefKeys.isFirstRun) ?? true;
 
-  // Get colors
-  static Color get getBackgroundColor => Color(prefs?.getInt(Constants.kKeyBackgroundColor) ?? Colors.black.toARGB32());
-  static Color get getBorderColor => Color(prefs?.getInt(Constants.kKeyBorderColor) ?? Colors.white.toARGB32());
-  static Color get getFontColor => Color(prefs?.getInt(Constants.kKeyFontColor) ?? Colors.white.toARGB32());
+  static bool get showVolumeTip => prefs.getBool(PrefKeys.showVolumeTip) ?? false;
 
-  /// Get menu style (icon, label / abbreviated)
-  static bool get getShowIcons => prefs?.getBool(Constants.kKeyShowMenuIcons) ?? true;
-  static bool get getShowLabel => prefs?.getBool(Constants.kKeyShowMenuLabel) ?? true;
-  static bool get getShowLabelMasked => prefs?.getBool(Constants.kKeyShowMenuMask) ?? true;
+  // -------------------------------------------------------------------------------------------------------------------
+  // Dashboard
+  // -------------------------------------------------------------------------------------------------------------------
 
-  static double get getFontSize => prefs?.getDouble(Constants.kKeyFontSize) ?? 16;
+  static Color get dashboardBackgroundColor =>
+      Color(prefs.getInt(PrefKeys.dashboardBackgroundColor) ?? Colors.black.toARGB32());
 
-  static bool get getEnableMagnetGestures => prefs?.getBool(Constants.kKeyEnableMagnetGestures) ?? false;
+  static Color get dashboardBorderColor => Color(prefs.getInt(PrefKeys.dashboardBorderColor) ?? Colors.red.toARGB32());
+
+  static Color get dashboardFontColor => Color(prefs.getInt(PrefKeys.dashboardFontColor) ?? Colors.red.toARGB32());
+
+  static bool get dashboardIcons => prefs.getBool(PrefKeys.dashboardIcons) ?? true;
+
+  static bool get dashboardLabels => prefs.getBool(PrefKeys.dashboardLabels) ?? true;
+
+  static bool get dashboardMasked => prefs.getBool(PrefKeys.dashboardMask) ?? true;
+
+  static double get dashboardFontSize => prefs.getDouble(PrefKeys.dashboardFontSize) ?? 30;
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Display
+  // -------------------------------------------------------------------------------------------------------------------
+
+  static double get displayBrightness => prefs.getDouble(PrefKeys.displayBrightness) ?? 0;
+
+  static bool get screenSaverEnabled => prefs.getBool(PrefKeys.displayScreenSaverEnable) ?? true;
+
+  static double get screenSaverTimeout => prefs.getDouble(PrefKeys.displayScreenSaverTimeout) ?? 60;
+
+  static bool get screenSaverAnimation => prefs.getBool(PrefKeys.displayScreenSaverAnimation) ?? true;
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Rider gestures
+  // -------------------------------------------------------------------------------------------------------------------
+
+  static bool get riderGesturesEnabled => prefs.getBool(PrefKeys.riderGesturesEnable) ?? false;
+
+  static double get riderGesturesStrength => prefs.getDouble(PrefKeys.riderGesturesStrength) ?? 1000.0;
+
+  static double get riderGesturesTapDelay => prefs.getDouble(PrefKeys.riderGesturesTapDelay) ?? 500.0;
+
+  static bool get riderGesturesTtsOnBtOnly => prefs.getBool(PrefKeys.riderGesturesTtsOnBtOnly) ?? true;
 
   // TODO: Add screen timeout, keep_screen_blank, favourite contacts & brightness
 }

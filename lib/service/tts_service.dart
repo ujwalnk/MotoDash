@@ -1,6 +1,9 @@
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:phone_state/phone_state.dart';
+
+import 'native_bridge.dart';
 
 class TtsService {
   final FlutterTts _tts = FlutterTts();
@@ -57,6 +60,11 @@ class TtsService {
 
   Future<void> speak(String text) async {
     await _tts.stop();
+
+    // FIXME: Make a settings option for this
+    if (ConfigProvider.riderGesturesTtsOnBtOnly && (!await AssistantBridge.isBluetoothConnected())) {
+      return;
+    }
 
     if (_isCallActive) {
       await _configureForCall();

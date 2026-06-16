@@ -51,14 +51,6 @@
         <meta-data
                 android:name="flutterEmbedding"
                 android:value="2"/>
-        <service
-                android:name="com.example.flutter_media_controller.MediaNotificationListener"
-                android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-                android:exported="false">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService"/>
-            </intent-filter>
-        </service>
     </application>
 
     <queries>

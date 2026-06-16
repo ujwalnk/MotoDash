@@ -5,13 +5,13 @@ import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/dash_action.dart';
 
 class DashWidgets {
-  Color? backgroundColor = ConfigProvider.getBackgroundColor;
-  Color? fontColor = ConfigProvider.getFontColor;
-  Color? borderColor = ConfigProvider.getBorderColor;
+  Color? backgroundColor = ConfigProvider.dashboardBackgroundColor;
+  Color? fontColor = ConfigProvider.dashboardFontColor;
+  Color? borderColor = ConfigProvider.dashboardBorderColor;
 
-  bool showIcons = ConfigProvider.getShowIcons;
-  bool showLabel = ConfigProvider.getShowLabel;
-  bool showMasked = ConfigProvider.getShowLabelMasked;
+  bool showIcons = ConfigProvider.dashboardIcons;
+  bool showLabel = ConfigProvider.dashboardLabels;
+  bool showMasked = ConfigProvider.dashboardMasked;
 
   bool isSplitScreen = false;
 
@@ -106,7 +106,7 @@ class DashWidgets {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: (_) {
-        if (route != Constants.kPathHome) {
+        if (route != AppRoutes.dashboard) {
           Navigator.pushNamed(context, route);
         } else {
           Navigator.pop(context);
@@ -175,7 +175,7 @@ class DashWidgets {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               softWrap: false,
-              style: TextStyle(color: fontColor ?? Colors.white, fontSize: 30),
+              style: TextStyle(color: fontColor ?? Colors.white, fontSize: ConfigProvider.dashboardFontSize),
               textAlign: TextAlign.center,
             ),
         ],

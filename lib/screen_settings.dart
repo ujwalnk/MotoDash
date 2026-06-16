@@ -23,6 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Magnetic Gestures
   bool magnetGesturesEnabled = false;
+  final magneticFieldStrengthTFC = TextEditingController();
 
   // Phone
   String favouriteContactNames = "";
@@ -57,24 +58,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
 
     setState(() {
-      menuIcon = ConfigProvider.getShowIcons;
-      menuLabel = ConfigProvider.getShowLabel;
-      menuMask = ConfigProvider.getShowLabelMasked;
+      menuIcon = ConfigProvider.dashboardIcons;
+      menuLabel = ConfigProvider.dashboardLabels;
+      menuMask = ConfigProvider.dashboardMasked;
 
-      brightness = prefs.getDouble(Constants.kKeyBrightness) ?? 0.0;
+      brightness = prefs.getDouble(PrefKeys.displayBrightness) ?? 0.0;
 
       keepScreenBlank = prefs.getBool("keep_screen_blank") ?? false;
       blankTimeController.text = prefs.getString("blank_time_minutes") ?? "";
 
-      fontSizeController.text = ConfigProvider.getFontSize.toString();
+      fontSizeController.text = ConfigProvider.dashboardFontSize.toString();
 
-      backgroundColor = ConfigProvider.getBackgroundColor;
-      borderColor = ConfigProvider.getBorderColor;
-      fontColor = ConfigProvider.getFontColor;
+      backgroundColor = ConfigProvider.dashboardBackgroundColor;
+      borderColor = ConfigProvider.dashboardBorderColor;
+      fontColor = ConfigProvider.dashboardFontColor;
 
-      favouriteContactNames = prefs.getStringList(Constants.kKeyFavContactNames)?.join(", ") ?? "";
+      favouriteContactNames = prefs.getStringList(PrefKeys.favouriteContactNames)?.join(", ") ?? "";
 
-      magnetGesturesEnabled = ConfigProvider.getEnableMagnetGestures;
+      magnetGesturesEnabled = ConfigProvider.riderGesturesEnabled;
     });
   }
 
@@ -84,22 +85,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setBool(Constants.kKeyShowMenuIcons, menuIcon);
-    await prefs.setBool(Constants.kKeyShowMenuLabel, menuLabel);
-    await prefs.setBool(Constants.kKeyShowMenuMask, menuMask);
+    await prefs.setBool(PrefKeys.dashboardIcons, menuIcon);
+    await prefs.setBool(PrefKeys.dashboardLabels, menuLabel);
+    await prefs.setBool(PrefKeys.dashboardMask, menuMask);
 
-    await prefs.setDouble(Constants.kKeyBrightness, brightness);
+    await prefs.setDouble(PrefKeys.displayBrightness, brightness);
 
     await prefs.setBool("keep_screen_blank", keepScreenBlank);
     await prefs.setString("blank_time_minutes", blankTimeController.text);
 
-    await prefs.setInt(Constants.kKeyFontColor, fontColor.toARGB32());
-    await prefs.setInt(Constants.kKeyBackgroundColor, backgroundColor.toARGB32());
-    await prefs.setInt(Constants.kKeyBorderColor, borderColor.toARGB32());
+    await prefs.setInt(PrefKeys.dashboardFontColor, fontColor.toARGB32());
+    await prefs.setInt(PrefKeys.dashboardBackgroundColor, backgroundColor.toARGB32());
+    await prefs.setInt(PrefKeys.dashboardBorderColor, borderColor.toARGB32());
 
-    await prefs.setDouble(Constants.kKeyFontSize, double.parse(fontSizeController.text));
+    await prefs.setDouble(PrefKeys.dashboardFontSize, double.parse(fontSizeController.text));
 
-    await prefs.setBool(Constants.kKeyEnableMagnetGestures, magnetGesturesEnabled);
+    await prefs.setBool(PrefKeys.riderGesturesEnable, magnetGesturesEnabled);
   }
 
   Widget _settingsCard({required String title, required List<Widget> children}) {
@@ -317,6 +318,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 magnetGesturesEnabled,
                 (v) => setState(() => magnetGesturesEnabled = v),
               ),
+              checkboxTile(
+                "TTS only on bluetooth",
+                magnetGesturesEnabled,
+                (v) => setState(() => magnetGesturesEnabled = v),
+              ),
+              textField("Magnetic Strength", magneticFieldStrengthTFC, inputType: TextInputType.number),
             ],
           ),
         ],

@@ -19,10 +19,14 @@ class MainActivity : FlutterActivity() {
     private val ASSISTANT_CHANNEL = "assistant.launcher"
     private val CALL_CHANNEL = "phone.call"
 
+    private lateinit var audio: AudioManager
+
     private var isSplitScreen: Boolean = false
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         // --- Assistant & Media Channel ---
         MethodChannel(
@@ -62,6 +66,13 @@ class MainActivity : FlutterActivity() {
                 }
 
                 "getSplitScreenState" -> result.success(isSplitScreen)
+
+                "isBluetoothConnected" -> {
+                    val isA2dp = audio.isBluetoothA2dpOn
+                    val isSco = audio.isBluetoothScoOn
+                    result.success(isA2dp || isSco)
+                }
+
                 else -> result.notImplemented()
             }
         }

@@ -11,6 +11,10 @@ class AssistantBridge {
       return false;
     }
   }
+
+  static Future<bool> isBluetoothConnected() async {
+    return await _channel.invokeMethod('isBluetoothConnected') ?? false;
+  }
 }
 
 class CallBridge {
