@@ -1,10 +1,12 @@
+// Author: Ujwal N K
+// Created:
+// Screen saver with a moving dot
+
 import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/service/timer.dart';
 
 class ScreenSaver extends StatefulWidget {
@@ -14,17 +16,15 @@ class ScreenSaver extends StatefulWidget {
   State<ScreenSaver> createState() => _ScreenSaverState();
 }
 
-class _ScreenSaverState extends State<ScreenSaver>
-    with SingleTickerProviderStateMixin {
+class _ScreenSaverState extends State<ScreenSaver> with SingleTickerProviderStateMixin {
   final Random _random = Random();
 
   Offset _position = Offset.zero;
-  Color _dotColor = Colors.red;
+  final Color _dotColor = ConfigProvider.dashboardFontColor;
+  final Duration _moveInterval = Duration(minutes: ConfigProvider.screenSaverTimeout.toInt());
 
   late final AnimationController _fadeController;
   late final Animation<double> _opacity;
-
-  Duration _moveInterval = const Duration(minutes: 2);
 
   static const double padding = 20.0;
   static const double radius = 10.0;
@@ -35,49 +35,24 @@ class _ScreenSaverState extends State<ScreenSaver>
   void initState() {
     super.initState();
 
-    // 🔴 Disable idle timer while saver is active
+    // Disable idle timer while saver is active
     IdleTimer.instance.setEnabled(false);
 
-    _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-
+    // Dot animation on move
+    _fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
     _opacity = Tween(begin: 1.0, end: 0.0).animate(_fadeController);
 
     _init();
   }
 
   Future<void> _init() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    _dotColor = Color(prefs.getInt("font_color") ?? Colors.red.toARGB32());
-
-    final moveStr = prefs.getString("blank_time_minutes");
-    final moveMinutes = int.tryParse(moveStr ?? "") ?? 2;
-    _moveInterval = Duration(minutes: moveMinutes);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeRandomStart();
       _runLoop();
     });
   }
 
-  void _initializeRandomStart() {
-    final size = MediaQuery.of(context).size;
-
-    final minX = padding + radius;
-    final maxX = size.width - padding - radius;
-    final minY = padding + radius;
-    final maxY = size.height - padding - radius;
-
-    setState(() {
-      _position = Offset(
-        minX + _random.nextDouble() * (maxX - minX),
-        minY + _random.nextDouble() * (maxY - minY),
-      );
-    });
-  }
+  void _initializeRandomStart() => _setRandomPosition();
 
   Future<void> _runLoop() async {
     if (_running) return;
@@ -99,16 +74,15 @@ class _ScreenSaverState extends State<ScreenSaver>
   void _setRandomPosition() {
     final size = MediaQuery.of(context).size;
 
-    final minX = padding + radius;
-    final maxX = size.width - padding - radius;
-    final minY = padding + radius;
-    final maxY = size.height - padding - radius;
+    // Screen boundaries with padding for the moving dot
+    final double minX = padding + radius;
+    final double maxX = size.width - padding - radius;
+    final double minY = padding + radius;
+    final double maxY = size.height - padding - radius;
 
+    // Random next move for the dot
     setState(() {
-      _position = Offset(
-        minX + _random.nextDouble() * (maxX - minX),
-        minY + _random.nextDouble() * (maxY - minY),
-      );
+      _position = Offset(minX + _random.nextDouble() * (maxX - minX), minY + _random.nextDouble() * (maxY - minY));
     });
   }
 
@@ -116,7 +90,7 @@ class _ScreenSaverState extends State<ScreenSaver>
   void dispose() {
     _fadeController.dispose();
 
-    // 🟢 Re-enable idle timer when saver exits
+    // Re-enable idle timer when saver exits
     IdleTimer.instance.setEnabled(true);
 
     super.dispose();
@@ -139,10 +113,7 @@ class _ScreenSaverState extends State<ScreenSaver>
                 child: Container(
                   width: radius * 2,
                   height: radius * 2,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: _dotColor,
-                  ),
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: _dotColor),
                 ),
               ),
             ),

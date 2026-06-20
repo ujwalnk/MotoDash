@@ -1,3 +1,7 @@
+// Author: Ujwal N K
+// Created:
+// Magnet intent detector, to detect the action to be taken based on the user rider gestures
+
 import 'dart:async';
 import 'dart:math';
 
@@ -20,7 +24,7 @@ class MagnetIntentService {
   // TIMEOUT DURATION
   // ==========================
 
-  static const Duration _timeoutDuration = Duration(seconds: 2);
+  static final Duration _timeoutDuration = Duration(milliseconds: ConfigProvider.riderGesturesTapDelay.toInt());
 
   // ==========================
   // SAMPLING CONTROL
@@ -29,7 +33,7 @@ class MagnetIntentService {
   static const Duration _slowSampling = Duration(milliseconds: 100);
   static const Duration _fastSampling = Duration(milliseconds: 33);
 
-  Duration? _currentSampling; // 🔥 FIXED: was causing sensor not to start
+  Duration? _currentSampling;
 
   void _startSampling(Duration period) {
     if (_currentSampling == period && _sub != null) return;

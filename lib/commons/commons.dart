@@ -1,3 +1,6 @@
+// Author: Ujwal N K
+// TODO: Check if this is required
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<Duration> loadBlankTimeDuration() async {

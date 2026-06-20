@@ -11,7 +11,6 @@ import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:moto_dash/menu_actions.dart' show menuActions;
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
-import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
 class RootScreen extends StatefulWidget {
   const RootScreen({super.key});
@@ -21,37 +20,27 @@ class RootScreen extends StatefulWidget {
 }
 
 class _RootScreenState extends State<RootScreen> {
-  Color backgroundColor = ConfigProvider.dashboardBackgroundColor;
-  Color fontColor = ConfigProvider.dashboardFontColor;
-  Color borderColor = ConfigProvider.dashboardBorderColor;
-
-  bool showVolumeTip = true;
-
-  double fontSize = ConfigProvider.dashboardFontSize;
+  final Color backgroundColor = ConfigProvider.dashboardBackgroundColor;
+  final Color fontColor = ConfigProvider.dashboardFontColor;
+  final Color borderColor = ConfigProvider.dashboardBorderColor;
+  final double fontSize = ConfigProvider.dashboardFontSize;
 
   Timer? _screenSaverTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
 
   void _resetScreenSaverTimer() {
     _screenSaverTimer?.cancel();
 
-    if (!ConfigProvider.screenSaverAnimation) {
-      Navigator.pushNamed(context, AppRoutes.screenSaverBlank);
-    }
-
-    // TODO: Use the screensaver timer from [ConfigProvider] here
     _screenSaverTimer = Timer(Duration(seconds: ConfigProvider.screenSaverTimeout.toInt()), () {
-      // Prevent duplicate push
+      // Prevent duplicate push of screen saver
       if (!mounted && ModalRoute.of(context)?.settings.name == AppRoutes.screenSaver) {
         return;
       }
 
-      Navigator.pushNamed(context, AppRoutes.screenSaver);
+      if (!ConfigProvider.screenSaverAnimation) {
+        Navigator.pushNamed(context, AppRoutes.screenSaverBlank);
+      } else {
+        Navigator.pushNamed(context, AppRoutes.screenSaver);
+      }
     });
   }
 
@@ -110,19 +99,5 @@ class _RootScreenState extends State<RootScreen> {
         );
       },
     );
-  }
-
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    showVolumeTip = prefs.getBool("show_volume_tip") ?? true;
-
-    // loading = false;
-    setState(() {});
-
-    // Show popup after UI builds
-    // if (showVolumeTip) {
-    //   Future.delayed(Duration(milliseconds: 300), _showSettingsTip);
-    // }
   }
 }

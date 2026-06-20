@@ -10,7 +10,7 @@ import 'package:moto_dash/service/contact_picker.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'commons/menu_tiles.dart';
+import '../commons/menu_tiles.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -254,15 +254,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           const PrefTextFieldTile(
-            label: "Gesture Delay (ms)",
-            prefKey: PrefKeys.riderGesturesTapDelay,
-            defaultValue: "500",
+            label: "Multi-Tap Window (ms)",
+            prefKey: PrefKeys.riderGesturesIntentEmissionDelay,
+            defaultValue: "2000",
             inputType: TextInputType.number,
           ),
           Padding(
             padding: const EdgeInsets.only(top: 4, bottom: 12),
             child: Text(
-              "Minimum time between consecutive gesture taps.",
+              "The delay before a gesture sequence is finalized. "
+              "Lower values provide snappier feedback, while higher values give you more time "
+              "to complete multi-step gestures.",
               style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
             ),
           ),
@@ -292,6 +294,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.only(top: 4, bottom: 12),
           child: Text(
             "Display the volume slider when volume changes.",
+            style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+          ),
+        ),
+        const PrefTextFieldTile(
+          label: "Maximum listed call logs",
+          prefKey: PrefKeys.miscMaxCallLogsListed,
+          defaultValue: "5",
+          inputType: TextInputType.number,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 12),
+          child: Text(
+            "Number of recent calls to display. \nHigher values show more call logs but make the buttons smaller. "
+            "Lower values make buttons larger and easier to use. The call log screen does not support scrolling.",
             style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
           ),
         ),

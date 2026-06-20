@@ -2,14 +2,31 @@
 // Created On: 05 Feb, 2026
 // All Constants of the Application
 
+/// Defines application-wide configuration constants.
+///
+/// Provides a centralized location for immutable values that are shared across the application.
+///
+/// Side effects:None.
+///
+/// State mutations: None.
+///
+/// External variables modified: None.
 abstract class AppConfig {
   static const String appName = "MotoDash";
 }
 
+/// Defines keys used to persist and retrieve application settings.
+///
+/// The constants in this class are used as identifiers for values stored in persistent storage.
+///
+/// Side effects: None.
+///
+/// State mutations: None.
+///
+/// External variables modified: None.
 abstract class PrefKeys {
   static const String isFirstRun = "is_first_run";
-  static const String showVolumeTip = 'show_volume_tip';
-  static const String favouriteContactNames = 'favourite_contact_names';
+  static const String favouriteContactNames = "favourite_contact_names";
 
   // Dashboard Domain
   static const String dashboardBackgroundColor = 'dashboard_background_color';
@@ -29,10 +46,23 @@ abstract class PrefKeys {
   // Rider Gestures Domain
   static const String riderGesturesEnable = "rider_gestures_enable";
   static const String riderGesturesStrength = "rider_gestures_strength";
-  static const String riderGesturesTapDelay = "rider_gestures_tap_delay";
+  static const String riderGesturesIntentEmissionDelay = "rider_gestures_intent_emission_delay";
   static const String riderGesturesTtsOnBtOnly = "rider_gestures_tts_on_bt_only";
+
+  // Miscellaneous
+  static const String showVolumeTip = "misc_show_volume_tip";
+  static const String miscMaxCallLogsListed = "misc_max_call_logs_listed";
 }
 
+/// Defines the named route paths used for application navigation.
+///
+/// Provides a centralized list of route identifiers used by the navigation system.
+///
+/// Side effects: None.
+///
+/// State mutations: None.
+///
+/// External variables modified: None.
 abstract class AppRoutes {
   static const dashboard = "/home";
   static const screenSaver = "/saver";

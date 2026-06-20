@@ -1,3 +1,7 @@
+// Author: Ujwal N K
+// Created:
+// RGB color picker for the settings menu
+
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -5,11 +9,7 @@ class HexWheelColorPickerDialog extends StatelessWidget {
   final Color color;
   final ValueChanged<Color> onChanged;
 
-  const HexWheelColorPickerDialog({
-    super.key,
-    required this.color,
-    required this.onChanged,
-  });
+  const HexWheelColorPickerDialog({super.key, required this.color, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class HexWheelColorPickerDialog extends StatelessWidget {
           onColorChanged: onChanged,
           mainAxisSize: MainAxisSize.min,
 
-          // ✅ Enable wheel + custom picker
+          // Enable wheel + custom picker
           pickersEnabled: {
             ColorPickerType.primary: false,
             ColorPickerType.accent: false,
@@ -32,29 +32,19 @@ class HexWheelColorPickerDialog extends StatelessWidget {
             ColorPickerType.custom: true,
           },
 
-          // ✅ Editable HEX input
+          // Editable HEX input
           showColorCode: true,
           colorCodeReadOnly: false,
           enableShadesSelection: false,
-          copyPasteBehavior: ColorPickerCopyPasteBehavior(
-            // copyButton: false,
-            // pasteButton: false,
-            editFieldCopyButton: false,
-          ),
+          copyPasteBehavior: ColorPickerCopyPasteBehavior(editFieldCopyButton: false),
 
-          // ❌ Clean UI
+          // Clean UI
           showColorName: false,
           showMaterialName: false,
-          // showRecentColors: true,
-          // opacitySubheading: "Opacity",
 
           // Optional
-          enableOpacity: true, // set false if you don’t want alpha
-          // showEditIconButton: true,
-          colorCodeTextStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+          enableOpacity: true,
+          colorCodeTextStyle: const TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),
       actions: [

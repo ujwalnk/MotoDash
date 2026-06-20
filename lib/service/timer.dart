@@ -23,7 +23,7 @@ class IdleTimer with WidgetsBindingObserver {
     timeout = await loadBlankTimeDuration();
   }
 
-  /// Enable or disable idle detection
+  // Enable or disable idle detection
   Future<void> setEnabled(bool value) async {
     enabled = value;
 

@@ -1,5 +1,6 @@
 // Author: Ujwal N K
 // Created: 16.06.2026
+// Blank screen saver
 
 import 'package:flutter/material.dart';
 

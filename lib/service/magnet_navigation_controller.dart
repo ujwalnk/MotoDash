@@ -1,3 +1,7 @@
+// Author: Ujwal N K
+// Created:
+// Magnet navigation controller - handle the intent produced by the [magnet_intent_detector], and perform the navigation
+
 import 'dart:async';
 
 import 'package:moto_dash/commons/dash_action.dart';
@@ -59,7 +63,7 @@ class MagnetNavigationController {
         final newPage = navigator.page;
 
         if (oldPage != newPage) {
-          // Page changed → reset
+          // Reset the selected index on page change
           _selectedIndex = 0;
 
           final newBuilder = menuActions[newPage];
@@ -73,7 +77,7 @@ class MagnetNavigationController {
       case AppIntent.back:
         navigator.pop();
 
-        // Reset index
+        // Reset index on
         _selectedIndex = 0;
 
         // Speak first item of new page

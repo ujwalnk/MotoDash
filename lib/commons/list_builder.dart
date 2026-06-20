@@ -1,3 +1,5 @@
+// Author: Ujwal N K
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show MethodChannel;
 import 'package:moto_dash/commons/config_provider.dart';

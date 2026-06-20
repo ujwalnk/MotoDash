@@ -6,9 +6,26 @@ import 'package:flutter/material.dart' show Color, Colors;
 import 'package:moto_dash/commons/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
+/// Provides centralized access to persisted application configuration values.
+///
+/// Reads settings from [prefs] using keys defined in [PrefKeys] and exposes typed getters with fallback defaults
+/// when no persisted value exists.
+///
+/// Side effects: None.
+///
+/// State mutations: None.
+///
+/// External variables modified: None.
+///
+/// Async behavior:
+/// Requires [init] to be awaited before accessing configuration values, as [prefs] is initialized asynchronously using
+/// [SharedPreferences.getInstance].
+
 class ConfigProvider {
   static late final SharedPreferences prefs;
 
+  /// Initializes [prefs] with the application's shared preferences instance.
+  /// Must be awaited before accessing any configuration getter that depends on [prefs].
   static Future<void> init() async {
     prefs = await SharedPreferences.getInstance();
   }
@@ -56,9 +73,13 @@ class ConfigProvider {
 
   static double get riderGesturesStrength => prefs.getDouble(PrefKeys.riderGesturesStrength) ?? 1000.0;
 
-  static double get riderGesturesTapDelay => prefs.getDouble(PrefKeys.riderGesturesTapDelay) ?? 500.0;
+  static double get riderGesturesTapDelay => prefs.getDouble(PrefKeys.riderGesturesIntentEmissionDelay) ?? 500.0;
 
   static bool get riderGesturesTtsOnBtOnly => prefs.getBool(PrefKeys.riderGesturesTtsOnBtOnly) ?? true;
 
-  // TODO: Add screen timeout, keep_screen_blank, favourite contacts & brightness
+  // -------------------------------------------------------------------------------------------------------------------
+  // Miscellaneous
+  // -------------------------------------------------------------------------------------------------------------------
+
+  static int get miscMaxCallLogsListed => prefs.getDouble(PrefKeys.miscMaxCallLogsListed)?.toInt() ?? 5;
 }

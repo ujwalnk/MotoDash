@@ -1,3 +1,7 @@
+// Author: Ujwal N K
+// Created:
+// Simple no transition page changer
+
 import 'package:flutter/material.dart';
 
 class NoTransitionsBuilder extends PageTransitionsBuilder {
@@ -5,11 +9,12 @@ class NoTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-      PageRoute<T> route,
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child) {
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return child; // No animation at all
   }
 }

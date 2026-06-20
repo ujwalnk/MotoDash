@@ -1,3 +1,7 @@
+// Author: Ujwal N K
+// Created:
+// Native bridge - kotlin platform integration through channels - [assistant.launcher] and [phone.call]
+
 import 'package:flutter/services.dart';
 
 class AssistantBridge {
