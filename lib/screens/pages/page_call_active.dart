@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/dash_action.dart';
-import 'package:moto_dash/screens/pages/volume_screen.dart';
-import 'package:moto_dash/service/native_bridge.dart';
+import 'package:moto_dash/screens/pages/page_volume.dart';
+import 'package:moto_dash/services/native_bridge.dart';
 
 import '../../navigation_graph.dart';
 

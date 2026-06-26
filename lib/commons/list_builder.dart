@@ -7,9 +7,9 @@ import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/dash_action.dart';
 
 class DashWidgets {
-  Color? backgroundColor = ConfigProvider.dashboardBackgroundColor;
-  Color? fontColor = ConfigProvider.dashboardFontColor;
-  Color? borderColor = ConfigProvider.dashboardBorderColor;
+  Color backgroundColor = ConfigProvider.dashboardBackgroundColor;
+  Color fontColor = ConfigProvider.dashboardFontColor;
+  Color borderColor = ConfigProvider.dashboardBorderColor;
 
   bool showIcons = ConfigProvider.dashboardIcons;
   bool showLabel = ConfigProvider.dashboardLabels;
@@ -117,10 +117,10 @@ class DashWidgets {
       child: SizedBox(
         height: (screenHeight - 30 - (itemCount - 1) * 10) / itemCount,
         child: Card(
-          color: backgroundColor ?? Colors.black,
+          color: backgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: (borderColor ?? Colors.grey), width: isSelected ? 3 : 1),
+            side: BorderSide(color: (borderColor), width: isSelected ? 3 : 1),
           ),
           child: Center(child: dashListTile(icons, title, null, null)),
         ),
@@ -147,10 +147,10 @@ class DashWidgets {
       child: SizedBox(
         height: (screenHeight - 30 - (itemCount - 1) * 10) / itemCount,
         child: Card(
-          color: backgroundColor ?? Colors.black,
+          color: backgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: (borderColor ?? Colors.grey), width: isSelected ? 3 : 1),
+            side: BorderSide(color: (borderColor), width: isSelected ? 3 : 1),
           ),
           child: Center(child: dashListTile(icons, title, overrideShowIcons, overrideShowLabel)),
         ),
@@ -169,7 +169,7 @@ class DashWidgets {
         mainAxisAlignment: MainAxisAlignment.center, // Center the row
         children: [
           if (showIconsFinal)
-            for (IconData icon in icons) Icon(icon, color: fontColor ?? Colors.white, size: 40), // Show icon if enabled
+            for (IconData icon in icons) Icon(icon, color: fontColor, size: 40), // Show icon if enabled
           SizedBox(width: 8.0), // Space between icon and text
           if (showLabelFinal)
             Text(
@@ -177,7 +177,7 @@ class DashWidgets {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               softWrap: false,
-              style: TextStyle(color: fontColor ?? Colors.white, fontSize: ConfigProvider.dashboardFontSize),
+              style: TextStyle(color: fontColor, fontSize: ConfigProvider.dashboardFontSize),
               textAlign: TextAlign.center,
             ),
         ],

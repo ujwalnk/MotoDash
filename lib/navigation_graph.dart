@@ -17,7 +17,7 @@ class NavigationGraph extends ChangeNotifier {
   CurrentPage get page => _page;
 
   // Getter - can pop?
-  bool get canPop => _page != CurrentPage.homePage;
+  bool get canPop => _page != CurrentPage.homePage && _page != CurrentPage.callActPage;
 
   Future<void> goTo(CurrentPage page) async {
     _page = page;

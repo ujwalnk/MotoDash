@@ -3,7 +3,7 @@
 // Custom auto-saving SharedPreferences UI components
 
 import 'package:flutter/material.dart';
-import 'package:moto_dash/service/rgb_color_picker.dart'; // Keep your custom color picker dialog
+import 'package:moto_dash/services/rgb_color_picker.dart'; // Keep your custom color picker dialog
 import 'package:shared_preferences/shared_preferences.dart';
 
 const Color _textColor = Colors.white;

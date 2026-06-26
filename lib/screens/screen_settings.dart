@@ -6,11 +6,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
-import 'package:moto_dash/service/contact_picker.dart';
+import 'package:moto_dash/screens/screen_contact_picker.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../commons/menu_tiles.dart';
+import '../commons/settings_tiles.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});

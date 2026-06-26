@@ -7,7 +7,7 @@ import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
 import '../../navigation_graph.dart';
-import '../../service/native_bridge.dart';
+import '../../services/native_bridge.dart';
 
 /// Builds dashboard actions for configured favorite contacts.
 ///

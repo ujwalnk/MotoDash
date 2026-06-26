@@ -26,7 +26,9 @@ import 'package:audioplayers/audioplayers.dart';
 /// - Playback requests are ignored when [beepEnabled] is `false`.
 class BeepService {
   static final BeepService _instance = BeepService._internal();
+
   factory BeepService() => _instance;
+
   BeepService._internal();
 
   bool beepEnabled = true;
@@ -34,6 +36,7 @@ class BeepService {
   final AudioPlayer _player = AudioPlayer();
 
   Future<void> init() async {
+    if (!beepEnabled) return;
     final session = await audio_session.AudioSession.instance;
     await session.configure(
       audio_session.AudioSessionConfiguration(
@@ -41,7 +44,7 @@ class BeepService {
         avAudioSessionCategoryOptions: audio_session.AVAudioSessionCategoryOptions.mixWithOthers,
         androidAudioAttributes: const audio_session.AndroidAudioAttributes(
           contentType: audio_session.AndroidAudioContentType.sonification,
-          usage: audio_session.AndroidAudioUsage.assistanceSonification,
+          usage: audio_session.AndroidAudioUsage.voiceCommunicationSignalling,
         ),
         androidAudioFocusGainType: audio_session.AndroidAudioFocusGainType.gainTransientMayDuck,
         androidWillPauseWhenDucked: false,
@@ -58,6 +61,7 @@ class BeepService {
   }
 
   void dispose() {
+    if (!beepEnabled) return;
     _player.dispose();
   }
 }

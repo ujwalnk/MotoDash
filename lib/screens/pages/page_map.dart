@@ -4,13 +4,13 @@
 
 import 'package:moto_dash/commons/dash_action.dart';
 import 'package:moto_dash/navigation_graph.dart';
-import 'package:moto_dash/screens/pages/call_act_screen.dart';
-import 'package:moto_dash/screens/pages/call_fav_screen.dart';
-import 'package:moto_dash/screens/pages/call_log_screen.dart';
-import 'package:moto_dash/screens/pages/call_nav_screen.dart';
-import 'package:moto_dash/screens/pages/home_screen.dart';
-import 'package:moto_dash/screens/pages/music_screen.dart';
-import 'package:moto_dash/screens/pages/volume_screen.dart';
+import 'package:moto_dash/screens/pages/page_call_active.dart';
+import 'package:moto_dash/screens/pages/page_call_favourites.dart';
+import 'package:moto_dash/screens/pages/page_call_log.dart';
+import 'package:moto_dash/screens/pages/page_call_navigation.dart';
+import 'package:moto_dash/screens/pages/page_home.dart';
+import 'package:moto_dash/screens/pages/page_music.dart';
+import 'package:moto_dash/screens/pages/page_volume.dart';
 
 final Map<CurrentPage, Future<List<DashAction>> Function()> menuActions = {
   CurrentPage.homePage: buildHomeActions,

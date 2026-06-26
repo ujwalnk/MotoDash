@@ -1,8 +1,10 @@
+// Author: Ujwal N K
+// Created:
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-abstract class SplitScreenState<T extends StatefulWidget> extends State<T>
-    with WidgetsBindingObserver {
+abstract class SplitScreenState<T extends StatefulWidget> extends State<T> with WidgetsBindingObserver {
   bool isSplitScreen = false;
 
   @override
@@ -24,11 +26,7 @@ abstract class SplitScreenState<T extends StatefulWidget> extends State<T>
   }
 
   Future<void> _updateSplitScreenState() async {
-    final value =
-        await const MethodChannel(
-          'assistant.launcher',
-        ).invokeMethod<bool>('getSplitScreenState') ??
-        false;
+    final value = await const MethodChannel('assistant.launcher').invokeMethod<bool>('getSplitScreenState') ?? false;
 
     if (!mounted || value == isSplitScreen) return;
 

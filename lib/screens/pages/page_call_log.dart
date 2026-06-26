@@ -11,7 +11,7 @@ import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../navigation_graph.dart';
-import '../../service/native_bridge.dart';
+import '../../services/native_bridge.dart';
 
 /// Builds dashboard actions from recent call log entries.
 ///

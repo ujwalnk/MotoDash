@@ -6,8 +6,7 @@ class FavouriteContactsScreen extends StatefulWidget {
   const FavouriteContactsScreen({super.key});
 
   @override
-  State<FavouriteContactsScreen> createState() =>
-      _FavouriteContactsScreenState();
+  State<FavouriteContactsScreen> createState() => _FavouriteContactsScreenState();
 }
 
 class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
@@ -32,6 +31,7 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
   Future<void> loadContacts() async {
     final prefs = await SharedPreferences.getInstance();
 
+    // TODO: Use ConfigProvider here.
     setState(() {
       names = prefs.getStringList("fav_contact_names") ?? [];
       numbers = prefs.getStringList("fav_contact_numbers") ?? [];
@@ -44,6 +44,7 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
   Future<void> saveContacts() async {
     final prefs = await SharedPreferences.getInstance();
 
+    // TODO: Use ConfigProvider here.
     await prefs.setStringList("fav_contact_names", names);
     await prefs.setStringList("fav_contact_numbers", numbers);
   }
@@ -57,15 +58,11 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
       if (contact == null) return;
 
       final name = contact.fullName ?? "";
-      final phone = (contact.phoneNumbers?.isNotEmpty ?? false)
-          ? contact.phoneNumbers!.first
-          : "";
+      final phone = (contact.phoneNumbers?.isNotEmpty ?? false) ? contact.phoneNumbers!.first : "";
 
       if (name.isEmpty || phone.isEmpty) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Contact must have name & phone")),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Contact must have name & phone")));
         return;
       }
 
@@ -147,19 +144,10 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
                   key: ValueKey(index),
                   color: _kCardColor,
                   child: ListTile(
-                    title: Text(
-                      names[index],
-                      style: const TextStyle(color: _kTextColor, fontSize: 18),
-                    ),
-                    subtitle: Text(
-                      numbers[index],
-                      style: const TextStyle(color: Colors.white70),
-                    ),
+                    title: Text(names[index], style: const TextStyle(color: _kTextColor, fontSize: 18)),
+                    subtitle: Text(numbers[index], style: const TextStyle(color: Colors.white70)),
                     trailing: IconButton(
-                      icon: const Icon(
-                        Icons.delete_rounded,
-                        color: Colors.redAccent,
-                      ),
+                      icon: const Icon(Icons.delete_rounded, color: Colors.redAccent),
                       onPressed: () => deleteContact(index),
                     ),
                   ),

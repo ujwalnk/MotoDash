@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import 'package:moto_dash/commons/dash_action.dart';
-import 'package:moto_dash/menu_actions.dart';
 import 'package:moto_dash/navigation_graph.dart';
-import 'package:moto_dash/service/global_services.dart';
-import 'package:moto_dash/service/magent_intent_detector.dart';
+import 'package:moto_dash/screens/pages/page_map.dart';
+import 'package:moto_dash/services/global_services.dart';
+import 'package:moto_dash/services/magent_intent_detector.dart';
 
 class MagnetNavigationController {
   MagnetNavigationController._();

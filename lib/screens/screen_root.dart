@@ -9,8 +9,8 @@ import 'package:moto_dash/commons/config_provider.dart' show ConfigProvider;
 import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:moto_dash/commons/list_builder.dart';
-import 'package:moto_dash/menu_actions.dart' show menuActions;
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
+import 'package:moto_dash/screens/pages/page_map.dart' show menuActions;
 
 class RootScreen extends StatefulWidget {
   const RootScreen({super.key});
@@ -31,16 +31,14 @@ class _RootScreenState extends State<RootScreen> {
     _screenSaverTimer?.cancel();
 
     _screenSaverTimer = Timer(Duration(seconds: ConfigProvider.screenSaverTimeout.toInt()), () {
-      // Prevent duplicate push of screen saver
-      if (!mounted && ModalRoute.of(context)?.settings.name == AppRoutes.screenSaver) {
-        return;
-      }
+      if (!mounted || Navigator.of(context).canPop()) return;
 
-      if (!ConfigProvider.screenSaverAnimation) {
-        Navigator.pushNamed(context, AppRoutes.screenSaverBlank);
-      } else {
-        Navigator.pushNamed(context, AppRoutes.screenSaver);
-      }
+      final route = ConfigProvider.screenSaverAnimation ? AppRoutes.screenSaver : AppRoutes.screenSaverBlank;
+
+      Navigator.pushNamed(context, route).then((_) {
+        // Fires exactly when the screensaver is popped — RootScreen is visible again
+        if (mounted) _resetScreenSaverTimer();
+      });
     });
   }
 

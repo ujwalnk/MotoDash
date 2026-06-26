@@ -20,7 +20,6 @@ import 'package:shared_preferences/shared_preferences.dart' show SharedPreferenc
 /// Async behavior:
 /// Requires [init] to be awaited before accessing configuration values, as [prefs] is initialized asynchronously using
 /// [SharedPreferences.getInstance].
-
 class ConfigProvider {
   static late final SharedPreferences prefs;
 
@@ -61,7 +60,7 @@ class ConfigProvider {
 
   static bool get screenSaverEnabled => prefs.getBool(PrefKeys.displayScreenSaverEnable) ?? true;
 
-  static double get screenSaverTimeout => prefs.getDouble(PrefKeys.displayScreenSaverTimeout) ?? 60;
+  static int get screenSaverTimeout => prefs.getDouble(PrefKeys.displayScreenSaverTimeout)?.toInt() ?? 60;
 
   static bool get screenSaverAnimation => prefs.getBool(PrefKeys.displayScreenSaverAnimation) ?? true;
 

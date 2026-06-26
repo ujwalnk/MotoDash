@@ -7,7 +7,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/config_provider.dart';
-import 'package:moto_dash/service/timer.dart';
 
 class ScreenSaver extends StatefulWidget {
   const ScreenSaver({super.key});
@@ -21,7 +20,7 @@ class _ScreenSaverState extends State<ScreenSaver> with SingleTickerProviderStat
 
   Offset _position = Offset.zero;
   final Color _dotColor = ConfigProvider.dashboardFontColor;
-  final Duration _moveInterval = Duration(minutes: ConfigProvider.screenSaverTimeout.toInt());
+  final Duration _moveInterval = Duration(seconds: ConfigProvider.screenSaverTimeout.toInt());
 
   late final AnimationController _fadeController;
   late final Animation<double> _opacity;
@@ -34,9 +33,6 @@ class _ScreenSaverState extends State<ScreenSaver> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-
-    // Disable idle timer while saver is active
-    IdleTimer.instance.setEnabled(false);
 
     // Dot animation on move
     _fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
@@ -68,6 +64,7 @@ class _ScreenSaverState extends State<ScreenSaver> with SingleTickerProviderStat
   Future<void> _animateMove() async {
     await _fadeController.forward();
     _setRandomPosition();
+    if (!mounted) return;
     await _fadeController.reverse();
   }
 
@@ -89,10 +86,6 @@ class _ScreenSaverState extends State<ScreenSaver> with SingleTickerProviderStat
   @override
   void dispose() {
     _fadeController.dispose();
-
-    // Re-enable idle timer when saver exits
-    IdleTimer.instance.setEnabled(true);
-
     super.dispose();
   }
 
