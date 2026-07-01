@@ -3,9 +3,9 @@
 // DashScreen - Home screen
 
 import 'package:flutter/material.dart';
+import 'package:moto_dash/bridges/assistant_bridge.dart';
 import 'package:moto_dash/commons/dash_action.dart';
 import 'package:moto_dash/navigation_graph.dart';
-import 'package:moto_dash/services/native_bridge.dart' show AssistantBridge;
 
 Future<List<DashAction>> buildHomeActions() async {
   return [

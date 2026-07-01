@@ -33,9 +33,10 @@ class _RootScreenState extends State<RootScreen> {
     _screenSaverTimer = Timer(Duration(seconds: ConfigProvider.screenSaverTimeout.toInt()), () {
       if (!mounted || Navigator.of(context).canPop()) return;
 
-      final route = ConfigProvider.screenSaverAnimation ? AppRoutes.screenSaver : AppRoutes.screenSaverBlank;
-
-      Navigator.pushNamed(context, route).then((_) {
+      Navigator.pushNamed(
+        context,
+        ConfigProvider.screenSaverAnimation ? AppRoutes.screenSaver : AppRoutes.screenSaverBlank,
+      ).then((_) {
         // Fires exactly when the screensaver is popped — RootScreen is visible again
         if (mounted) _resetScreenSaverTimer();
       });
@@ -44,16 +45,15 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // FIXME: Take care of the page jumping, fix using animation - AnimatedSwitcher
     return AnimatedBuilder(
       animation: NavigationGraph.instance,
       builder: (context, _) {
+        // Reset the screen timer
         if (ConfigProvider.screenSaverEnabled) {
-          // Reset the screen timer
           _resetScreenSaverTimer();
         }
 
-        final navigator = NavigationGraph.instance;
+        final NavigationGraph navigator = NavigationGraph.instance;
         final widgets = DashWidgets();
 
         widgets.backgroundColor = backgroundColor;

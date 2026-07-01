@@ -48,7 +48,7 @@ class ConfigProvider {
 
   static bool get dashboardLabels => prefs.getBool(PrefKeys.dashboardLabels) ?? true;
 
-  static bool get dashboardMasked => prefs.getBool(PrefKeys.dashboardMask) ?? true;
+  static bool get dashboardMasked => prefs.getBool(PrefKeys.dashboardMask) ?? false;
 
   static double get dashboardFontSize => prefs.getDouble(PrefKeys.dashboardFontSize) ?? 30;
 
@@ -72,7 +72,7 @@ class ConfigProvider {
 
   static double get riderGesturesStrength => prefs.getDouble(PrefKeys.riderGesturesStrength) ?? 1000.0;
 
-  static double get riderGesturesTapDelay => prefs.getDouble(PrefKeys.riderGesturesIntentEmissionDelay) ?? 500.0;
+  static double get riderGesturesTapDelay => prefs.getDouble(PrefKeys.riderGesturesIntentEmissionDelay) ?? 2000.0;
 
   static bool get riderGesturesTtsOnBtOnly => prefs.getBool(PrefKeys.riderGesturesTtsOnBtOnly) ?? true;
 

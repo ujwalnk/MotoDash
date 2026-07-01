@@ -18,10 +18,11 @@ class MainActivity : FlutterActivity() {
 
     private val ASSISTANT_CHANNEL = "assistant.launcher"
     private val CALL_CHANNEL = "phone.call"
+    private val PERMISSIONS_CHANNEL = "com.motodash/permissions"
 
     private lateinit var audio: AudioManager
-
     private var isSplitScreen: Boolean = false
+    private var pendingPermissionResult: MethodChannel.Result? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -30,8 +31,7 @@ class MainActivity : FlutterActivity() {
 
         // --- Assistant & Media Channel ---
         MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            ASSISTANT_CHANNEL
+            flutterEngine.dartExecutor.binaryMessenger, ASSISTANT_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "launchAssistant" -> {
@@ -79,22 +79,44 @@ class MainActivity : FlutterActivity() {
 
         // --- Phone Call Channel ---
         MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            CALL_CHANNEL
+            flutterEngine.dartExecutor.binaryMessenger, CALL_CHANNEL
         ).setMethodCallHandler { call, result ->
             val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             when (call.method) {
+                "answerCall" -> {
+                    val telecom = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+
+                    if (ActivityCompat.checkSelfPermission(
+                            this, Manifest.permission.ANSWER_PHONE_CALLS
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        telecom.acceptRingingCall()
+                        result.success(true)
+                    } else {
+                        result.error(
+                            "PERMISSION_DENIED", "ANSWER_PHONE_CALLS permission not granted", null
+                        )
+                    }
+                }
+
                 "endCall" -> {
                     val telecom = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ANSWER_PHONE_CALLS)
-                        == PackageManager.PERMISSION_GRANTED
+                    if (ActivityCompat.checkSelfPermission(
+                            this, Manifest.permission.ANSWER_PHONE_CALLS
+                        ) == PackageManager.PERMISSION_GRANTED
                     ) {
                         telecom.endCall()
                         result.success(true)
                     } else {
                         result.error("PERMISSION_DENIED", "ANSWER_PHONE_CALLS permission not granted", null)
                     }
+                }
+
+                "silenceRinger" -> {
+                    val telecom = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+                    telecom.silenceRinger()
+                    result.success(true)
                 }
 
                 "setMute" -> {
@@ -141,11 +163,46 @@ class MainActivity : FlutterActivity() {
 
                 "requestOverlayPermission" -> {
                     val intent = Intent(
-                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:$packageName")
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")
                     )
                     startActivity(intent)
                     result.success(true)
+                }
+
+                else -> result.notImplemented()
+            }
+        }
+
+        // --- Permissions Channel ---
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger, PERMISSIONS_CHANNEL
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "isCallLogGranted" -> result.success(
+                    ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.READ_CALL_LOG
+                    ) == PackageManager.PERMISSION_GRANTED
+                )
+
+                "requestCallLogPermission" -> {
+                    pendingPermissionResult = result
+                    ActivityCompat.requestPermissions(
+                        this, arrayOf(Manifest.permission.READ_CALL_LOG), 1001
+                    )
+                    // result is completed later in onRequestPermissionsResult
+                }
+
+                "isNotificationListenerEnabled" -> {
+                    val enabled = Settings.Secure.getString(
+                        contentResolver, "enabled_notification_listeners"
+                    ) ?: ""
+                    result.success(enabled.contains("$packageName/"))
+                }
+
+                "openNotificationListenerSettings" -> {
+                    startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                    result.success(null)
                 }
 
                 else -> result.notImplemented()
@@ -167,5 +224,19 @@ class MainActivity : FlutterActivity() {
         val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         audioManager.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
         audioManager.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001) {
+            pendingPermissionResult?.success(
+                grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+            )
+            pendingPermissionResult = null
+        }
     }
 }

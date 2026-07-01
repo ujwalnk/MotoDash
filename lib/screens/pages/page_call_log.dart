@@ -6,12 +6,12 @@ import 'package:call_log/call_log.dart';
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart' show IconData;
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:moto_dash/bridges/telephony_bridge.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../navigation_graph.dart';
-import '../../services/native_bridge.dart';
 
 /// Builds dashboard actions from recent call log entries.
 ///
@@ -48,7 +48,7 @@ Future<List<DashAction>> buildCallLogActions() async {
         // Place a call using the native caller application
         action: () async {
           // Start the Call Bridge service
-          await CallBridge().startCallService();
+          await TelephonyBridge.startCallService();
 
           // Place the call & wait for the dialer to open
           await FlutterPhoneDirectCaller.callNumber(callLogs[i].number!);
@@ -57,8 +57,8 @@ Future<List<DashAction>> buildCallLogActions() async {
           // Navigate to the active call management page
           NavigationGraph.instance.goTo(CurrentPage.callActPage);
 
-          // Bring the applicaiton to the foreground
-          await CallBridge().bringToFront();
+          // Bring the application to the foreground
+          await TelephonyBridge.bringToFront();
         },
 
         canMask: false,

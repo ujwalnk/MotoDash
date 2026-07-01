@@ -64,8 +64,11 @@ abstract class PrefKeys {
 ///
 /// External variables modified: None.
 abstract class AppRoutes {
+  static const String grantPermission = "/setup/permissions";
+  static const settings = "/settings";
+
   static const dashboard = "/home";
+
   static const screenSaver = "/saver";
   static const screenSaverBlank = "/saver_blank";
-  static const settings = "/settings";
 }

@@ -11,24 +11,22 @@ dependencies:
     sdk: flutter
   audio_session: ^0.2.2
   audioplayers: ^6.1.0
-  shared_preferences: ^2.5.3
-  screen_brightness: ^2.1.7
-  flutter_local_notifications: ^21.0.0
-  volume_controller: ^3.4.0
   call_log: ^6.0.1
-  flutter_contacts: ^1.1.9+2
+  flex_color_picker: ^3.8.0
+  flutter_local_notifications: ^21.0.0
   flutter_native_contact_picker_plus: ^1.3.1
   flutter_phone_direct_caller: ^2.2.1
   flutter_settings_screens: ^0.3.4
   flutter_tts: ^4.2.5
-  flex_color_picker: ^3.8.0
-  sensors_plus: ^7.0.0
   permission_handler: ^12.0.1
-  google_fonts: ^8.0.2
-  statemachine: ^3.4.0
   phone_state: ^3.0.1
   provider: ^6.1.5+1
-  url_launcher: ^6.3.2
+  rotation_log: ^0.1.1
+  screen_brightness: ^2.1.7
+  sensors_plus: ^7.0.0
+  shared_preferences: ^2.5.3
+  statemachine: ^3.4.0
+  volume_controller: ^3.4.0
   wakelock_plus: ^1.4.0
 
 dev_dependencies:

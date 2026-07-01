@@ -3,17 +3,17 @@
 // DashScreen - Favourite contacts
 
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:moto_dash/bridges/telephony_bridge.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
 import '../../navigation_graph.dart';
-import '../../services/native_bridge.dart';
 
 /// Builds dashboard actions for configured favorite contacts.
 ///
 /// Retrieves favorite contacts using [_getFavorites] and creates a [DashAction] for each entry. When invoked, an action
 /// starts the call service, places a call to the associated contact, navigates to [CurrentPage.callActPage] through
-/// [NavigationGraph.instance], and brings the application to the foreground using [CallBridge.bringToFront].
+/// [NavigationGraph.instance], and brings the application to the foreground using [TelephonyBridge.bringToFront].
 ///
 /// Side effects:
 /// Reads persisted favorite contact data via [_getFavorites].
@@ -34,11 +34,11 @@ Future<List<DashAction>> buildCallFavActions() async {
         label: favorites.keys.elementAt(i),
         icons: [],
         action: () async {
-          await CallBridge().startCallService();
+          await TelephonyBridge.startCallService();
           await FlutterPhoneDirectCaller.callNumber(favorites.values.elementAt(i));
           await Future.delayed(const Duration(milliseconds: 2000)); // TODO: Add this to configuration
           NavigationGraph.instance.goTo(CurrentPage.callActPage);
-          await CallBridge().bringToFront();
+          await TelephonyBridge.bringToFront();
         },
         canMask: false,
       ),

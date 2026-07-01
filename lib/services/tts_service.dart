@@ -4,10 +4,9 @@
 
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:moto_dash/bridges/assistant_bridge.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:phone_state/phone_state.dart';
-
-import 'native_bridge.dart';
 
 class TtsService {
   final FlutterTts _tts = FlutterTts();

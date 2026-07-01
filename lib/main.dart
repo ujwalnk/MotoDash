@@ -1,23 +1,25 @@
 // Author: Ujwal N K
 // Created On: 2025.12.07
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_settings_screens/flutter_settings_screens.dart' show Settings, SharePreferenceCache;
+import 'package:moto_dash/commons/call_state.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
-import 'package:moto_dash/navigation_graph.dart' show NavigationGraph, CurrentPage;
+import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screens/screen_root.dart';
 import 'package:moto_dash/screens/screen_saver.dart';
 import 'package:moto_dash/screens/screen_saver_blank.dart';
 import 'package:moto_dash/screens/screen_settings.dart';
+import 'package:moto_dash/screens/screen_setup.dart';
 import 'package:moto_dash/services/global_services.dart';
 import 'package:moto_dash/services/magnet_navigation_controller.dart';
-import 'package:moto_dash/services/native_bridge.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:phone_state/phone_state.dart';
 import 'package:provider/provider.dart';
+import 'package:rotation_log/rotation_log.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:volume_controller/volume_controller.dart';
@@ -26,9 +28,14 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final log = RotationLogger(
+  RotationLogTerm.size(1024 * 1024),
+  options: const RotationLogOptions(fileNamePrefix: 'moto_dash', maxArchivedFiles: 3),
+);
 
 // Holds a pending action when the navigator isn't ready yet
 String? _pendingNotificationAction;
+bool showSetupScreen = false;
 
 void _handlePendingNotificationAction() {
   final actionId = _pendingNotificationAction;
@@ -102,13 +109,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
+  await log.init();
 
   await Settings.init(cacheProvider: SharePreferenceCache());
 
   await ConfigProvider.init();
 
   if (ConfigProvider.isFirstRun == true) {
-    // await FlutterMediaController.requestPermissions();
+    showSetupScreen = true;
     await prefs.setBool(PrefKeys.isFirstRun, false);
   }
 
@@ -120,22 +128,18 @@ void main() async {
     await ScreenBrightness.instance.resetApplicationScreenBrightness();
   }
 
-  var status = await Permission.phone.status;
-
-  if (!status.isGranted) {
-    status = await Permission.phone.request();
-    if (!status.isGranted) return;
-  }
+  // var status = await Permission.phone.status;
+  //
+  // if (!status.isGranted) {
+  //   status = await Permission.phone.request();
+  //   if (!status.isGranted) return;
+  // }
 
   VolumeController.instance.showSystemUI = true;
 
-  _initCallStateListener();
-
-  final call = CallBridge();
-
-  if (!await call.checkOverlayPermission()) {
-    await call.requestOverlayPermission();
-  }
+  // if (!await TelephonyBridge.checkOverlayPermission()) {
+  //   await TelephonyBridge.requestOverlayPermission();
+  // }
   if (ConfigProvider.riderGesturesEnabled) {
     magnetService.start();
     MagnetNavigationController.instance.start();
@@ -171,18 +175,10 @@ void main() async {
   );
 
   await showMotoDashNotification();
-  runApp(const MotoDash());
-}
 
-void _initCallStateListener() {
-  PhoneState.stream.listen((state) {
-    if (state.status == PhoneStateStatus.CALL_ENDED || state.status == PhoneStateStatus.NOTHING) {
-      if (NavigationGraph.instance.page == CurrentPage.callActPage) {
-        NavigationGraph.instance.pop();
-      }
-      CallBridge().stopCallService();
-    }
-  });
+  // runZonedGuarded(() {
+  runApp(const MotoDash());
+  // }, log.exception);
 }
 
 class MotoDash extends StatefulWidget {
@@ -199,6 +195,8 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     WakelockPlus.enable();
 
+    CallStateListener.init();
+
     // Retry after the first frame — navigator is guaranteed to be mounted by then
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _handlePendingNotificationAction();
@@ -210,6 +208,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     WakelockPlus.disable();
     magnetService.stop();
+    CallStateListener.dispose();
     super.dispose();
   }
 
@@ -235,12 +234,40 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
       create: (_) => NavigationGraph.instance,
       child: MaterialApp(
         navigatorKey: navigatorKey,
-        home: const RootScreen(),
-        theme: ThemeData(fontFamily: 'AtkinsonHyperlegible'), // Special font for easier legibility
-        routes: {
-          AppRoutes.settings: (_) => const SettingsScreen(),
-          AppRoutes.screenSaver: (_) => const ScreenSaver(),
-          AppRoutes.screenSaverBlank: (_) => const ScreenSaverBlank(),
+        home: showSetupScreen ? const SetupScreen() : const RootScreen(),
+        theme: ThemeData(fontFamily: 'AtkinsonHyperlegible'),
+        onGenerateRoute: (settings) {
+          late Widget page;
+
+          switch (settings.name) {
+            case AppRoutes.grantPermission:
+              page = const SetupScreen();
+              break;
+            case AppRoutes.settings:
+              page = const SettingsScreen();
+              break;
+            case AppRoutes.screenSaver:
+              page = const ScreenSaver();
+              break;
+            case AppRoutes.screenSaverBlank:
+              page = const ScreenSaverBlank();
+              break;
+            case AppRoutes.dashboard:
+              page = const RootScreen();
+              break;
+            default:
+              throw Exception('Unknown route: ${settings.name}');
+          }
+
+          return PageRouteBuilder(
+            settings: settings,
+            transitionDuration: const Duration(milliseconds: 200),
+            reverseTransitionDuration: const Duration(milliseconds: 200),
+            pageBuilder: (_, __, ___) => page,
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          );
         },
       ),
     );

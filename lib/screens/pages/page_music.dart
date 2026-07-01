@@ -3,11 +3,8 @@
 // DashScreen - Music controls
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:moto_dash/bridges/music_bridge.dart';
 import 'package:moto_dash/commons/dash_action.dart';
-
-// TODO: Change the channel name
-const MethodChannel _channel = MethodChannel('assistant.launcher');
 
 /// Builds the set of dashboard actions for controlling media playback.
 ///
@@ -28,20 +25,12 @@ const MethodChannel _channel = MethodChannel('assistant.launcher');
 /// asynchronous method channel invocation when executed.
 Future<List<DashAction>> buildMusicActions() async {
   return [
-    DashAction(
-      label: 'Previous',
-      icons: [Icons.skip_previous_rounded],
-      action: () async => await _channel.invokeMethod('previousTrack'),
-    ),
+    DashAction(label: 'Previous', icons: [Icons.skip_previous_rounded], action: MusicBridge.previous),
     DashAction(
       label: 'Play Pause',
       icons: [Icons.play_arrow_rounded, Icons.pause_rounded],
-      action: () async => await _channel.invokeMethod('togglePlayPause'),
+      action: MusicBridge.playPause,
     ),
-    DashAction(
-      label: 'Next',
-      icons: [Icons.skip_next_rounded],
-      action: () async => await _channel.invokeMethod('nextTrack'),
-    ),
+    DashAction(label: 'Next', icons: [Icons.skip_next_rounded], action: MusicBridge.next),
   ];
 }
