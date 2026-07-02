@@ -5,8 +5,7 @@
 import 'package:flutter/services.dart';
 
 abstract class MusicBridge {
-  // TODO: Change channel name
-  static const MethodChannel _channel = MethodChannel("assistant.launcher");
+  static const MethodChannel _channel = MethodChannel("in.madilu.motodash/assistant");
 
   static Future<void> previous() async => await _channel.invokeMethod<void>("previousTrack");
 

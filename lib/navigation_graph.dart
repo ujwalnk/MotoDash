@@ -19,6 +19,9 @@ class NavigationGraph extends ChangeNotifier {
   // Getter - can pop?
   bool get canPop => _page != CurrentPage.homePage && _page != CurrentPage.callActPage;
 
+  // Data
+  Map<String, dynamic> data = {};
+
   Future<void> goTo(CurrentPage page) async {
     _page = page;
     notifyListeners();
@@ -32,6 +35,8 @@ class NavigationGraph extends ChangeNotifier {
     } else {
       _page = CurrentPage.homePage;
     }
+
+    data = {}; // Clear data on pop
     notifyListeners();
   }
 }

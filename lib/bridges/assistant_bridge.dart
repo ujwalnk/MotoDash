@@ -5,7 +5,7 @@
 import 'package:flutter/services.dart';
 
 class AssistantBridge {
-  static const MethodChannel _channel = MethodChannel('assistant.launcher');
+  static const MethodChannel _channel = MethodChannel('in.madilu.motodash/assistant');
 
   static Future<bool> launch() async {
     try {

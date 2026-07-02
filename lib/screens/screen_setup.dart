@@ -10,14 +10,14 @@ import '../commons/constants.dart';
 
 /// Native bridge for the two permissions `permission_handler` doesn't cover:
 /// Call Log and Notification Listener access. Wire these methods up on the
-/// Android side the same way you did for the `phone.call` channel.
+/// Android side the same way you did for the `in.madilu.motodash/telephony` channel.
 ///
 ///   isCallLogGranted               -> bool, checks READ_CALL_LOG
 ///   requestCallLogPermission       -> triggers the native runtime request
 ///   isNotificationListenerEnabled  -> bool, checks the listener is in Settings.Secure ENABLED_NOTIFICATION_LISTENERS
 ///   openNotificationListenerSettings -> launches ACTION_NOTIFICATION_LISTENER_SETTINGS
 class _NativePermissions {
-  static const _channel = MethodChannel('com.motodash/permissions');
+  static const _channel = MethodChannel('in.madilu.motodash/permissions');
 
   static Future<bool> isCallLogGranted() async {
     try {
@@ -234,7 +234,24 @@ class _SetupScreenState extends State<SetupScreen> with WidgetsBindingObserver {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: _allGranted
-                            ? () => Navigator.pushReplacementNamed(context, AppRoutes.dashboard)
+                            ? () async {
+                                await showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text('Restart Required'),
+                                    content: const Text(
+                                      'MotoDash must be restarted for all permissions and settings to take effect.\n\n'
+                                      'After leaving this screen, a persistent notification will appear. Use the notification to exit the app, or swipe the app away from the Recent Apps screen.\n\n'
+                                      'Important: Do not swipe the app away from Recent Apps and then tap "Exit" from the notification. Choose only one of these methods.',
+                                    ),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
+                                    ],
+                                  ),
+                                );
+                                Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+                              }
                             : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: accent,

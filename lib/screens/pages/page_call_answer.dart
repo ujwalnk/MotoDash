@@ -8,8 +8,11 @@ import '../../bridges/telephony_bridge.dart';
 import '../../commons/dash_action.dart';
 import '../../navigation_graph.dart';
 
+const String kDisplayValueKey = "display_contact";
+
 Future<List<DashAction>> buildCallActiveActions() async {
   return [
+    DashAction(label: NavigationGraph.instance.data[kDisplayValueKey], icons: [], action: () {}),
     DashAction(
       label: "Answer",
       icons: [Icons.call_rounded],

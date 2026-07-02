@@ -3,22 +3,23 @@ package com.example.moto_dash
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.AudioManager
+import android.net.Uri
+import android.provider.ContactsContract
+import android.provider.Settings
 import android.telecom.TelecomManager
 import android.view.KeyEvent
 import androidx.core.app.ActivityCompat
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
 
-    private val ASSISTANT_CHANNEL = "assistant.launcher"
-    private val CALL_CHANNEL = "phone.call"
-    private val PERMISSIONS_CHANNEL = "com.motodash/permissions"
+    private val ASSISTANT_CHANNEL = "in.madilu.motodash/assistant"
+    private val CALL_CHANNEL = "in.madilu.motodash/telephony"
+    private val PERMISSIONS_CHANNEL = "in.madilu.motodash/permissions"
 
     private lateinit var audio: AudioManager
     private var isSplitScreen: Boolean = false
@@ -84,6 +85,17 @@ class MainActivity : FlutterActivity() {
             val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             when (call.method) {
+                "getContactName" -> {
+                    val phoneNumber = call.argument<String>("phoneNumber")
+
+                    if (phoneNumber == null) {
+                        result.error("INVALID_ARGUMENT", "phoneNumber is required", null)
+                        return@setMethodCallHandler
+                    }
+
+                    result.success(getContactName(phoneNumber))
+                }
+
                 "answerCall" -> {
                     val telecom = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
 
@@ -162,9 +174,7 @@ class MainActivity : FlutterActivity() {
                 }
 
                 "requestOverlayPermission" -> {
-                    val intent = Intent(
-                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")
-                    )
+                    val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
                     startActivity(intent)
                     result.success(true)
                 }
@@ -175,7 +185,8 @@ class MainActivity : FlutterActivity() {
 
         // --- Permissions Channel ---
         MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger, PERMISSIONS_CHANNEL
+            flutterEngine.dartExecutor.binaryMessenger,
+            PERMISSIONS_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "isCallLogGranted" -> result.success(
@@ -187,16 +198,12 @@ class MainActivity : FlutterActivity() {
 
                 "requestCallLogPermission" -> {
                     pendingPermissionResult = result
-                    ActivityCompat.requestPermissions(
-                        this, arrayOf(Manifest.permission.READ_CALL_LOG), 1001
-                    )
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CALL_LOG), 1001)
                     // result is completed later in onRequestPermissionsResult
                 }
 
                 "isNotificationListenerEnabled" -> {
-                    val enabled = Settings.Secure.getString(
-                        contentResolver, "enabled_notification_listeners"
-                    ) ?: ""
+                    val enabled = Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: ""
                     result.success(enabled.contains("$packageName/"))
                 }
 
@@ -226,17 +233,31 @@ class MainActivity : FlutterActivity() {
         audioManager.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 1001) {
-            pendingPermissionResult?.success(
-                grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
-            )
+            pendingPermissionResult?.success(grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED)
             pendingPermissionResult = null
         }
+    }
+
+    private fun getContactName(phoneNumber: String): String? {
+        val uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber))
+
+        val projection = arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME)
+
+        contentResolver.query(
+            uri, projection, null, null, null
+        )?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)
+
+                if (nameIndex >= 0) {
+                    return cursor.getString(nameIndex)
+                }
+            }
+        }
+
+        return null
     }
 }

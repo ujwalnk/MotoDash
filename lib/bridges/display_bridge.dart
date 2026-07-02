@@ -26,7 +26,8 @@ abstract class SplitScreenState<T extends StatefulWidget> extends State<T> with 
   }
 
   Future<void> _updateSplitScreenState() async {
-    final value = await const MethodChannel('assistant.launcher').invokeMethod<bool>('getSplitScreenState') ?? false;
+    final value =
+        await const MethodChannel('in.madilu.motodash/assistant').invokeMethod<bool>('getSplitScreenState') ?? false;
 
     if (!mounted || value == isSplitScreen) return;
 

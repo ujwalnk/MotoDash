@@ -51,7 +51,11 @@ class MagnetNavigationController {
 
     switch (intent) {
       case AppIntent.next:
-        _selectedIndex = (_selectedIndex + 1) % total;
+        // Skip reading the items that don't have any actions
+        do {
+          _selectedIndex = (_selectedIndex + 1) % total;
+        } while (_selectedIndex < items.length && items[_selectedIndex].action == null);
+
         _speak(items, navigator);
         break;
 
@@ -96,7 +100,7 @@ class MagnetNavigationController {
 
   void _performAction(List<DashAction> items, NavigationGraph navigator) {
     if (_selectedIndex < items.length) {
-      items[_selectedIndex].action();
+      items[_selectedIndex].action?.call();
     } else {
       navigator.pop();
     }

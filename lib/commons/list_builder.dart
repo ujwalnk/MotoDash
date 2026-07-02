@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show MethodChannel;
 import 'package:moto_dash/commons/config_provider.dart';
-import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/dash_action.dart';
 
 class DashWidgets {
@@ -17,8 +16,11 @@ class DashWidgets {
 
   bool isSplitScreen = false;
 
+  double tileHeight = 0.0;
+
   Future<void> init() async {
-    isSplitScreen = await MethodChannel('assistant.launcher').invokeMethod<bool>('getSplitScreenState') ?? false;
+    isSplitScreen =
+        await MethodChannel('in.madilu.motodash/assistant').invokeMethod<bool>('getSplitScreenState') ?? false;
   }
 
   Widget dashView(bool isSplitScreen, List<Widget> children) {
@@ -96,42 +98,10 @@ class DashWidgets {
     return dashCardFunc(action.label, action.icons, action.action, context, itemCount, isSelected: isSelected);
   }
 
-  Widget dashCardRoute(
-    String title,
-    List<IconData> icons,
-    String route,
-    BuildContext context,
-    int itemCount, {
-    bool isSelected = false,
-  }) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) {
-        if (route != AppRoutes.dashboard) {
-          Navigator.pushNamed(context, route);
-        } else {
-          Navigator.pop(context);
-        }
-      },
-      child: SizedBox(
-        height: (screenHeight - 30 - (itemCount - 1) * 10) / itemCount,
-        child: Card(
-          color: backgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: (borderColor), width: isSelected ? 3 : 1),
-          ),
-          child: Center(child: dashListTile(icons, title, null, null)),
-        ),
-      ),
-    );
-  }
-
   Widget dashCardFunc(
     String title,
     List<IconData> icons,
-    Function() onTap,
+    Function()? onTap,
     BuildContext context,
     int itemCount, {
     bool? overrideShowIcons,
@@ -141,11 +111,10 @@ class DashWidgets {
     final screenHeight = MediaQuery.of(context).size.height;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTapDown: (_) {
-        onTap();
-      },
+      onTapDown: (_) => onTap?.call(),
       child: SizedBox(
         height: (screenHeight - 30 - (itemCount - 1) * 10) / itemCount,
+        // height: tileHeight,
         child: Card(
           color: backgroundColor,
           shape: RoundedRectangleBorder(
@@ -169,8 +138,10 @@ class DashWidgets {
         mainAxisAlignment: MainAxisAlignment.center, // Center the row
         children: [
           if (showIconsFinal)
-            for (IconData icon in icons) Icon(icon, color: fontColor, size: 40), // Show icon if enabled
-          SizedBox(width: 8.0), // Space between icon and text
+            for (IconData icon in icons) Icon(icon, color: fontColor, size: ConfigProvider.dashboardFontSize),
+          // Show icon if enabled
+          SizedBox(width: 8.0),
+          // Space between icon and text
           if (showLabelFinal)
             Text(
               showMasked ? title.substring(0, 1) : title, // FIXME: Get the canMask attribute here

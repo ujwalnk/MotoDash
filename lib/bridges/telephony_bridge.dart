@@ -1,11 +1,11 @@
 // Author: Ujwal N K
 // Created:
-// Native bridge - kotlin platform integration through channels - [assistant.launcher] and [phone.call]
+// Native bridge - kotlin platform integration through channels - [in.madilu.motodash/assistant] and [in.madilu.motodash/telephony]
 
 import 'package:flutter/services.dart';
 
 abstract class TelephonyBridge {
-  static const _channel = MethodChannel('phone.call');
+  static const _channel = MethodChannel('in.madilu.motodash/telephony');
 
   static Future<void> answerCall() async => await _channel.invokeMethod('answerCall');
 
@@ -26,4 +26,8 @@ abstract class TelephonyBridge {
   static Future<bool> checkOverlayPermission() async => await _channel.invokeMethod('checkOverlayPermission') ?? false;
 
   static Future<void> requestOverlayPermission() async => await _channel.invokeMethod('requestOverlayPermission');
+
+  static Future<String?> getContactName(String phoneNumber) async {
+    return await _channel.invokeMethod<String>('getContactName', {'phoneNumber': phoneNumber}) ?? phoneNumber;
+  }
 }
