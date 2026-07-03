@@ -112,7 +112,6 @@ void main() async {
   await log.init();
 
   await Settings.init(cacheProvider: SharePreferenceCache());
-
   await ConfigProvider.init();
 
   if (ConfigProvider.isFirstRun == true) {

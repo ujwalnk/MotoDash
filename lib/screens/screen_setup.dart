@@ -250,6 +250,8 @@ class _SetupScreenState extends State<SetupScreen> with WidgetsBindingObserver {
                                     ],
                                   ),
                                 );
+
+                                if (!context.mounted) return;
                                 Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
                               }
                             : null,
@@ -288,7 +290,7 @@ class _PermissionTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.06)),
+        border: Border.all(color: Colors.white.withAlpha(6)),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -296,7 +298,7 @@ class _PermissionTile extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(10)),
+            decoration: BoxDecoration(color: Colors.white.withAlpha(5), borderRadius: BorderRadius.circular(10)),
             child: Icon(item.icon, color: item.granted ? accent : Colors.white70, size: 22),
           ),
           const SizedBox(width: 14),
@@ -320,7 +322,7 @@ class _PermissionTile extends StatelessWidget {
                   onPressed: onTap,
                   style: OutlinedButton.styleFrom(
                     foregroundColor: accent,
-                    side: BorderSide(color: accent.withOpacity(0.5)),
+                    side: BorderSide(color: accent.withAlpha(50)),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),

@@ -143,13 +143,15 @@ class DashWidgets {
           SizedBox(width: 8.0),
           // Space between icon and text
           if (showLabelFinal)
-            Text(
-              showMasked ? title.substring(0, 1) : title, // FIXME: Get the canMask attribute here
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
-              style: TextStyle(color: fontColor, fontSize: ConfigProvider.dashboardFontSize),
-              textAlign: TextAlign.center,
+            Expanded(
+              child: Text(
+                showMasked ? title.substring(0, 1) : title, // FIXME: Get the canMask attribute here
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: TextStyle(color: fontColor, fontSize: ConfigProvider.dashboardFontSize),
+                textAlign: TextAlign.center,
+              ),
             ),
         ],
       ),
