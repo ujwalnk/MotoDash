@@ -26,6 +26,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   String _favouriteContactsSummary = "";
 
+  final Map<String, bool> _expanded = {};
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _displaySetting(),
           _contactsSetting(context),
           _magnetSettings(),
+          _dynamicVolumeSettings(),
           _extraSettings(context),
         ],
       ),
@@ -315,6 +318,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _dynamicVolumeSettings() {
+    return _settingsCard(
+      title: "Dynamic Volume",
+      children: [
+        PrefSwitchTile(
+          title: "Speed Adaptive Volume",
+          prefKey: PrefKeys.adaptiveVolumeEnable,
+          defaultValue: false,
+          onChanged: (_) => setState(() {}),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 12),
+          child: Text(
+            "Adapt device music volume based on vehicle speed",
+            style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+          ),
+        ),
+        if (ConfigProvider.adaptiveVolumeEnabled) ...[
+          const PrefTextFieldTile(
+            label: "Activation Speed (km/h)",
+            prefKey: PrefKeys.adaptiveVolumeSpeedInterval,
+            defaultValue: "50",
+            inputType: TextInputType.number,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 12),
+            child: Text(
+              "The speed at which dynamic volume adjustment begins. Below this speed, your volume remains unchanged.",
+              style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+            ),
+          ),
+          const PrefTextFieldTile(
+            label: "Speed interval (km/h)",
+            prefKey: PrefKeys.adaptiveVolumeSpeedInterval,
+            defaultValue: "10",
+            inputType: TextInputType.number,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 12),
+            child: Text(
+              "The speed increase required before the volume is raised by one step. Smaller values increase the volume more frequently.\n"
+              "Default: Increase the volume by one step for every 10 km/h increase in speed.",
+              style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+            ),
+          ),
+          const PrefTextFieldTile(
+            label: "Maximum volume increase (steps)",
+            prefKey: PrefKeys.adaptiveVolumeMaxSteps,
+            defaultValue: "3",
+            inputType: TextInputType.number,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 12),
+            child: Text(
+              "Specifies the maximum number of volume steps that may be applied automatically above the initial media volume.",
+              style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+            ),
+          ),
+          PrefSliderTile(title: "Brightness", prefKey: PrefKeys.adaptiveVolumeSamplingInterval, defaultValue: 3.0),
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 12),
+            child: Text(
+              "Controls how gradually the media volume is adjusted in response to changes in vehicle speed.\n"
+              "Higher the slider value, higher the battery consumption",
+              style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
   Widget _settingsCard({required String title, required List<Widget> children}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -322,19 +397,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: cardBg,
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              ...children,
-            ],
+        child: ExpansionTile(
+          shape: const Border(),
+          collapsedShape: const Border(),
+          initiallyExpanded: _expanded[title] ?? false,
+          onExpansionChanged: (value) => setState(() => _expanded[title] = value),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          iconColor: textColor,
+          collapsedIconColor: textColor,
+          title: Text(
+            title,
+            style: const TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
           ),
+          children: children,
         ),
       ),
     );

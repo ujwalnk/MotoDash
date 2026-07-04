@@ -77,6 +77,21 @@ class ConfigProvider {
   static bool get riderGesturesTtsOnBtOnly => prefs.getBool(PrefKeys.riderGesturesTtsOnBtOnly) ?? true;
 
   // -------------------------------------------------------------------------------------------------------------------
+  // Adaptive Volume
+  // -------------------------------------------------------------------------------------------------------------------
+
+  static bool get adaptiveVolumeEnabled => prefs.getBool(PrefKeys.adaptiveVolumeEnable) ?? false;
+
+  static double get adaptiveVolumeSpeedInterval => prefs.getDouble(PrefKeys.adaptiveVolumeSpeedInterval) ?? 10.0;
+
+  static int get adaptiveVolumeMaxSteps => prefs.getDouble(PrefKeys.adaptiveVolumeMaxSteps)?.toInt() ?? 3;
+
+  static int get adaptiveVolumeActivateMinSpeed =>
+      prefs.getDouble(PrefKeys.adaptiveVolumeActivateMinSpeed)?.toInt() ?? 50;
+
+  static double get adaptiveVolumeSamplingInterval => prefs.getDouble(PrefKeys.adaptiveVolumeSpeedInterval) ?? 3;
+
+  // -------------------------------------------------------------------------------------------------------------------
   // Miscellaneous
   // -------------------------------------------------------------------------------------------------------------------
 

@@ -49,6 +49,13 @@ abstract class PrefKeys {
   static const String riderGesturesIntentEmissionDelay = "rider_gestures_intent_emission_delay";
   static const String riderGesturesTtsOnBtOnly = "rider_gestures_tts_on_bt_only";
 
+  // Adaptive Volume
+  static const String adaptiveVolumeEnable = "misc_adaptive_volume_enable";
+  static const String adaptiveVolumeSpeedInterval = "adaptive_volume_speed_interval";
+  static const String adaptiveVolumeMaxSteps = "adaptive_volume_max_steps";
+  static const String adaptiveVolumeActivateMinSpeed = "adaptive_volume_activate_min_speed";
+  static const String adaptiveVolumeSamplingInterval = "adaptive_volume_sampling_interval";
+
   // Miscellaneous
   static const String showVolumeTip = "misc_show_volume_tip";
   static const String miscMaxCallLogsListed = "misc_max_call_logs_listed";
