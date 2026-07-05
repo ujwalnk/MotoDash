@@ -59,7 +59,7 @@ class _PermItem {
   final String subtitle;
   final IconData icon;
   final _PermKind kind;
-  final Permission? permission; // set when kind == runtime
+  final List<Permission?>? permission; // set when kind == runtime
   bool granted;
 
   _PermItem({
@@ -72,21 +72,21 @@ class _PermItem {
   });
 }
 
-class SetupScreen extends StatefulWidget {
-  const SetupScreen({super.key});
+class PermissionsScreen extends StatefulWidget {
+  const PermissionsScreen({super.key});
 
   @override
-  State<SetupScreen> createState() => _SetupScreenState();
+  State<PermissionsScreen> createState() => _PermissionsScreenState();
 }
 
-class _SetupScreenState extends State<SetupScreen> with WidgetsBindingObserver {
+class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindingObserver {
   late final List<_PermItem> _items = [
     _PermItem(
       title: 'Phone',
       subtitle: 'Detect call state, make / answer / end calls',
       icon: Icons.phone_outlined,
       kind: _PermKind.runtime,
-      permission: Permission.phone,
+      permission: [Permission.phone],
     ),
     _PermItem(title: 'Call Log', subtitle: 'Show recent calls', icon: Icons.history_outlined, kind: _PermKind.callLog),
     _PermItem(
@@ -94,28 +94,35 @@ class _SetupScreenState extends State<SetupScreen> with WidgetsBindingObserver {
       subtitle: 'Show contact names and favourites',
       icon: Icons.contacts_outlined,
       kind: _PermKind.runtime,
-      permission: Permission.contacts,
+      permission: [Permission.contacts],
     ),
     _PermItem(
       title: 'Display over other apps',
       subtitle: 'Show the incoming call UI above other apps',
       icon: Icons.layers_outlined,
       kind: _PermKind.runtime,
-      permission: Permission.systemAlertWindow,
+      permission: [Permission.systemAlertWindow],
     ),
     _PermItem(
       title: 'Notifications',
       subtitle: 'Show the persistent MotoDash notification',
       icon: Icons.notifications_outlined,
       kind: _PermKind.runtime,
-      permission: Permission.notification,
+      permission: [Permission.notification],
     ),
     _PermItem(
       title: 'Battery optimization',
       subtitle: 'Keep MotoDash running reliably in the background',
       icon: Icons.battery_charging_full_outlined,
       kind: _PermKind.runtime,
-      permission: Permission.ignoreBatteryOptimizations,
+      permission: [Permission.ignoreBatteryOptimizations],
+    ),
+    _PermItem(
+      title: 'Location',
+      subtitle: 'Determine your vehicle speed for Speed Adaptive Volume',
+      icon: Icons.location_on_outlined,
+      kind: _PermKind.runtime,
+      permission: [Permission.location, Permission.locationAlways],
     ),
   ];
 
@@ -150,14 +157,19 @@ class _SetupScreenState extends State<SetupScreen> with WidgetsBindingObserver {
     if (mounted) setState(() => _checking = false);
   }
 
-  Future<bool> _checkOne(_PermItem item) {
+  Future<bool> _checkOne(_PermItem item) async {
     switch (item.kind) {
       case _PermKind.callLog:
         return _NativePermissions.isCallLogGranted();
       case _PermKind.notificationListener:
         return _NativePermissions.isNotificationListenerEnabled();
       case _PermKind.runtime:
-        return item.permission!.isGranted;
+        for (final permission in item.permission!) {
+          if (!await permission!.isGranted) {
+            return false;
+          }
+        }
+        return true;
     }
   }
 
@@ -166,15 +178,24 @@ class _SetupScreenState extends State<SetupScreen> with WidgetsBindingObserver {
       case _PermKind.callLog:
         await _NativePermissions.requestCallLog();
         break;
+
       case _PermKind.notificationListener:
         await _NativePermissions.openNotificationListenerSettings();
         break;
+
       case _PermKind.runtime:
-        await item.permission!.request();
+        for (final permission in item.permission!) {
+          if (!await permission!.isGranted) {
+            await permission.request();
+          }
+        }
         break;
     }
+
     final granted = await _checkOne(item);
-    if (mounted) setState(() => item.granted = granted);
+    if (mounted) {
+      setState(() => item.granted = granted);
+    }
   }
 
   bool get _allGranted => _items.every((e) => e.granted);

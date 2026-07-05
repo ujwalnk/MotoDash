@@ -5,15 +5,15 @@
 import 'dart:async';
 
 import 'package:moto_dash/commons/dash_action.dart';
+import 'package:moto_dash/controllers/magnet_intent_detector.dart';
 import 'package:moto_dash/navigation_graph.dart';
 import 'package:moto_dash/screens/pages/page_map.dart';
-import 'package:moto_dash/services/global_services.dart';
-import 'package:moto_dash/services/magent_intent_detector.dart';
+import 'package:moto_dash/services/global_service.dart';
 
-class MagnetNavigationController {
-  MagnetNavigationController._();
+class MagnetNavigator {
+  MagnetNavigator._();
 
-  static final MagnetNavigationController instance = MagnetNavigationController._();
+  static final MagnetNavigator instance = MagnetNavigator._();
 
   StreamSubscription<AppIntent>? _sub;
 
@@ -81,7 +81,7 @@ class MagnetNavigationController {
       case AppIntent.back:
         navigator.pop();
 
-        // Reset index on
+        // Reset index
         _selectedIndex = 0;
 
         // Speak first item of new page

@@ -7,7 +7,7 @@ import 'dart:math';
 
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/services/beep_service.dart';
-import 'package:moto_dash/services/global_services.dart';
+import 'package:moto_dash/services/global_service.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:statemachine/statemachine.dart' as machine;
 

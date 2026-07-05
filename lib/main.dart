@@ -10,14 +10,15 @@ import 'package:flutter_settings_screens/flutter_settings_screens.dart' show Set
 import 'package:moto_dash/commons/call_state.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
+import 'package:moto_dash/controllers/magnet_navigator.dart';
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
+import 'package:moto_dash/screens/screen_permissions.dart';
 import 'package:moto_dash/screens/screen_root.dart';
 import 'package:moto_dash/screens/screen_saver.dart';
 import 'package:moto_dash/screens/screen_saver_blank.dart';
 import 'package:moto_dash/screens/screen_settings.dart';
-import 'package:moto_dash/screens/screen_setup.dart';
-import 'package:moto_dash/services/global_services.dart';
-import 'package:moto_dash/services/magnet_navigation_controller.dart';
+import 'package:moto_dash/services/adaptive_volume_service.dart';
+import 'package:moto_dash/services/global_service.dart';
 import 'package:provider/provider.dart';
 import 'package:rotation_log/rotation_log.dart';
 import 'package:screen_brightness/screen_brightness.dart';
@@ -127,21 +128,11 @@ void main() async {
     await ScreenBrightness.instance.resetApplicationScreenBrightness();
   }
 
-  // var status = await Permission.phone.status;
-  //
-  // if (!status.isGranted) {
-  //   status = await Permission.phone.request();
-  //   if (!status.isGranted) return;
-  // }
-
   VolumeController.instance.showSystemUI = true;
 
-  // if (!await TelephonyBridge.checkOverlayPermission()) {
-  //   await TelephonyBridge.requestOverlayPermission();
-  // }
   if (ConfigProvider.riderGesturesEnabled) {
     magnetService.start();
-    MagnetNavigationController.instance.start();
+    MagnetNavigator.instance.start();
   }
 
   const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings(
@@ -175,9 +166,7 @@ void main() async {
 
   await showMotoDashNotification();
 
-  // runZonedGuarded(() {
   runApp(const MotoDash());
-  // }, log.exception);
 }
 
 class MotoDash extends StatefulWidget {
@@ -192,22 +181,24 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    if (ConfigProvider.adaptiveVolumeEnabled) AdaptiveVolumeService.init();
+    CallStateListener.init();
     WakelockPlus.enable();
 
-    CallStateListener.init();
-
     // Retry after the first frame — navigator is guaranteed to be mounted by then
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _handlePendingNotificationAction();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _handlePendingNotificationAction());
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    WakelockPlus.disable();
-    magnetService.stop();
+
+    if (ConfigProvider.adaptiveVolumeEnabled) AdaptiveVolumeService.dispose();
     CallStateListener.dispose();
+    WakelockPlus.disable();
+    magnetService.dispose();
+
     super.dispose();
   }
 
@@ -233,14 +224,14 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
       create: (_) => NavigationGraph.instance,
       child: MaterialApp(
         navigatorKey: navigatorKey,
-        home: showSetupScreen ? const SetupScreen() : const RootScreen(),
+        home: showSetupScreen ? const PermissionsScreen() : const RootScreen(),
         theme: ThemeData(fontFamily: 'AtkinsonHyperlegible'),
         onGenerateRoute: (settings) {
           late Widget page;
 
           switch (settings.name) {
             case AppRoutes.grantPermission:
-              page = const SetupScreen();
+              page = const PermissionsScreen();
               break;
             case AppRoutes.settings:
               page = const SettingsScreen();

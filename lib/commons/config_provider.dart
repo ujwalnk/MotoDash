@@ -89,7 +89,7 @@ class ConfigProvider {
   static int get adaptiveVolumeActivateMinSpeed =>
       prefs.getDouble(PrefKeys.adaptiveVolumeActivateMinSpeed)?.toInt() ?? 50;
 
-  static double get adaptiveVolumeSamplingInterval => prefs.getDouble(PrefKeys.adaptiveVolumeSpeedInterval) ?? 3;
+  static int get adaptiveVolumeSamplingInterval => prefs.getDouble(PrefKeys.adaptiveVolumeSpeedInterval)?.toInt() ?? 3;
 
   // -------------------------------------------------------------------------------------------------------------------
   // Miscellaneous
