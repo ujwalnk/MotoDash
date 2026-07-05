@@ -13,13 +13,17 @@ class AdaptiveVolumeService {
   static double? _currentSpeed;
   static int _volumeOffset = 0;
 
-  static late final double _activationSpeed;
+  static late final int _activationSpeed;
   static late final double speedInterval;
   static late final int maximumVolumeSteps;
 
   static Future<void> init() async {
-    // Catch double starts
-    if (_timer != null) return;
+    // Catch double stars & Enable only if user has enabled the setting
+    if (!ConfigProvider.adaptiveVolumeEnabled || _timer != null) return;
+
+    _activationSpeed = ConfigProvider.adaptiveVolumeActivateMinSpeed;
+    speedInterval = ConfigProvider.adaptiveVolumeSpeedInterval;
+    maximumVolumeSteps = ConfigProvider.adaptiveVolumeMaxSteps;
 
     // Continue updating periodically.
     _timer = Timer.periodic(
@@ -67,6 +71,8 @@ class AdaptiveVolumeService {
   }
 
   static Future<void> dispose() async {
+    if (!ConfigProvider.adaptiveVolumeEnabled) return;
+
     // Cancel timer
     _timer?.cancel();
     _timer = null;

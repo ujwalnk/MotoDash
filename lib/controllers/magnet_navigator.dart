@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/dash_action.dart';
 import 'package:moto_dash/controllers/magnet_intent_detector.dart';
 import 'package:moto_dash/navigation_graph.dart';
@@ -23,11 +24,15 @@ class MagnetNavigator {
   // START / STOP
   // -------------------------
 
-  void start() {
-    _sub = magnetService.intents.listen(_handleIntent);
+  void init() {
+    if (!ConfigProvider.riderGesturesEnabled) return;
+    magnetIntentService.init();
+    _sub = magnetIntentService.intents.listen(_handleIntent);
   }
 
-  void stop() {
+  void dispose() {
+    if (!ConfigProvider.riderGesturesEnabled) return;
+    magnetIntentService.dispose();
     _sub?.cancel();
   }
 

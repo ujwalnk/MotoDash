@@ -139,17 +139,13 @@ class MagnetIntentService {
   // START / STOP
   // ==========================
 
-  void start() {
+  void init() {
     _startSampling(_slowSampling);
   }
 
-  void stop() {
+  void dispose() {
     _sub?.cancel();
     _activeTimer?.cancel();
-  }
-
-  void dispose() {
-    stop();
     _intentController.close();
   }
 
