@@ -108,40 +108,42 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
         navigatorKey: navigatorKey,
         home: showSetupScreen ? const PermissionsScreen() : const RootScreen(),
         theme: ThemeData(fontFamily: 'AtkinsonHyperlegible'),
-        onGenerateRoute: (settings) {
-          late Widget page;
-
-          switch (settings.name) {
-            case AppRoutes.grantPermission:
-              page = const PermissionsScreen();
-              break;
-            case AppRoutes.settings:
-              page = const SettingsScreen();
-              break;
-            case AppRoutes.screenSaver:
-              page = const ScreenSaver();
-              break;
-            case AppRoutes.screenSaverBlank:
-              page = const ScreenSaverBlank();
-              break;
-            case AppRoutes.dashboard:
-              page = const RootScreen();
-              break;
-            default:
-              throw Exception('Unknown route: ${settings.name}');
-          }
-
-          return PageRouteBuilder(
-            settings: settings,
-            transitionDuration: const Duration(milliseconds: 200),
-            reverseTransitionDuration: const Duration(milliseconds: 200),
-            pageBuilder: (_, __, ___) => page,
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-          );
-        },
+        onGenerateRoute: router,
       ),
+    );
+  }
+
+  Route<dynamic>? router(settings) {
+    late Widget page;
+
+    switch (settings.name) {
+      case AppRoutes.grantPermission:
+        page = const PermissionsScreen();
+        break;
+      case AppRoutes.settings:
+        page = const SettingsScreen();
+        break;
+      case AppRoutes.screenSaver:
+        page = const ScreenSaver();
+        break;
+      case AppRoutes.screenSaverBlank:
+        page = const ScreenSaverBlank();
+        break;
+      case AppRoutes.dashboard:
+        page = const RootScreen();
+        break;
+      default:
+        throw Exception('Unknown route: ${settings.name}');
+    }
+
+    return PageRouteBuilder(
+      settings: settings,
+      transitionDuration: const Duration(milliseconds: 200),
+      reverseTransitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
     );
   }
 }
