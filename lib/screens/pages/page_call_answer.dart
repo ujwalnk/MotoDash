@@ -10,7 +10,7 @@ import '../../navigation_graph.dart';
 
 const String kDisplayValueKey = "display_contact";
 
-Future<List<DashAction>> buildCallActiveActions() async {
+Future<List<DashAction>> buildCallAnswerActions() async {
   return [
     DashAction(label: NavigationGraph.instance.data[kDisplayValueKey], icons: [], action: () {}),
     DashAction(

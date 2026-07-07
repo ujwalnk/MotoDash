@@ -5,6 +5,7 @@
 import 'package:moto_dash/commons/dash_action.dart';
 import 'package:moto_dash/navigation_graph.dart';
 import 'package:moto_dash/screens/pages/page_call_active.dart';
+import 'package:moto_dash/screens/pages/page_call_answer.dart';
 import 'package:moto_dash/screens/pages/page_call_favourites.dart';
 import 'package:moto_dash/screens/pages/page_call_log.dart';
 import 'package:moto_dash/screens/pages/page_call_navigation.dart';
@@ -20,4 +21,5 @@ final Map<CurrentPage, Future<List<DashAction>> Function()> menuActions = {
   CurrentPage.callFavPage: buildCallFavActions,
   CurrentPage.callLogPage: buildCallLogActions,
   CurrentPage.callActPage: buildCallActiveActions,
+  CurrentPage.callAnsPage: buildCallAnswerActions,
 };
