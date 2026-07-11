@@ -6,18 +6,20 @@ import 'dart:async';
 
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/dash_action.dart';
-import 'package:moto_dash/controllers/magnet_intent_detector.dart';
 import 'package:moto_dash/navigation_graph.dart';
 import 'package:moto_dash/screens/pages/page_map.dart';
 import 'package:moto_dash/services/global_service.dart';
 
-class MagnetNavigator {
-  MagnetNavigator._();
+import 'navigation_intent_bus.dart';
 
-  static final MagnetNavigator instance = MagnetNavigator._();
+enum NavigationIntent { previous, next, select, back, emergency }
 
-  StreamSubscription<AppIntent>? _sub;
+class NavigationIntentHandler {
+  NavigationIntentHandler._();
 
+  static final NavigationIntentHandler instance = NavigationIntentHandler._();
+
+  StreamSubscription<NavigationIntent>? _sub;
   int _selectedIndex = 0;
 
   // -------------------------
@@ -27,21 +29,22 @@ class MagnetNavigator {
   void init() {
     if (!ConfigProvider.riderGesturesEnabled) return;
     magnetIntentService.init();
-    _sub = magnetIntentService.intents.listen(_handleIntent);
+    _sub = NavigationIntentBus.stream.listen(_handleIntent);
   }
 
   void dispose() {
     if (!ConfigProvider.riderGesturesEnabled) return;
     magnetIntentService.dispose();
     _sub?.cancel();
+    NavigationIntentBus.dispose();
   }
 
   // -------------------------
   // INTENT HANDLER
   // -------------------------
 
-  Future<void> _handleIntent(AppIntent intent) async {
-    final navigator = NavigationGraph.instance;
+  Future<void> _handleIntent(NavigationIntent intent) async {
+    final NavigationGraph navigator = NavigationGraph.instance;
     final builder = menuActions[navigator.page];
 
     if (builder == null) return;
@@ -49,13 +52,13 @@ class MagnetNavigator {
     final List<DashAction> items = await builder();
     final int total = items.length + (navigator.canPop ? 1 : 0);
 
-    // Safety
+    // Rotate through the available menu
     if (_selectedIndex >= total) {
       _selectedIndex = 0;
     }
 
     switch (intent) {
-      case AppIntent.next:
+      case NavigationIntent.next:
         // Skip reading the items that don't have any actions
         do {
           _selectedIndex = (_selectedIndex + 1) % total;
@@ -64,7 +67,7 @@ class MagnetNavigator {
         _speak(items, navigator);
         break;
 
-      case AppIntent.select:
+      case NavigationIntent.select:
         final oldPage = navigator.page;
 
         _performAction(items, navigator);
@@ -83,7 +86,7 @@ class MagnetNavigator {
         }
         break;
 
-      case AppIntent.back:
+      case NavigationIntent.back:
         navigator.pop();
 
         // Reset index
@@ -95,6 +98,21 @@ class MagnetNavigator {
           final newItems = await newBuilder();
           _speak(newItems, navigator);
         }
+        break;
+
+      case NavigationIntent.previous:
+        // TODO: Untested
+        // Skip reading the items that don't have any actions
+        do {
+          _selectedIndex = (_selectedIndex - 1) % total;
+        } while (_selectedIndex < items.length && items[_selectedIndex].action == null);
+
+        _speak(items, navigator);
+        break;
+
+      case NavigationIntent.emergency:
+        // TODO: Implement this, & test it
+        _speak(items, navigator);
         break;
     }
   }

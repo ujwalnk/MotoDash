@@ -68,7 +68,7 @@ class _PermItem {
     required this.icon,
     required this.kind,
     this.permission,
-    this.granted = false,
+    this.granted = false, // ignore: unused_element_parameter
   });
 }
 
@@ -84,43 +84,43 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
     _PermItem(
       title: 'Phone',
       subtitle: 'Detect call state, make / answer / end calls',
-      icon: Icons.phone_outlined,
+      icon: Icons.phone_rounded,
       kind: _PermKind.runtime,
       permission: [Permission.phone],
     ),
-    _PermItem(title: 'Call Log', subtitle: 'Show recent calls', icon: Icons.history_outlined, kind: _PermKind.callLog),
+    _PermItem(title: 'Call Log', subtitle: 'Show recent calls', icon: Icons.history_rounded, kind: _PermKind.callLog),
     _PermItem(
       title: 'Contacts',
       subtitle: 'Show contact names and favourites',
-      icon: Icons.contacts_outlined,
+      icon: Icons.contacts_rounded,
       kind: _PermKind.runtime,
       permission: [Permission.contacts],
     ),
     _PermItem(
       title: 'Display over other apps',
       subtitle: 'Show the incoming call UI above other apps',
-      icon: Icons.layers_outlined,
+      icon: Icons.layers_rounded,
       kind: _PermKind.runtime,
       permission: [Permission.systemAlertWindow],
     ),
     _PermItem(
       title: 'Notifications',
       subtitle: 'Show the persistent MotoDash notification',
-      icon: Icons.notifications_outlined,
+      icon: Icons.notifications_none_rounded,
       kind: _PermKind.runtime,
       permission: [Permission.notification],
     ),
     _PermItem(
       title: 'Battery optimization',
       subtitle: 'Keep MotoDash running reliably in the background',
-      icon: Icons.battery_charging_full_outlined,
+      icon: Icons.battery_full_rounded,
       kind: _PermKind.runtime,
       permission: [Permission.ignoreBatteryOptimizations],
     ),
     _PermItem(
       title: 'Location',
       subtitle: 'Determine your vehicle speed for Speed Adaptive Volume',
-      icon: Icons.location_on_outlined,
+      icon: Icons.location_on_rounded,
       kind: _PermKind.runtime,
       permission: [Permission.location, Permission.locationAlways],
     ),

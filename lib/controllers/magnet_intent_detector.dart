@@ -6,18 +6,15 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:moto_dash/commons/config_provider.dart';
+import 'package:moto_dash/controllers/navigation_intent_bus.dart';
 import 'package:moto_dash/services/beep_service.dart';
 import 'package:moto_dash/services/global_service.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:statemachine/statemachine.dart' as machine;
 
-enum AppIntent { next, select, back }
+import 'navigation_intent_handler.dart' show NavigationIntent;
 
 class MagnetIntentService {
-  final _intentController = StreamController<AppIntent>.broadcast();
-
-  Stream<AppIntent> get intents => _intentController.stream;
-
   StreamSubscription<MagnetometerEvent>? _sub;
 
   // ==========================
@@ -25,6 +22,7 @@ class MagnetIntentService {
   // ==========================
 
   static final Duration _timeoutDuration = Duration(milliseconds: ConfigProvider.riderGesturesTapDelay.toInt());
+  static bool humanContextTimeout = true; // Hotfix: Speak the current selected item after timeout
 
   // ==========================
   // SAMPLING CONTROL
@@ -146,7 +144,6 @@ class MagnetIntentService {
   void dispose() {
     _sub?.cancel();
     _activeTimer?.cancel();
-    _intentController.close();
   }
 
   // ==========================
@@ -171,8 +168,8 @@ class MagnetIntentService {
       _baseline = (_baseline * 0.99) + (magnitude * 0.01);
     }
 
-    final enterThreshold = _baseline + _enterDelta;
-    final exitThreshold = _baseline + _exitDelta;
+    final double enterThreshold = _baseline + _enterDelta;
+    final double exitThreshold = _baseline + _exitDelta;
 
     if (magnitude > enterThreshold) {
       if (_outerM.current == _stateFar) {
@@ -191,13 +188,12 @@ class MagnetIntentService {
 
   void _emitIntentFromCount(int count) {
     lastNavigationWasMagnet = true;
-
     if (count == 1) {
-      _intentController.add(AppIntent.next);
+      NavigationIntentBus.emit(NavigationIntent.next);
     } else if (count == 2) {
-      _intentController.add(AppIntent.select);
-    } else if (count >= 3) {
-      _intentController.add(AppIntent.back);
+      NavigationIntentBus.emit(NavigationIntent.select);
+    } else if (count == 3) {
+      NavigationIntentBus.emit(NavigationIntent.back);
     }
   }
 }

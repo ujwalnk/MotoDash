@@ -7,7 +7,7 @@ import 'package:flutter_settings_screens/flutter_settings_screens.dart' show Set
 import 'package:moto_dash/commons/call_state.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
-import 'package:moto_dash/controllers/magnet_navigator.dart';
+import 'package:moto_dash/controllers/navigation_intent_handler.dart';
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screens/screen_permissions.dart';
 import 'package:moto_dash/screens/screen_root.dart';
@@ -35,7 +35,7 @@ void main() async {
   await ConfigProvider.init();
   await NotificationService.init(navigatorKey);
   await Settings.init(cacheProvider: SharePreferenceCache());
-  MagnetNavigator.instance.init();
+  NavigationIntentHandler.instance.init();
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   VolumeController.instance.showSystemUI = ConfigProvider.showVolumeTip;
@@ -114,27 +114,14 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
   }
 
   Route<dynamic>? router(settings) {
-    late Widget page;
-
-    switch (settings.name) {
-      case AppRoutes.grantPermission:
-        page = const PermissionsScreen();
-        break;
-      case AppRoutes.settings:
-        page = const SettingsScreen();
-        break;
-      case AppRoutes.screenSaver:
-        page = const ScreenSaver();
-        break;
-      case AppRoutes.screenSaverBlank:
-        page = const ScreenSaverBlank();
-        break;
-      case AppRoutes.dashboard:
-        page = const RootScreen();
-        break;
-      default:
-        throw Exception('Unknown route: ${settings.name}');
-    }
+    final Widget page = switch (settings.name) {
+      AppRoutes.grantPermission => const PermissionsScreen(),
+      AppRoutes.settings => const SettingsScreen(),
+      AppRoutes.screenSaver => const ScreenSaver(),
+      AppRoutes.screenSaverBlank => const ScreenSaverBlank(),
+      AppRoutes.dashboard => const RootScreen(),
+      _ => throw Exception('Unknown route: ${settings.name}'),
+    };
 
     return PageRouteBuilder(
       settings: settings,
