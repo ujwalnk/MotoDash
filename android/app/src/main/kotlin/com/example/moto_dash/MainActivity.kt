@@ -13,6 +13,7 @@ import android.view.KeyEvent
 import androidx.core.app.ActivityCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
@@ -20,15 +21,17 @@ class MainActivity : FlutterActivity() {
     private val ASSISTANT_CHANNEL = "in.madilu.motodash/assistant"
     private val CALL_CHANNEL = "in.madilu.motodash/telephony"
     private val PERMISSIONS_CHANNEL = "in.madilu.motodash/permissions"
+    private val INPUT_CHANNEL = "in.madilu.motodash/input_events"
 
     private lateinit var audio: AudioManager
     private var isSplitScreen: Boolean = false
     private var pendingPermissionResult: MethodChannel.Result? = null
+    private var eventSink: EventChannel.EventSink? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
-        val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         // --- Assistant & Media Channel ---
         MethodChannel(
@@ -82,7 +85,7 @@ class MainActivity : FlutterActivity() {
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger, CALL_CHANNEL
         ).setMethodCallHandler { call, result ->
-            val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             when (call.method) {
                 "getContactName" -> {
@@ -185,14 +188,12 @@ class MainActivity : FlutterActivity() {
 
         // --- Permissions Channel ---
         MethodChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            PERMISSIONS_CHANNEL
+            flutterEngine.dartExecutor.binaryMessenger, PERMISSIONS_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
                 "isCallLogGranted" -> result.success(
                     ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.READ_CALL_LOG
+                        this, Manifest.permission.READ_CALL_LOG
                     ) == PackageManager.PERMISSION_GRANTED
                 )
 
@@ -212,9 +213,30 @@ class MainActivity : FlutterActivity() {
                     result.success(null)
                 }
 
+                "openAccessibilitySettings" -> {
+                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    result.success(true)
+                }
+
+                "isAccessibilityServiceEnabled" -> {
+                    result.success(isAccessibilityServiceEnabled())
+                }
+
                 else -> result.notImplemented()
             }
         }
+
+        EventChannel(
+            flutterEngine.dartExecutor.binaryMessenger, INPUT_CHANNEL
+        ).setStreamHandler(object : EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                InputEventBus.eventSink = events
+            }
+
+            override fun onCancel(arguments: Any?) {
+                InputEventBus.eventSink = null
+            }
+        })
     }
 
     override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean) {
@@ -259,5 +281,37 @@ class MainActivity : FlutterActivity() {
         }
 
         return null
+    }
+
+    private fun isAccessibilityServiceEnabled(): Boolean {
+
+        val expected = "$packageName/${MotoDashAccessibilityService::class.java.name}"
+
+        val enabled = Settings.Secure.getString(
+            contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: return false
+
+        return enabled.split(':').any { it.equals(expected, ignoreCase = true) }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+
+        val device = event.device
+
+        val payload = hashMapOf<String, Any?>(
+            "keyCode" to event.keyCode,
+            "scanCode" to event.scanCode,
+            "action" to event.action,
+            "repeatCount" to event.repeatCount,
+            "deviceId" to event.deviceId,
+            "deviceName" to device?.name,
+            "eventTime" to event.eventTime
+        )
+
+//        eventSink?.success(payload)
+        InputEventBus.eventSink?.success(payload)
+//        return super.dispatchKeyEvent(event)
+
+        return true
     }
 }

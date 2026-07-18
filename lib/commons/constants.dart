@@ -45,11 +45,19 @@ abstract class PrefKeys {
 
   // Rider Gestures Domain
   static const String riderGesturesEnable = "rider_gestures_enable";
-  static const String riderGesturesStrength = "rider_gestures_strength";
-  static const String riderGesturesIntentEmissionDelay = "rider_gestures_intent_emission_delay";
   static const String riderGesturesTtsOnBtOnly = "rider_gestures_tts_on_bt_only";
 
-  // Adaptive Volume
+  // Rider Gestures Bluetooth HID sub domain
+  static const String riderGesturesBtEnable = "rider_gestures_bt_enable";
+  static const String riderGesturesHidBtKeys = 'rider_gestures_hid_keys'; // TODO: Rename to BtKeys remove HID
+  static const String riderGesturesBtIntentEmissionDelay = "rider_gestures_bt_intent_emission_delay";
+
+  // Rider Gestures Magnet sub domain
+  static const String riderGesturesMagnetEnable = "rider_gestures_magnet_enable";
+  static const String riderGesturesMagnetStrength = "rider_gestures_magnet_strength";
+  static const String riderGesturesMagnetIntentEmissionDelay = "rider_gestures_magnet_intent_emission_delay";
+
+  // Adaptive Volume Domain
   static const String adaptiveVolumeEnable = "misc_adaptive_volume_enable";
   static const String adaptiveVolumeSpeedInterval = "adaptive_volume_speed_interval";
   static const String adaptiveVolumeMaxSteps = "adaptive_volume_max_steps";

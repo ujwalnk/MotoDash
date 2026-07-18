@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/dash_action.dart';
 import 'package:moto_dash/navigation_graph.dart';
@@ -19,6 +20,10 @@ class NavigationIntentHandler {
 
   static final NavigationIntentHandler instance = NavigationIntentHandler._();
 
+  static bool _state = true;
+
+  static void setState(bool value) => _state = value;
+
   StreamSubscription<NavigationIntent>? _sub;
   int _selectedIndex = 0;
 
@@ -27,16 +32,15 @@ class NavigationIntentHandler {
   // -------------------------
 
   void init() {
-    if (!ConfigProvider.riderGesturesEnabled) return;
-    magnetIntentService.init();
+    if (ConfigProvider.riderGesturesMagnetEnabled) magnetIntentService.init();
+    // if (ConfigProvider.riderGesturesBtEnabled) BtIntentDetector.init();
     _sub = NavigationIntentBus.stream.listen(_handleIntent);
   }
 
   void dispose() {
-    if (!ConfigProvider.riderGesturesEnabled) return;
-    magnetIntentService.dispose();
+    if (ConfigProvider.riderGesturesMagnetEnabled) magnetIntentService.dispose();
     _sub?.cancel();
-    NavigationIntentBus.dispose();
+    // if (ConfigProvider.riderGesturesBtEnabled) BtIntentDetector.dispose();
   }
 
   // -------------------------
@@ -44,6 +48,11 @@ class NavigationIntentHandler {
   // -------------------------
 
   Future<void> _handleIntent(NavigationIntent intent) async {
+    debugPrint("Got intent: $intent");
+
+    debugPrint("_state = $_state");
+    if (!_state) return;
+
     final NavigationGraph navigator = NavigationGraph.instance;
     final builder = menuActions[navigator.page];
 

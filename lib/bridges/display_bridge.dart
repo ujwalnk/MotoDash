@@ -29,17 +29,8 @@ abstract class SplitScreenState<T extends StatefulWidget> extends State<T> with 
     final value =
         await const MethodChannel('in.madilu.motodash/assistant').invokeMethod<bool>('getSplitScreenState') ?? false;
 
-    debugPrint("Native returned: $value");
-    debugPrint("Current state: $isSplitScreen");
+    if (!mounted) return;
 
-    if (!mounted) {
-      debugPrint("Returning");
-      return;
-    }
-
-    setState(() {
-      isSplitScreen = value;
-      debugPrint("Running in split screen");
-    });
+    setState(() => isSplitScreen = value);
   }
 }

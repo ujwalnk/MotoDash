@@ -7,13 +7,14 @@ import 'package:flutter_settings_screens/flutter_settings_screens.dart' show Set
 import 'package:moto_dash/commons/call_state.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
+import 'package:moto_dash/controllers/bt_hid_intent_detector/bt_intent_detector.dart';
 import 'package:moto_dash/controllers/navigation_intent_handler.dart';
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screens/screen_permissions.dart';
 import 'package:moto_dash/screens/screen_root.dart';
 import 'package:moto_dash/screens/screen_saver.dart';
 import 'package:moto_dash/screens/screen_saver_blank.dart';
-import 'package:moto_dash/screens/screen_settings.dart';
+import 'package:moto_dash/screens/screen_setting/screen_settings.dart';
 import 'package:moto_dash/services/adaptive_volume_service.dart';
 import 'package:moto_dash/services/global_service.dart';
 import 'package:moto_dash/services/notification_service.dart';
@@ -65,7 +66,9 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    // Get all the services up and running
     AdaptiveVolumeService.init();
+    BtIntentDetector.init();
     CallStateListener.init();
     WakelockPlus.enable();
 
@@ -77,7 +80,9 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
 
+    // Clean disposal of all the services
     AdaptiveVolumeService.dispose();
+    BtIntentDetector.dispose();
     CallStateListener.dispose();
     WakelockPlus.disable();
     magnetIntentService.dispose();

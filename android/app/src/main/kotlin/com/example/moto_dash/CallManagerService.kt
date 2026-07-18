@@ -27,19 +27,13 @@ class CallManagerService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun buildNotification(): Notification {
-        return Notification.Builder(this, CHANNEL_ID)
-            .setContentTitle("MotoDash")
-            .setContentText("Ride active")
-            .setSmallIcon(android.R.drawable.ic_menu_call)
-            .setOngoing(true)
-            .build()
+        return Notification.Builder(this, CHANNEL_ID).setContentTitle("MotoDash").setContentText("Ride active")
+            .setSmallIcon(android.R.drawable.ic_menu_call).setOngoing(true).build()
     }
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Call Manager",
-            NotificationManager.IMPORTANCE_LOW
+            CHANNEL_ID, "Call Manager", NotificationManager.IMPORTANCE_LOW
         )
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)

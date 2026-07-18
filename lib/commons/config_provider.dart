@@ -2,8 +2,11 @@
 // Created On: 05 Feb, 2026
 // All configuration defaults are defined here to maintain a consistent list.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart' show Color, Colors;
 import 'package:moto_dash/commons/constants.dart';
+import 'package:moto_dash/controllers/bt_hid_intent_detector/hid_key_registry.dart';
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
 /// Provides centralized access to persisted application configuration values.
@@ -68,13 +71,38 @@ class ConfigProvider {
   // Rider gestures
   // -------------------------------------------------------------------------------------------------------------------
 
-  static bool get riderGesturesEnabled => prefs.getBool(PrefKeys.riderGesturesEnable) ?? false;
-
-  static double get riderGesturesStrength => prefs.getDouble(PrefKeys.riderGesturesStrength) ?? 1000.0;
-
-  static double get riderGesturesTapDelay => prefs.getDouble(PrefKeys.riderGesturesIntentEmissionDelay) ?? 2000.0;
-
   static bool get riderGesturesTtsOnBtOnly => prefs.getBool(PrefKeys.riderGesturesTtsOnBtOnly) ?? true;
+
+  // Rider gestures - Bluetooth HID
+
+  static bool get riderGesturesBtEnabled => prefs.getBool(PrefKeys.riderGesturesBtEnable) ?? false;
+
+  static int get riderGesturesBtTapDelay =>
+      prefs.getDouble(PrefKeys.riderGesturesBtIntentEmissionDelay)?.toInt() ?? 250;
+
+  /// All registered Bluetooth HID keys, decoded from a single JSON string. Returns an empty list when nothing has been
+  /// registered yet.
+  static List<HidRegisteredKey> get riderGesturesHidKeys {
+    final String? raw = prefs.getString(PrefKeys.riderGesturesHidBtKeys);
+    if (raw == null || raw.isEmpty) return [];
+
+    final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
+    return decoded.map((e) => HidRegisteredKey.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  /// Persists the entire list of registered HID keys as a single JSON string.
+  static Future<void> setRiderGesturesHidKeys(List<HidRegisteredKey> keys) async {
+    final String encoded = jsonEncode(keys.map((k) => k.toJson()).toList());
+    await prefs.setString(PrefKeys.riderGesturesHidBtKeys, encoded);
+  }
+
+  // Rider gestures - Magnet
+  static bool get riderGesturesMagnetEnabled => prefs.getBool(PrefKeys.riderGesturesMagnetEnable) ?? false;
+
+  static double get riderGesturesMagnetStrength => prefs.getDouble(PrefKeys.riderGesturesMagnetStrength) ?? 1000.0;
+
+  static double get riderGesturesMagnetTapDelay =>
+      prefs.getDouble(PrefKeys.riderGesturesMagnetIntentEmissionDelay) ?? 2000.0;
 
   // -------------------------------------------------------------------------------------------------------------------
   // Adaptive Volume

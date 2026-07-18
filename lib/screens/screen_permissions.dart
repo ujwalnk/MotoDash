@@ -50,9 +50,23 @@ class _NativePermissions {
       // Surfaced via the next status refresh.
     }
   }
+
+  static Future<bool> isAccessibilityEnabled() async {
+    try {
+      return await _channel.invokeMethod<bool>('isAccessibilityServiceEnabled') ?? false;
+    } on PlatformException {
+      return false;
+    }
+  }
+
+  static Future<void> openAccessibilitySettings() async {
+    try {
+      await _channel.invokeMethod('openAccessibilitySettings');
+    } on PlatformException {}
+  }
 }
 
-enum _PermKind { runtime, callLog, notificationListener }
+enum _PermKind { runtime, callLog, notificationListener, accessibility }
 
 class _PermItem {
   final String title;
@@ -124,6 +138,12 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
       kind: _PermKind.runtime,
       permission: [Permission.location, Permission.locationAlways],
     ),
+    _PermItem(
+      title: 'Accessibility',
+      subtitle: 'Receive Bluetooth remote button presses while MotoDash is running',
+      icon: Icons.accessibility_new_rounded,
+      kind: _PermKind.accessibility,
+    ),
   ];
 
   bool _checking = true;
@@ -170,6 +190,8 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
           }
         }
         return true;
+      case _PermKind.accessibility:
+        return _NativePermissions.isAccessibilityEnabled();
     }
   }
 
@@ -189,6 +211,9 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
             await permission.request();
           }
         }
+        break;
+      case _PermKind.accessibility:
+        await _NativePermissions.openAccessibilitySettings();
         break;
     }
 

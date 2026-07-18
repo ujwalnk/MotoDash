@@ -21,7 +21,7 @@ class MagnetIntentService {
   // TIMEOUT DURATION
   // ==========================
 
-  static final Duration _timeoutDuration = Duration(milliseconds: ConfigProvider.riderGesturesTapDelay.toInt());
+  static final Duration _timeoutDuration = Duration(milliseconds: ConfigProvider.riderGesturesMagnetTapDelay.toInt());
   static bool humanContextTimeout = true; // Hotfix: Speak the current selected item after timeout
 
   // ==========================
@@ -49,8 +49,8 @@ class MagnetIntentService {
   double _baseline = 0;
   bool _baselineInitialized = false;
 
-  static final double _enterDelta = ConfigProvider.riderGesturesStrength;
-  static final double _exitDelta = ConfigProvider.riderGesturesStrength * 0.4;
+  static final double _enterDelta = ConfigProvider.riderGesturesMagnetStrength;
+  static final double _exitDelta = ConfigProvider.riderGesturesMagnetStrength * 0.4;
 
   // ==========================
   // TAP GROUPING
