@@ -9,6 +9,7 @@ import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/settings_tiles.dart';
 import 'package:moto_dash/controllers/bt_hid_intent_detector/hid_keys_manager.dart';
+import 'package:moto_dash/screens/screen_setting/sections/ble_keys_manager.dart';
 import 'package:moto_dash/screens/screen_setting/setting_card.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
@@ -30,13 +31,6 @@ class _RiderGesturesSettingsSectionState extends State<RiderGesturesSettingsSect
           prefKey: PrefKeys.riderGesturesMagnetEnable,
           defaultValue: false,
           onChanged: (_) => setState(() {}),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 4, bottom: 12),
-          child: Text(
-            "Control Moto Dash using a magnetic ring or bluetooth remote.",
-            style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
-          ),
         ),
         if (ConfigProvider.riderGesturesMagnetEnabled) ...[
           const PrefTextFieldTile(
@@ -94,6 +88,7 @@ class _RiderGesturesSettingsSectionState extends State<RiderGesturesSettingsSect
             ),
           ),
         ],
+        // TODO: Move to another section
         PrefSwitchTile(
           title: "Bluetooth HID Device",
           prefKey: PrefKeys.riderGesturesBtEnable,
@@ -102,6 +97,16 @@ class _RiderGesturesSettingsSectionState extends State<RiderGesturesSettingsSect
         ),
         if (ConfigProvider.riderGesturesBtEnabled) ...[
           const Padding(padding: EdgeInsets.only(bottom: 12), child: HidKeysManager()),
+        ],
+        // TODO: Move to another section
+        PrefSwitchTile(
+          title: "Bluetooth LE Device",
+          prefKey: PrefKeys.riderGesturesBleEnable,
+          defaultValue: false,
+          onChanged: (_) => setState(() {}),
+        ),
+        if (ConfigProvider.riderGesturesBleEnabled) ...[
+          const Padding(padding: EdgeInsets.only(bottom: 12), child: BleKeysManager()),
         ],
         PrefSwitchTile(title: "TTS only on bluetooth", prefKey: PrefKeys.riderGesturesTtsOnBtOnly, defaultValue: true),
         Padding(

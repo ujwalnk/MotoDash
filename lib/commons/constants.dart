@@ -52,6 +52,15 @@ abstract class PrefKeys {
   static const String riderGesturesHidBtKeys = 'rider_gestures_hid_keys'; // TODO: Rename to BtKeys remove HID
   static const String riderGesturesBtIntentEmissionDelay = "rider_gestures_bt_intent_emission_delay";
 
+  // Rider Gestures BLE sub domain
+  static const String riderGesturesBleEnable = "rider_gestures_ble_enable";
+  static const String riderGesturesBleDeviceId = "rider_gestures_ble_device_id";
+  static const String riderGesturesBleDeviceName = "rider_gestures_ble_device_name";
+  static const String riderGesturesBleServiceUuid = "rider_gestures_ble_service_uuid";
+  static const String riderGesturesBleCharacteristicUuid = "rider_gestures_ble_characteristic_uuid";
+  static const String riderGesturesBleKeys = "rider_gestures_ble_keys";
+  static const String riderGesturesBleIntentEmissionDelay = "rider_gestures_ble_intent_emission_delay";
+
   // Rider Gestures Magnet sub domain
   static const String riderGesturesMagnetEnable = "rider_gestures_magnet_enable";
   static const String riderGesturesMagnetStrength = "rider_gestures_magnet_strength";
@@ -67,6 +76,14 @@ abstract class PrefKeys {
   // Miscellaneous
   static const String showVolumeTip = "misc_show_volume_tip";
   static const String miscMaxCallLogsListed = "misc_max_call_logs_listed";
+}
+
+abstract class BleConstants {
+  /// Must match SERVICE_UUID in the ESP32 firmware.
+  static const String motoDashRemoteServiceUuid = "12345678-1234-1234-1234-1234567890ab";
+
+  /// Must match CHARACTERISTIC_UUID in the ESP32 firmware.
+  static const String motoDashRemoteCharacteristicUuid = "87654321-4321-4321-4321-ba0987654321";
 }
 
 /// Defines the named route paths used for application navigation.

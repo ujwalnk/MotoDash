@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart' show Color, Colors;
 import 'package:moto_dash/commons/constants.dart';
+import 'package:moto_dash/controllers/ble_hid_intent_detector/ble_registered_key.dart';
 import 'package:moto_dash/controllers/bt_hid_intent_detector/hid_key_registry.dart';
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
@@ -94,6 +95,54 @@ class ConfigProvider {
   static Future<void> setRiderGesturesHidKeys(List<HidRegisteredKey> keys) async {
     final String encoded = jsonEncode(keys.map((k) => k.toJson()).toList());
     await prefs.setString(PrefKeys.riderGesturesHidBtKeys, encoded);
+  }
+
+  // Rider gestures - Bluetooth LE (BLE)
+
+  static bool get riderGesturesBleEnabled => prefs.getBool(PrefKeys.riderGesturesBleEnable) ?? false;
+
+  static int get riderGesturesBleTapDelay =>
+      prefs.getDouble(PrefKeys.riderGesturesBleIntentEmissionDelay)?.toInt() ?? 250;
+
+  static String? get riderGesturesBleDeviceId => prefs.getString(PrefKeys.riderGesturesBleDeviceId);
+
+  static String? get riderGesturesBleDeviceName => prefs.getString(PrefKeys.riderGesturesBleDeviceName);
+
+  static String? get riderGesturesBleServiceUuid => prefs.getString(PrefKeys.riderGesturesBleServiceUuid);
+
+  static String? get riderGesturesBleCharacteristicUuid => prefs.getString(PrefKeys.riderGesturesBleCharacteristicUuid);
+
+  static Future<void> setRiderGesturesBleDevice({
+    required String deviceId,
+    required String deviceName,
+    required String serviceUuid,
+    required String characteristicUuid,
+  }) async {
+    await prefs.setString(PrefKeys.riderGesturesBleDeviceId, deviceId);
+    await prefs.setString(PrefKeys.riderGesturesBleDeviceName, deviceName);
+    await prefs.setString(PrefKeys.riderGesturesBleServiceUuid, serviceUuid);
+    await prefs.setString(PrefKeys.riderGesturesBleCharacteristicUuid, characteristicUuid);
+  }
+
+  static Future<void> clearRiderGesturesBleDevice() async {
+    await prefs.remove(PrefKeys.riderGesturesBleDeviceId);
+    await prefs.remove(PrefKeys.riderGesturesBleDeviceName);
+    await prefs.remove(PrefKeys.riderGesturesBleServiceUuid);
+    await prefs.remove(PrefKeys.riderGesturesBleCharacteristicUuid);
+  }
+
+  /// All registered BLE buttons, decoded from a single JSON string.
+  static List<BleRegisteredKey> get riderGesturesBleKeys {
+    final String? raw = prefs.getString(PrefKeys.riderGesturesBleKeys);
+    if (raw == null || raw.isEmpty) return [];
+
+    final List<dynamic> decoded = jsonDecode(raw) as List<dynamic>;
+    return decoded.map((e) => BleRegisteredKey.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  static Future<void> setRiderGesturesBleKeys(List<BleRegisteredKey> keys) async {
+    final String encoded = jsonEncode(keys.map((k) => k.toJson()).toList());
+    await prefs.setString(PrefKeys.riderGesturesBleKeys, encoded);
   }
 
   // Rider gestures - Magnet

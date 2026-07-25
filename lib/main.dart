@@ -24,6 +24,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import 'controllers/ble_hid_intent_detector/ble_intent_detector.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 bool showSetupScreen = false;
@@ -68,6 +70,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
 
     // Get all the services up and running
     AdaptiveVolumeService.init();
+    BleIntentDetector.init();
     BtIntentDetector.init();
     CallStateListener.init();
     WakelockPlus.enable();
@@ -82,6 +85,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
 
     // Clean disposal of all the services
     AdaptiveVolumeService.dispose();
+    BleIntentDetector.dispose();
     BtIntentDetector.dispose();
     CallStateListener.dispose();
     WakelockPlus.disable();

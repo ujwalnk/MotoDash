@@ -111,6 +111,13 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
       permission: [Permission.contacts],
     ),
     _PermItem(
+      title: 'Nearby devices (Bluetooth)',
+      subtitle: 'Scan for and connect to your BLE remote',
+      icon: Icons.bluetooth_rounded,
+      kind: _PermKind.runtime,
+      permission: [Permission.bluetoothScan, Permission.bluetoothConnect],
+    ),
+    _PermItem(
       title: 'Display over other apps',
       subtitle: 'Show the incoming call UI above other apps',
       icon: Icons.layers_rounded,
