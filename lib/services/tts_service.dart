@@ -141,7 +141,7 @@ class TtsService {
   /// based on [_isCallActive], enables the shared TTS instance, activates [_session], and then invokes [_tts.speak].
   ///
   /// Side effects:
-  /// - Stops any active TTS playback via [_tts.dispose].
+  /// - Stops any active TTS playback via [_tts.terminate].
   /// - Reconfigures the audio session.
   /// - Activates [_session].
   /// - Initiates TTS playback via [_tts.speak].
@@ -182,7 +182,7 @@ class TtsService {
   /// Stops any active text-to-speech playback and deactivates [_session].
   ///
   /// Side effects:
-  /// - Stops TTS playback via [_tts.dispose].
+  /// - Stops TTS playback via [_tts.terminate].
   /// - Deactivates [_session].
   ///
   /// State mutations:None.

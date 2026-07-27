@@ -26,11 +26,14 @@ import 'package:shared_preferences/shared_preferences.dart' show SharedPreferenc
 /// [SharedPreferences.getInstance].
 class ConfigProvider {
   static late final SharedPreferences prefs;
+  static bool _initialized = false;
 
   /// Initializes [prefs] with the application's shared preferences instance.
   /// Must be awaited before accessing any configuration getter that depends on [prefs].
   static Future<void> init() async {
+    if (_initialized) return;
     prefs = await SharedPreferences.getInstance();
+    _initialized = true;
   }
 
   static bool get isFirstRun => prefs.getBool(PrefKeys.isFirstRun) ?? true;
@@ -67,6 +70,14 @@ class ConfigProvider {
   static int get screenSaverTimeout => prefs.getDouble(PrefKeys.displayScreenSaverTimeout)?.toInt() ?? 60;
 
   static bool get screenSaverAnimation => prefs.getBool(PrefKeys.displayScreenSaverAnimation) ?? true;
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Favourites
+  // -------------------------------------------------------------------------------------------------------------------
+
+  static List<String> get phoneFavContactNames => prefs.getStringList(PrefKeys.phoneFavContactNames) ?? [];
+
+  static List<String> get phoneFavContactNumbers => prefs.getStringList(PrefKeys.phoneFavContactNumbers) ?? [];
 
   // -------------------------------------------------------------------------------------------------------------------
   // Rider gestures

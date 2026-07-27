@@ -29,7 +29,7 @@ class _ContactsSettingsSectionState extends State<ContactsSettingsSection> {
   Future<void> _loadFavouriteContacts() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _favouriteContactsSummary = prefs.getStringList(PrefKeys.favouriteContactNames)?.join(", ") ?? "";
+      _favouriteContactsSummary = prefs.getStringList(PrefKeys.phoneFavContactNames)?.join(", ") ?? "";
     });
   }
 

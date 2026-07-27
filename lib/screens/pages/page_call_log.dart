@@ -84,6 +84,7 @@ Future<List<DashAction>> buildCallLogActions() async {
 /// [CallLogEntry] objects, or `null` if permission is not granted.
 Future<List<CallLogEntry>?> _loadCallLogs() async {
   // Return null on missing permission
+  // TODO: Change this permissionCheck
   if (!(await Permission.phone.request().isGranted)) {
     return null;
   }

@@ -10,6 +10,7 @@ import 'package:moto_dash/commons/config_provider.dart' show ConfigProvider;
 import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:moto_dash/commons/list_builder.dart';
+import 'package:moto_dash/controllers/ble_hid_intent_detector/ble_intent_detector.dart';
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screens/pages/page_map.dart' show menuActions;
 
@@ -21,7 +22,6 @@ class RootScreen extends StatefulWidget {
 }
 
 class _RootScreenState extends SplitScreenState<RootScreen> {
-  // class _RootScreenState extends State<RootScreen> {
   final Color backgroundColor = ConfigProvider.dashboardBackgroundColor;
   final Color fontColor = ConfigProvider.dashboardFontColor;
   final Color borderColor = ConfigProvider.dashboardBorderColor;
@@ -46,14 +46,19 @@ class _RootScreenState extends SplitScreenState<RootScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    BleIntentDetector().addListener(() => setState(() {}));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: NavigationGraph.instance,
       builder: (context, _) {
         // Reset the screen timer
-        if (ConfigProvider.screenSaverEnabled) {
-          _resetScreenSaverTimer();
-        }
+        if (ConfigProvider.screenSaverEnabled) _resetScreenSaverTimer();
 
         final NavigationGraph navigator = NavigationGraph.instance;
         final widgets = DashWidgets();
@@ -79,25 +84,81 @@ class _RootScreenState extends SplitScreenState<RootScreen> {
 
             return Scaffold(
               backgroundColor: backgroundColor,
-              body: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-                child: widgets.dashView(isSplitScreen, [
-                  ...items.map(
-                    (item) => widgets.dashCardAction(item, context, items.length + (navigator.canPop ? 1 : 0)),
-                  ),
-
-                  if (navigator.canPop)
-                    widgets.dashCardAction(
-                      DashAction(label: "Back", icons: [Icons.undo_rounded], action: () => navigator.pop()),
-                      context,
-                      items.length + 1,
-                    ),
-                ]),
+              body: SafeArea(
+                // TODO: Add setting for the topbar
+                child: Column(children: [sectionTopBar(), sectionBody(widgets, items, context, navigator)]),
               ),
             );
           },
         );
       },
+    );
+  }
+
+  Stream<DateTime> get clockStream async* {
+    while (true) {
+      yield DateTime.now();
+
+      final now = DateTime.now();
+      await Future.delayed(Duration(minutes: 1, seconds: -now.second, milliseconds: -now.millisecond));
+    }
+  }
+
+  Widget sectionTopBar() {
+    return Container(
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        border: Border(bottom: BorderSide(color: borderColor, width: 0.5)),
+      ),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [_timeStreamWidget(), _iconWidget()]),
+    );
+  }
+
+  Row _iconWidget() {
+    return Row(
+      children: [
+        // TODO: Check for the init of these before showing the top bar
+        if (BleIntentDetector().isInitialized) Icon(Icons.settings_bluetooth, size: 16),
+        SizedBox(width: 6),
+        Icon(Icons.gps_fixed, size: 16),
+        SizedBox(width: 6),
+        Icon(Icons.battery_full, size: 16),
+      ],
+    );
+  }
+
+  StreamBuilder<DateTime> _timeStreamWidget() {
+    return StreamBuilder<DateTime>(
+      stream: clockStream,
+      initialData: DateTime.now(),
+      builder: (context, snapshot) {
+        return Text(
+          MaterialLocalizations.of(context).formatTimeOfDay(
+            TimeOfDay.fromDateTime(snapshot.data!),
+            alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+          ),
+          style: TextStyle(color: fontColor, fontSize: 12),
+        );
+      },
+    );
+  }
+
+  Expanded sectionBody(DashWidgets widgets, List<DashAction> items, BuildContext context, NavigationGraph navigator) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
+        child: widgets.dashView(isSplitScreen, [
+          ...items.map((item) => widgets.dashCardAction(item, context, items.length + (navigator.canPop ? 1 : 0))),
+          if (navigator.canPop)
+            widgets.dashCardAction(
+              DashAction(label: "Back", icons: [Icons.undo_rounded], action: () => navigator.pop()),
+              context,
+              items.length + 1,
+            ),
+        ]),
+      ),
     );
   }
 }

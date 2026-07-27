@@ -16,7 +16,7 @@ import '../commons/constants.dart';
 ///   requestCallLogPermission       -> triggers the native runtime request
 ///   isNotificationListenerEnabled  -> bool, checks the listener is in Settings.Secure ENABLED_NOTIFICATION_LISTENERS
 ///   openNotificationListenerSettings -> launches ACTION_NOTIFICATION_LISTENER_SETTINGS
-class _NativePermissions {
+class NativePermissions {
   static const _channel = MethodChannel('in.madilu.motodash/permissions');
 
   static Future<bool> isCallLogGranted() async {
@@ -27,11 +27,11 @@ class _NativePermissions {
     }
   }
 
-  static Future<void> requestCallLog() async {
+  static Future<bool> requestCallLog() async {
     try {
-      await _channel.invokeMethod('requestCallLogPermission');
+      return await _channel.invokeMethod<bool>('requestCallLogPermission') ?? false;
     } on PlatformException {
-      // Surfaced via the next status refresh.
+      return false;
     }
   }
 
@@ -50,23 +50,9 @@ class _NativePermissions {
       // Surfaced via the next status refresh.
     }
   }
-
-  static Future<bool> isAccessibilityEnabled() async {
-    try {
-      return await _channel.invokeMethod<bool>('isAccessibilityServiceEnabled') ?? false;
-    } on PlatformException {
-      return false;
-    }
-  }
-
-  static Future<void> openAccessibilitySettings() async {
-    try {
-      await _channel.invokeMethod('openAccessibilitySettings');
-    } on PlatformException {}
-  }
 }
 
-enum _PermKind { runtime, callLog, notificationListener, accessibility }
+enum _PermKind { runtime, callLog, notificationListener }
 
 class _PermItem {
   final String title;
@@ -145,12 +131,6 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
       kind: _PermKind.runtime,
       permission: [Permission.location, Permission.locationAlways],
     ),
-    _PermItem(
-      title: 'Accessibility',
-      subtitle: 'Receive Bluetooth remote button presses while MotoDash is running',
-      icon: Icons.accessibility_new_rounded,
-      kind: _PermKind.accessibility,
-    ),
   ];
 
   bool _checking = true;
@@ -187,9 +167,9 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
   Future<bool> _checkOne(_PermItem item) async {
     switch (item.kind) {
       case _PermKind.callLog:
-        return _NativePermissions.isCallLogGranted();
+        return NativePermissions.isCallLogGranted();
       case _PermKind.notificationListener:
-        return _NativePermissions.isNotificationListenerEnabled();
+        return NativePermissions.isNotificationListenerEnabled();
       case _PermKind.runtime:
         for (final permission in item.permission!) {
           if (!await permission!.isGranted) {
@@ -197,19 +177,17 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
           }
         }
         return true;
-      case _PermKind.accessibility:
-        return _NativePermissions.isAccessibilityEnabled();
     }
   }
 
   Future<void> _request(_PermItem item) async {
     switch (item.kind) {
       case _PermKind.callLog:
-        await _NativePermissions.requestCallLog();
+        await NativePermissions.requestCallLog();
         break;
 
       case _PermKind.notificationListener:
-        await _NativePermissions.openNotificationListenerSettings();
+        await NativePermissions.openNotificationListenerSettings();
         break;
 
       case _PermKind.runtime:
@@ -218,9 +196,6 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
             await permission.request();
           }
         }
-        break;
-      case _PermKind.accessibility:
-        await _NativePermissions.openAccessibilitySettings();
         break;
     }
 

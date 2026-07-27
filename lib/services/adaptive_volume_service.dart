@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:moto_dash/commons/config_provider.dart';
+import 'package:moto_dash/commons/permission_check.dart';
 import 'package:volume_controller/volume_controller.dart';
 
 class AdaptiveVolumeService {
@@ -18,7 +19,8 @@ class AdaptiveVolumeService {
   static late final int maximumVolumeSteps;
 
   static Future<void> init() async {
-    // Catch double stars & Enable only if user has enabled the setting
+    // Catch double stars & Enable only if user has enabled the setting, with permission check
+    if (!await PermissionCheck.location) return;
     if (!ConfigProvider.adaptiveVolumeEnabled || _timer != null) return;
 
     _activationSpeed = ConfigProvider.adaptiveVolumeActivateMinSpeed;

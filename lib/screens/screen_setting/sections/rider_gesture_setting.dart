@@ -116,6 +116,11 @@ class _RiderGesturesSettingsSectionState extends State<RiderGesturesSettingsSect
             style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
           ),
         ),
+        PrefSwitchTile(
+          title: "Exit app on Bt device disconnect",
+          prefKey: PrefKeys.riderGesturesTtsOnBtOnly,
+          defaultValue: false,
+        ),
       ],
     );
   }

@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:moto_dash/bridges/input_event_bridge.dart';
 import 'package:moto_dash/commons/config_provider.dart';
+import 'package:moto_dash/commons/permission_check.dart';
 import 'package:moto_dash/controllers/bt_hid_intent_detector/hid_key_registry.dart';
 import 'package:moto_dash/controllers/navigation_intent_bus.dart';
 import 'package:moto_dash/controllers/navigation_intent_handler.dart' show NavigationIntent;
@@ -21,7 +22,8 @@ class BtIntentDetector {
   /// One tracker per physical key code, so taps on different buttons are counted independently.
   static final Map<int, _TapTracker> _trackers = {};
 
-  static void init() {
+  static Future<void> init() async {
+    if (!await PermissionCheck.bluetooth) return;
     if (!ConfigProvider.riderGesturesBtEnabled) return;
     _subscription = InputEventBridge.events.listen(_handleEvent);
   }

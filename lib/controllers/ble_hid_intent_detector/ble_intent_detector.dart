@@ -8,29 +8,58 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:moto_dash/commons/config_provider.dart';
+import 'package:moto_dash/commons/permission_check.dart';
 import 'package:moto_dash/controllers/ble_hid_intent_detector/ble_hid_bridge.dart';
 import 'package:moto_dash/controllers/ble_hid_intent_detector/ble_registered_key.dart';
 import 'package:moto_dash/controllers/navigation_intent_bus.dart';
 import 'package:moto_dash/controllers/navigation_intent_handler.dart' show NavigationIntent;
+import 'package:moto_dash/services/notification_service.dart';
 
-class BleIntentDetector {
+class BleIntentDetector extends ChangeNotifier {
   static StreamSubscription? _subscription;
+  static StreamSubscription<BluetoothConnectionState>? _connStatusSub;
   static final Map<String, _TapTracker> _trackers = {};
 
-  static void init() {
+  static bool _initialized = false;
+
+  bool get isInitialized => _initialized;
+
+  Future<void> init() async {
+    if (!await PermissionCheck.bluetooth) return;
     if (!ConfigProvider.riderGesturesBleEnabled) return;
+    if (_initialized) return;
+
     _subscription = BleHidBridge.instance.events.listen(_handleEvent);
-    BleHidBridge.instance.reconnectSaved();
+    _connStatusSub = BleHidBridge.instance.connectionState.listen(_handleConnectionChange);
+
+    BleHidBridge.instance.reconnectSaved().then(
+      (ok) => _handleConnectionChange(ok ? BluetoothConnectionState.connected : BluetoothConnectionState.disconnected),
+    );
+
+    _initialized = true;
+    notifyListeners();
   }
 
-  static void dispose() {
+  Future<void> terminate() async {
     if (!ConfigProvider.riderGesturesBleEnabled) return;
-    _subscription?.cancel();
+    if (!_initialized) return;
+    await _subscription?.cancel();
+    await _connStatusSub?.cancel();
     for (final tracker in _trackers.values) {
       tracker.dispose();
     }
     _trackers.clear();
+
+    _initialized = false;
+    notifyListeners();
+  }
+
+  static void _handleConnectionChange(BluetoothConnectionState state) {
+    final name = ConfigProvider.riderGesturesBleDeviceName ?? "BLE remote";
+    final status = state == BluetoothConnectionState.connected ? "Connected to $name" : "Not connected";
+    NotificationService.updateConnectionStatus(status);
   }
 
   static void _handleEvent(Map<String, dynamic> event) {

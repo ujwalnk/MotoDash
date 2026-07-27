@@ -26,11 +26,13 @@ class BleCandidateCharacteristic {
   final BluetoothCharacteristic characteristic;
 
   String get serviceUuid => service.uuid.toString();
+
   String get characteristicUuid => characteristic.uuid.toString();
 }
 
 class BleHidBridge {
   BleHidBridge._();
+
   static final BleHidBridge instance = BleHidBridge._();
 
   /// Well-known Bluetooth SIG services present on almost every peripheral (Generic Access,
@@ -45,10 +47,12 @@ class BleHidBridge {
   };
 
   final StreamController<Map<String, dynamic>> _events = StreamController<Map<String, dynamic>>.broadcast();
+
   Stream<Map<String, dynamic>> get events => _events.stream;
 
   final StreamController<BluetoothConnectionState> _connectionState =
       StreamController<BluetoothConnectionState>.broadcast();
+
   Stream<BluetoothConnectionState> get connectionState => _connectionState.stream;
 
   BluetoothDevice? _device;
@@ -81,7 +85,7 @@ class BleHidBridge {
   /// yields zero candidates or the caller decides not to proceed, call [abortDiscovery] to
   /// disconnect; otherwise call [subscribeTo] with the chosen candidate.
   Future<List<BleCandidateCharacteristic>> discoverCandidates(BluetoothDevice device) async {
-    await device.connect(timeout: const Duration(seconds: 10), license: License.free);
+    await device.connect(timeout: const Duration(seconds: 10), license: License.nonprofit);
 
     final services = await device.discoverServices();
     final candidates = <BleCandidateCharacteristic>[];
@@ -128,17 +132,20 @@ class BleHidBridge {
   /// Re-establishes a connection to the previously configured device, matching the exact
   /// service/characteristic UUIDs discovered and saved at pairing time. No-op if nothing has
   /// been registered yet.
-  Future<void> reconnectSaved() async {
+  /// Re-establishes a connection to the previously configured device, matching the exact
+  /// service/characteristic UUIDs discovered and saved at pairing time. Returns false if
+  /// nothing has been registered yet, or if the connection attempt fails.
+  Future<bool> reconnectSaved() async {
     final deviceId = ConfigProvider.riderGesturesBleDeviceId;
     final serviceUuid = ConfigProvider.riderGesturesBleServiceUuid;
     final characteristicUuid = ConfigProvider.riderGesturesBleCharacteristicUuid;
-    if (deviceId == null || serviceUuid == null || characteristicUuid == null) return;
+    if (deviceId == null || serviceUuid == null || characteristicUuid == null) return false;
 
     await _teardown();
 
     try {
       final device = BluetoothDevice.fromId(deviceId);
-      await device.connect(timeout: const Duration(seconds: 10), license: License.free);
+      await device.connect(timeout: const Duration(seconds: 10), license: License.nonprofit);
 
       final services = await device.discoverServices();
       final service = services.firstWhere((s) => s.uuid.toString().toLowerCase() == serviceUuid.toLowerCase());
@@ -147,9 +154,48 @@ class BleHidBridge {
       );
 
       await _subscribe(device, char);
+      return true;
     } catch (e) {
       debugPrint("BleHidBridge: reconnect failed: $e");
+      return false;
     }
+  }
+
+  /// Turns Bluetooth on (Android only - iOS users control this themselves) if it isn't already,
+  /// waiting up to [timeout] for the adapter to actually come up.
+  Future<bool> ensureAdapterOn({Duration timeout = const Duration(seconds: 6)}) async {
+    final current = await FlutterBluePlus.adapterState.first;
+    if (current == BluetoothAdapterState.on) return true;
+
+    try {
+      await FlutterBluePlus.turnOn();
+    } catch (e) {
+      debugPrint("BleHidBridge: turnOn failed (likely iOS, or user declined the system prompt): $e");
+    }
+
+    try {
+      final state = await FlutterBluePlus.adapterState
+          .firstWhere((s) => s == BluetoothAdapterState.on)
+          .timeout(timeout);
+      return state == BluetoothAdapterState.on;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Turns Bluetooth on if needed and reconnects to the saved device. Returns the device's
+  /// display name on success, or null if there's nothing paired, the adapter didn't come up, or
+  /// the connection failed.
+  Future<String?> connectToSavedDevice() async {
+    if (ConfigProvider.riderGesturesBleDeviceId == null) return null;
+
+    final adapterOn = await ensureAdapterOn();
+    if (!adapterOn) return null;
+
+    final ok = await reconnectSaved();
+    if (!ok) return null;
+
+    return ConfigProvider.riderGesturesBleDeviceName ?? "BLE remote";
   }
 
   Future<void> _subscribe(BluetoothDevice device, BluetoothCharacteristic char) async {

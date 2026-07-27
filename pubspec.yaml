@@ -19,6 +19,7 @@ dependencies:
   flutter_phone_direct_caller: ^2.2.1
   flutter_settings_screens: ^0.3.4
   flutter_tts: ^4.2.5
+  fluttertoast: ^9.1.0
   geolocator: ^14.0.3
   permission_handler: ^12.0.1
   phone_state: ^3.0.1

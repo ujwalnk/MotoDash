@@ -70,7 +70,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
 
     // Get all the services up and running
     AdaptiveVolumeService.init();
-    BleIntentDetector.init();
+    BleIntentDetector().init();
     BtIntentDetector.init();
     CallStateListener.init();
     WakelockPlus.enable();
@@ -85,7 +85,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
 
     // Clean disposal of all the services
     AdaptiveVolumeService.dispose();
-    BleIntentDetector.dispose();
+    BleIntentDetector().terminate();
     BtIntentDetector.dispose();
     CallStateListener.dispose();
     WakelockPlus.disable();

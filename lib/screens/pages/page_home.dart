@@ -4,16 +4,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:moto_dash/bridges/assistant_bridge.dart';
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/dash_action.dart';
+import 'package:moto_dash/commons/permission_check.dart';
 import 'package:moto_dash/navigation_graph.dart';
 
 Future<List<DashAction>> buildHomeActions() async {
   return [
-    DashAction(
-      label: 'Phone',
-      icons: [Icons.phone_rounded],
-      action: () => NavigationGraph.instance.goTo(CurrentPage.callNavPage),
-    ),
+    if (await PermissionCheck.phone &&
+        await PermissionCheck.callLog() &&
+        ConfigProvider.phoneFavContactNames.isNotEmpty)
+      DashAction(
+        label: 'Phone',
+        icons: [Icons.phone_rounded],
+        action: () => NavigationGraph.instance.goTo(CurrentPage.callNavPage),
+      ),
     DashAction(
       label: 'Music',
       icons: [Icons.music_note_rounded],

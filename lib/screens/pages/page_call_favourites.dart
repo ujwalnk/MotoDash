@@ -4,6 +4,7 @@
 
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:moto_dash/bridges/telephony_bridge.dart';
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
@@ -63,9 +64,7 @@ Future<List<DashAction>> buildCallFavActions() async {
 /// [SharedPreferences] instance and loading the stored contact data.
 Future<Map<String, String>> _getFavorites() async {
   // TODO: Later change to store and retrieve a map rather than list
-  final prefs = await SharedPreferences.getInstance();
-
-  final names = prefs.getStringList("fav_contact_names") ?? [];
-  final numbers = prefs.getStringList("fav_contact_numbers") ?? [];
+  final names = ConfigProvider.phoneFavContactNames;
+  final numbers = ConfigProvider.phoneFavContactNumbers;
   return {for (var i = 0; i < names.length; i++) names[i]: numbers[i]};
 }

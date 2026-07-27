@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_contact_picker_plus/flutter_native_contact_picker_plus.dart';
+import 'package:moto_dash/commons/config_provider.dart';
+import 'package:moto_dash/commons/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FavouriteContactsScreen extends StatefulWidget {
@@ -29,12 +31,9 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
   // Load from shared preferences
   // ------------------------------------------------------------
   Future<void> loadContacts() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // TODO: Use ConfigProvider here.
     setState(() {
-      names = prefs.getStringList("fav_contact_names") ?? [];
-      numbers = prefs.getStringList("fav_contact_numbers") ?? [];
+      names = ConfigProvider.phoneFavContactNames;
+      numbers = ConfigProvider.phoneFavContactNumbers;
     });
   }
 
@@ -45,8 +44,8 @@ class _FavouriteContactsScreenState extends State<FavouriteContactsScreen> {
     final prefs = await SharedPreferences.getInstance();
 
     // TODO: Use ConfigProvider here.
-    await prefs.setStringList("fav_contact_names", names);
-    await prefs.setStringList("fav_contact_numbers", numbers);
+    await prefs.setStringList(PrefKeys.phoneFavContactNames, names);
+    await prefs.setStringList(PrefKeys.phoneFavContactNumbers, numbers);
   }
 
   // ------------------------------------------------------------

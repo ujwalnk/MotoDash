@@ -26,7 +26,7 @@ abstract class AppConfig {
 /// External variables modified: None.
 abstract class PrefKeys {
   static const String isFirstRun = "is_first_run";
-  static const String favouriteContactNames = "favourite_contact_names";
+  // static const String favouriteContactNames = "favourite_contact_names";
 
   // Dashboard Domain
   static const String dashboardBackgroundColor = 'dashboard_background_color';
@@ -43,9 +43,15 @@ abstract class PrefKeys {
   static const String displayScreenSaverTimeout = "display_screen_saver_timeout";
   static const String displayScreenSaverAnimation = "display_screen_saver_animation";
 
+  // Phone favourite contacts
+  static const String phoneFavContactNames = "phone_favourite_contact_names";
+  static const String phoneFavContactNumbers = "phone_favourite_contact_numbers";
+
   // Rider Gestures Domain
   static const String riderGesturesEnable = "rider_gestures_enable";
   static const String riderGesturesTtsOnBtOnly = "rider_gestures_tts_on_bt_only";
+  static const String riderGesturesExitOnBtDisconnect = "rider_gestures_exit_on_bt_disconnect";
+  static const String riderGesturesExitOnBtDisconnectDelay = "rider_gestures_exit_on_bt_disconnect_delay";
 
   // Rider Gestures Bluetooth HID sub domain
   static const String riderGesturesBtEnable = "rider_gestures_bt_enable";
