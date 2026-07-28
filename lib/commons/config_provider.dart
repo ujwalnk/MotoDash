@@ -59,6 +59,8 @@ class ConfigProvider {
 
   static double get dashboardFontSize => prefs.getDouble(PrefKeys.dashboardFontSize) ?? 30;
 
+  static bool get dashboardStatusBar => prefs.getBool(PrefKeys.dashboardStatusBar) ?? false;
+
   // -------------------------------------------------------------------------------------------------------------------
   // Display
   // -------------------------------------------------------------------------------------------------------------------
@@ -184,4 +186,6 @@ class ConfigProvider {
   // -------------------------------------------------------------------------------------------------------------------
 
   static int get miscMaxCallLogsListed => prefs.getDouble(PrefKeys.miscMaxCallLogsListed)?.toInt() ?? 5;
+
+  static bool get miscSwapMusicButtonPositions => prefs.getBool(PrefKeys.miscSwapMusicButtonPositions) ?? true;
 }

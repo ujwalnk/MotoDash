@@ -16,25 +16,39 @@ import 'package:moto_dash/controllers/navigation_intent_handler.dart' show Navig
 /// Android's `KeyEvent.ACTION_DOWN`. Only key-down events count towards a tap; ACTION_UP is ignored.
 const int _kActionDown = 0;
 
-class BtIntentDetector {
+class BtIntentDetector extends ChangeNotifier {
   static late final StreamSubscription _subscription;
+
+  static bool _initialized = false;
+
+  static bool get isInitialized => _initialized;
 
   /// One tracker per physical key code, so taps on different buttons are counted independently.
   static final Map<int, _TapTracker> _trackers = {};
 
-  static Future<void> init() async {
+  Future<void> init() async {
     if (!await PermissionCheck.bluetooth) return;
     if (!ConfigProvider.riderGesturesBtEnabled) return;
+    if (_initialized) return;
+
     _subscription = InputEventBridge.events.listen(_handleEvent);
+
+    _initialized = true;
+    notifyListeners();
   }
 
-  static void dispose() {
+  Future<void> terminate() async {
     if (!ConfigProvider.riderGesturesBtEnabled) return;
+    if (!_initialized) return;
+
     _subscription.cancel();
     for (final tracker in _trackers.values) {
       tracker.dispose();
     }
     _trackers.clear();
+
+    _initialized = false;
+    notifyListeners();
   }
 
   static void _handleEvent(Map<dynamic, dynamic> event) {

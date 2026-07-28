@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/controllers/navigation_intent_bus.dart';
 import 'package:moto_dash/services/beep_service.dart';
@@ -14,7 +15,7 @@ import 'package:statemachine/statemachine.dart' as machine;
 
 import 'navigation_intent_handler.dart' show NavigationIntent;
 
-class MagnetIntentService {
+class MagnetIntentService extends ChangeNotifier {
   StreamSubscription<MagnetometerEvent>? _sub;
 
   // ==========================
@@ -32,6 +33,9 @@ class MagnetIntentService {
   static const Duration _fastSampling = Duration(milliseconds: 33);
 
   Duration? _currentSampling;
+
+  static bool _initialized = false;
+  static bool get isInitialized => _initialized;
 
   void _startSampling(Duration period) {
     if (_currentSampling == period && _sub != null) return;
@@ -137,13 +141,23 @@ class MagnetIntentService {
   // START / STOP
   // ==========================
 
-  void init() {
+  Future<void> init() async {
+    if (!ConfigProvider.riderGesturesMagnetEnabled) return;
+    if (_initialized) return;
+
     _startSampling(_slowSampling);
+    _initialized = true;
+    notifyListeners();
   }
 
-  void dispose() {
+  Future<void> terminate() async {
+    if (!ConfigProvider.riderGesturesMagnetEnabled) return;
+    if (!_initialized) return;
+
     _sub?.cancel();
     _activeTimer?.cancel();
+    _initialized = false;
+    notifyListeners();
   }
 
   // ==========================

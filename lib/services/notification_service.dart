@@ -62,7 +62,7 @@ class NotificationService {
       showMotoDashNotification();
     } else if (actionId == kActionExit) {
       // TODO: Move this later, to directly use the dispose from the main.dart file
-      magnetIntentService.dispose();
+      magnetIntentService.terminate();
       SystemNavigator.pop();
     }
   }
@@ -72,7 +72,6 @@ class NotificationService {
   /// it's safe to fire from a tapped action with `showsUserInterface: false` - including when the
   /// app is fully terminated.
   static Future<void> _handleConnectBleAction() async {
-    debugPrint("NotificationService: Connect action tapped");
     try {
       WidgetsFlutterBinding.ensureInitialized();
       await ConfigProvider.init();

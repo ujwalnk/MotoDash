@@ -11,8 +11,11 @@ import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/dash_action.dart' show DashAction;
 import 'package:moto_dash/commons/list_builder.dart';
 import 'package:moto_dash/controllers/ble_hid_intent_detector/ble_intent_detector.dart';
+import 'package:moto_dash/controllers/bt_hid_intent_detector/bt_intent_detector.dart';
+import 'package:moto_dash/controllers/magnet_intent_detector.dart';
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screens/pages/page_map.dart' show menuActions;
+import 'package:moto_dash/services/adaptive_volume_service.dart';
 
 class RootScreen extends StatefulWidget {
   const RootScreen({super.key});
@@ -49,7 +52,12 @@ class _RootScreenState extends SplitScreenState<RootScreen> {
   void initState() {
     super.initState();
 
-    BleIntentDetector().addListener(() => setState(() {}));
+    if (ConfigProvider.dashboardStatusBar) {
+      BleIntentDetector().addListener(() => setState(() {}));
+      BtIntentDetector().addListener(() => setState(() {}));
+      MagnetIntentService().addListener(() => setState(() {}));
+      AdaptiveVolumeService().addListener(() => setState(() {}));
+    }
   }
 
   @override
@@ -86,7 +94,12 @@ class _RootScreenState extends SplitScreenState<RootScreen> {
               backgroundColor: backgroundColor,
               body: SafeArea(
                 // TODO: Add setting for the topbar
-                child: Column(children: [sectionTopBar(), sectionBody(widgets, items, context, navigator)]),
+                child: Column(
+                  children: [
+                    if (ConfigProvider.dashboardStatusBar) sectionTopBar(),
+                    sectionBody(widgets, items, context, navigator),
+                  ],
+                ),
               ),
             );
           },
@@ -108,23 +121,20 @@ class _RootScreenState extends SplitScreenState<RootScreen> {
     return Container(
       height: 28,
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        border: Border(bottom: BorderSide(color: borderColor, width: 0.5)),
-      ),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [_timeStreamWidget(), _iconWidget()]),
+      decoration: BoxDecoration(color: backgroundColor),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [_iconWidget(), _timeStreamWidget()]),
     );
   }
 
   Row _iconWidget() {
     return Row(
       children: [
-        // TODO: Check for the init of these before showing the top bar
-        if (BleIntentDetector().isInitialized) Icon(Icons.settings_bluetooth, size: 16),
+        if (BleIntentDetector.isInitialized || BtIntentDetector.isInitialized)
+          Icon(Icons.bluetooth, color: fontColor, size: 16),
         SizedBox(width: 6),
-        Icon(Icons.gps_fixed, size: 16),
+        if (AdaptiveVolumeService.isInitialized) Icon(Icons.speed_rounded, color: fontColor, size: 16),
         SizedBox(width: 6),
-        Icon(Icons.battery_full, size: 16),
+        if (MagnetIntentService.isInitialized) Icon(Icons.sensors, color: fontColor, size: 16),
       ],
     );
   }

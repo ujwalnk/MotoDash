@@ -3,25 +3,31 @@
 
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/permission_check.dart';
 import 'package:volume_controller/volume_controller.dart';
 
-class AdaptiveVolumeService {
+class AdaptiveVolumeService extends ChangeNotifier {
   static StreamSubscription<Position>? _locationSubscription;
   static Timer? _timer;
   static double? _currentSpeed;
   static int _volumeOffset = 0;
 
+  static bool _initialized = false;
+
+  static bool get isInitialized => _initialized;
+
   static late final int _activationSpeed;
   static late final double speedInterval;
   static late final int maximumVolumeSteps;
 
-  static Future<void> init() async {
+  Future<void> init() async {
     // Catch double stars & Enable only if user has enabled the setting, with permission check
     if (!await PermissionCheck.location) return;
     if (!ConfigProvider.adaptiveVolumeEnabled || _timer != null) return;
+    if (_initialized) return;
 
     _activationSpeed = ConfigProvider.adaptiveVolumeActivateMinSpeed;
     speedInterval = ConfigProvider.adaptiveVolumeSpeedInterval;
@@ -39,6 +45,9 @@ class AdaptiveVolumeService {
         ).listen((position) {
           _currentSpeed = position.speed >= 0 ? position.speed * 3.6 : null;
         });
+
+    _initialized = true;
+    notifyListeners();
   }
 
   static Future<void> _changeVolume() async {
@@ -72,11 +81,12 @@ class AdaptiveVolumeService {
     }
   }
 
-  static Future<void> dispose() async {
+  Future<void> terminate() async {
     if (!ConfigProvider.adaptiveVolumeEnabled) return;
+    if (!_initialized) return;
 
     // Cancel timer
-    _timer?.cancel();
+    _timer!.cancel();
     _timer = null;
 
     // Revert volume back to what it was
@@ -86,5 +96,8 @@ class AdaptiveVolumeService {
     // Dispose the location subscription
     await _locationSubscription?.cancel();
     _locationSubscription = null;
+
+    _initialized = false;
+    notifyListeners();
   }
 }

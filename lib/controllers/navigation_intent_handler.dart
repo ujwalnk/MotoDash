@@ -38,7 +38,7 @@ class NavigationIntentHandler {
   }
 
   void dispose() {
-    if (ConfigProvider.riderGesturesMagnetEnabled) magnetIntentService.dispose();
+    if (ConfigProvider.riderGesturesMagnetEnabled) magnetIntentService.terminate();
     _sub?.cancel();
     // if (ConfigProvider.riderGesturesBtEnabled) BtIntentDetector.dispose();
   }

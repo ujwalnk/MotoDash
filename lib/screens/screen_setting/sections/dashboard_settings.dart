@@ -16,6 +16,11 @@ class DashboardSettingsSection extends StatelessWidget {
     return SettingsCard(
       title: "Dashboard",
       children: [
+        PrefSwitchTile(
+          title: "Status Bar",
+          prefKey: PrefKeys.dashboardStatusBar,
+          defaultValue: ConfigProvider.dashboardStatusBar,
+        ),
         Padding(
           padding: const EdgeInsets.only(top: 4, bottom: 12),
           child: Text("Menu style", style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13)),
@@ -31,14 +36,14 @@ class DashboardSettingsSection extends StatelessWidget {
           defaultValue: ConfigProvider.dashboardLabels,
         ),
         PrefSwitchTile(
-          title: "Mask Menus",
+          title: "Mask Menus (Experimental)",
           prefKey: PrefKeys.dashboardMask,
           defaultValue: ConfigProvider.dashboardMasked,
         ),
         Padding(
           padding: const EdgeInsets.only(top: 4, bottom: 12),
           child: Text(
-            "Mask Menus, shows only the first letter of all the menus",
+            "Mask Menus, shows only the first letter of all the menus (Experimental)",
             style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
           ),
         ),

@@ -24,7 +24,7 @@ class BleIntentDetector extends ChangeNotifier {
 
   static bool _initialized = false;
 
-  bool get isInitialized => _initialized;
+  static bool get isInitialized => _initialized;
 
   Future<void> init() async {
     if (!await PermissionCheck.bluetooth) return;

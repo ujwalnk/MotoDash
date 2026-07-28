@@ -8,6 +8,7 @@ import 'package:moto_dash/commons/call_state.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/controllers/bt_hid_intent_detector/bt_intent_detector.dart';
+import 'package:moto_dash/controllers/magnet_intent_detector.dart';
 import 'package:moto_dash/controllers/navigation_intent_handler.dart';
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
 import 'package:moto_dash/screens/screen_permissions.dart';
@@ -69,10 +70,11 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     // Get all the services up and running
-    AdaptiveVolumeService.init();
+    AdaptiveVolumeService().init();
     BleIntentDetector().init();
-    BtIntentDetector.init();
+    BtIntentDetector().init();
     CallStateListener.init();
+    MagnetIntentService().init();
     WakelockPlus.enable();
 
     // Retry after the first frame — navigator is guaranteed to be mounted by then
@@ -84,12 +86,12 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
 
     // Clean disposal of all the services
-    AdaptiveVolumeService.dispose();
+    AdaptiveVolumeService().terminate();
     BleIntentDetector().terminate();
-    BtIntentDetector.dispose();
+    BtIntentDetector().terminate();
     CallStateListener.dispose();
     WakelockPlus.disable();
-    magnetIntentService.dispose();
+    magnetIntentService.terminate();
 
     super.dispose();
   }

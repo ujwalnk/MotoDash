@@ -3,6 +3,7 @@
 // "Misc" settings section: volume tip + call log list length.
 
 import 'package:flutter/material.dart';
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/settings_tiles.dart';
 import 'package:moto_dash/screens/screen_setting/setting_card.dart';
@@ -15,7 +16,11 @@ class MiscSettingsSection extends StatelessWidget {
     return SettingsCard(
       title: "Misc",
       children: [
-        PrefSwitchTile(title: "Volume Tip", prefKey: PrefKeys.showVolumeTip, defaultValue: false),
+        PrefSwitchTile(
+          title: "Volume Tip",
+          prefKey: PrefKeys.showVolumeTip,
+          defaultValue: ConfigProvider.showVolumeTip,
+        ),
         Padding(
           padding: const EdgeInsets.only(top: 4, bottom: 12),
           child: Text(
@@ -36,6 +41,11 @@ class MiscSettingsSection extends StatelessWidget {
             "Lower values make buttons larger and easier to use. The call log screen does not support scrolling.",
             style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
           ),
+        ),
+        PrefSwitchTile(
+          title: "Swap Previous & play/pause key position",
+          prefKey: PrefKeys.miscSwapMusicButtonPositions,
+          defaultValue: ConfigProvider.miscSwapMusicButtonPositions,
         ),
       ],
     );

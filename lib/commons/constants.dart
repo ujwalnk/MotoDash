@@ -36,6 +36,7 @@ abstract class PrefKeys {
   static const String dashboardIcons = 'dashboard_icons';
   static const String dashboardLabels = 'dashboard_label';
   static const String dashboardMask = 'dashboard_mask';
+  static const String dashboardStatusBar = "dashboard_status_bar";
 
   // Display / Screensaver Domain
   static const String displayBrightness = "display_brightness";
@@ -82,6 +83,7 @@ abstract class PrefKeys {
   // Miscellaneous
   static const String showVolumeTip = "misc_show_volume_tip";
   static const String miscMaxCallLogsListed = "misc_max_call_logs_listed";
+  static const String miscSwapMusicButtonPositions = "misc_swap_music_button_position";
 }
 
 abstract class BleConstants {
