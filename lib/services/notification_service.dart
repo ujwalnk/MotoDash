@@ -83,7 +83,7 @@ class NotificationService {
       );
 
       await updateConnectionStatus(deviceName != null ? "Connected to $deviceName" : "Not connected");
-    } catch (e, st) {
+    } catch (e) {
       try {
         await Fluttertoast.showToast(msg: "Connect action failed: $e");
       } catch (_) {}
