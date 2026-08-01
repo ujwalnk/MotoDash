@@ -2,6 +2,30 @@
 // Created: 2026, Mar 22
 // Description: Root screen for MotoDash
 
+/*
+ *
+ * This intentionally does not model each dashboard page as an independent Widget, StatefulWidget, or route.
+ *
+ * Instead, every page is represented by a lightweight page controller that produces a List<DashAction>, which is then
+ * rendered by this single root screen.
+ *
+ * This architecture was chosen because the dashboard is not purely UI-driven. The active DashActions must remain
+ * accessible even when the display is off, allowing external input sources (Bluetooth remotes, hardware buttons,
+ * sensors, voice commands, notification actions, etc.) to interact with the currently active page without depending
+ * on the widget tree.
+ *
+ * Keeping a single rendering surface provides several advantages:
+ *
+ * • A single source of truth for the active DashActions.
+ * • UI and non-UI input mechanisms operate on the exact same actions.
+ * • No widget or route transitions between dashboard pages.
+ * • Lower rebuild overhead and reduced widget complexity.
+ * • Page-specific lifecycle (init/terminate) can still be managed without coupling business logic to Flutter widgets.
+ *
+ * In this architecture, pages represent application state and behavior rather than screens. The root screen is only
+ * responsible for rendering the current page's DashActions, while the page itself owns its lifecycle and domain logic.
+ */
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';

@@ -11,15 +11,29 @@ import 'package:moto_dash/screens/pages/page_call_log.dart';
 import 'package:moto_dash/screens/pages/page_call_navigation.dart';
 import 'package:moto_dash/screens/pages/page_home.dart';
 import 'package:moto_dash/screens/pages/page_music.dart';
+import 'package:moto_dash/screens/pages/page_navigation.dart';
 import 'package:moto_dash/screens/pages/page_volume.dart';
 
+// final Map<CurrentPage, Future<List<DashAction>> Function()> menuActions = {
+//   CurrentPage.callActPage: buildCallActiveActions,
+//   CurrentPage.callAnsPage: buildCallAnswerActions,
+//   CurrentPage.callFavPage: buildCallFavActions,
+//   CurrentPage.callLogPage: buildCallLogActions,
+//   CurrentPage.callNavPage: buildCallNavActions,
+//   CurrentPage.homePage: buildHomeActions,
+//   CurrentPage.musicPage: buildMusicActions,
+//   CurrentPage.navigation: buildNavigationActions,
+//   CurrentPage.volumePage: buildVolumeActions,
+// };
+
 final Map<CurrentPage, Future<List<DashAction>> Function()> menuActions = {
-  CurrentPage.homePage: buildHomeActions,
-  CurrentPage.musicPage: buildMusicActions,
-  CurrentPage.volumePage: buildVolumeActions,
-  CurrentPage.callNavPage: buildCallNavActions,
-  CurrentPage.callFavPage: buildCallFavActions,
-  CurrentPage.callLogPage: buildCallLogActions,
   CurrentPage.callActPage: buildCallActiveActions,
   CurrentPage.callAnsPage: buildCallAnswerActions,
+  CurrentPage.callFavPage: buildCallFavActions,
+  CurrentPage.callLogPage: buildCallLogActions,
+  CurrentPage.callNavPage: buildCallNavActions,
+  CurrentPage.homePage: buildHomeActions,
+  CurrentPage.musicPage: buildMusicActions,
+  CurrentPage.navigation: buildNavigationActions,
+  CurrentPage.volumePage: buildVolumeActions,
 };

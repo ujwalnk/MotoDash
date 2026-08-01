@@ -10,15 +10,19 @@ import android.provider.ContactsContract
 import android.provider.Settings
 import android.telecom.TelecomManager
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
 
     private val ASSISTANT_CHANNEL = "in.madilu.motodash/assistant"
     private val CALL_CHANNEL = "in.madilu.motodash/telephony"
+    private val NAVIGATION_CHANNEL = "in.madilu.motodash/navigation"
+    private val NAVIGATION_EVENTS_CHANNEL = "in.madilu.motodash/navigation_events"
     private val PERMISSIONS_CHANNEL = "in.madilu.motodash/permissions"
 
     private lateinit var audio: AudioManager
@@ -183,6 +187,71 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger, NAVIGATION_CHANNEL
+        ).setMethodCallHandler { call, result ->
+
+            when (call.method) {
+
+                "startNavigation" -> {
+
+                    val latitude = call.argument<Double>("lat")
+                    val longitude = call.argument<Double>("lng")
+
+                    if (latitude == null || longitude == null) {
+                        result.error("INVALID_ARGS", "Latitude or Longitude missing", null)
+                        return@setMethodCallHandler
+                    }
+
+                    startGoogleNavigation(latitude, longitude)
+                    result.success(true)
+                }
+
+                "getNavigationState" -> {
+
+                    val state = MapsNotificationListener.currentState
+
+                    if (state == null) {
+                        result.success(null)
+                        return@setMethodCallHandler
+                    }
+
+                    result.success(
+                        mapOf(
+                            "title" to state.title,
+                            "text" to state.text,
+                            "subText" to state.subText,
+                            "bigText" to state.bigText,
+                            "actions" to state.actions.keys.toList()
+                        )
+                    )
+                }
+
+                "invokeNavigationAction" -> {
+
+                    val action = call.argument<String>("action")
+
+                    if (action == null) {
+                        result.error("INVALID_ARGS", "Action missing", null)
+                        return@setMethodCallHandler
+                    }
+
+                    try {
+                        MapsNotificationListener.currentState?.actions?.get(action)?.send()
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("ERROR", e.message, null)
+                    }
+                }
+
+                else -> result.notImplemented()
+            }
+        }
+
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, NAVIGATION_EVENTS_CHANNEL).setStreamHandler(
+            NavigationEventHandler
+        )
+
         // --- Permissions Channel ---
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger, PERMISSIONS_CHANNEL
@@ -244,9 +313,7 @@ class MainActivity : FlutterActivity() {
 
         val projection = arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME)
 
-        contentResolver.query(
-            uri, projection, null, null, null
-        )?.use { cursor ->
+        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val nameIndex = cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME)
 
@@ -257,6 +324,14 @@ class MainActivity : FlutterActivity() {
         }
 
         return null
+    }
+
+    private fun startGoogleNavigation(latitude: Double, longitude: Double) {
+        val uri = Uri.parse("google.navigation:q=$latitude,$longitude&mode=l")
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+
+        intent.setPackage("com.google.android.apps.maps")
+        startActivity(intent)
     }
 
 }

@@ -55,6 +55,17 @@
                     android:value="Keeps MotoDash active during a ride for call management"/>
         </service>
 
+        <service
+                android:name=".MapsNotificationListener"
+                android:label="MotoDash Notification Listener"
+                android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+                android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
         <meta-data
                 android:name="flutterEmbedding"
                 android:value="2"/>

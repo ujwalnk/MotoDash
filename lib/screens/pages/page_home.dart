@@ -24,6 +24,11 @@ Future<List<DashAction>> buildHomeActions() async {
       icons: [Icons.music_note_rounded],
       action: () => NavigationGraph.instance.goTo(CurrentPage.musicPage),
     ),
+    DashAction(
+      label: "Navigation",
+      icons: [Icons.navigation_rounded],
+      action: () => NavigationGraph.instance.goTo(CurrentPage.navigation),
+    ),
     DashAction(label: 'Assistant', icons: [Icons.assistant_rounded], action: () => AssistantBridge.launch()),
     DashAction(
       label: 'Volume',
