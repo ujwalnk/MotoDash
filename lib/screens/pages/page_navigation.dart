@@ -6,8 +6,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:moto_dash/bridges/navigation_bridge.dart';
+import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/dash_action.dart';
 import 'package:moto_dash/commons/dash_page.dart';
+import 'package:moto_dash/navigation_graph.dart';
+import 'package:moto_dash/services/global_service.dart';
 
 class PageNavigation extends DashPage {
   /*
@@ -43,7 +46,7 @@ class PageNavigation extends DashPage {
   @override
   Future<List<DashAction>> buildActions() async {
     final directions = _directions;
-    final String? text = [
+    final String text = [
       directions?["title"],
       directions?["text"],
       directions?["subText"],
@@ -51,22 +54,33 @@ class PageNavigation extends DashPage {
 
     return [
       if (directions != null) ...[
-        DashAction(label: text ?? "Reread navigation", icons: [Icons.assistant_navigation], action: () async {}),
+        DashAction(
+          label: text,
+          icons: [Icons.assistant_navigation],
+          action: () async {
+            await ttsService.speak("$text . Click to reread navigation");
+          },
+        ),
         DashAction(
           label: "Exit navigation",
           icons: [Icons.exit_to_app_rounded],
-          action: () => NavigationBridge.exitNavigation(),
-        ),
-      ],
-      if (_directions == null) ...[
-        DashAction(
-          label: "Test location A",
-          icons: [],
           action: () async {
-            await NavigationBridge.navigateTo(12.8848955, 77.5275458);
+            await NavigationBridge.exitNavigation();
+            await ttsService.speak("Navigation exited");
+            await Future.delayed(Duration(seconds: 2));
+            await NavigationGraph.instance.pop();
           },
         ),
       ],
+      if (_directions == null)
+        for (final favourite in ConfigProvider.navigationFavourites)
+          DashAction(
+            label: favourite.name,
+            icons: [Icons.location_on],
+            action: () async {
+              await NavigationBridge.navigateTo(favourite.latitude, favourite.longitude);
+            },
+          ),
     ];
   }
 }

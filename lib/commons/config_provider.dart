@@ -10,6 +10,8 @@ import 'package:moto_dash/controllers/ble_hid_intent_detector/ble_registered_key
 import 'package:moto_dash/controllers/bt_hid_intent_detector/hid_key_registry.dart';
 import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 
+import 'navigation_destination_model.dart';
+
 /// Provides centralized access to persisted application configuration values.
 ///
 /// Reads settings from [prefs] using keys defined in [PrefKeys] and exposes typed getters with fallback defaults
@@ -80,6 +82,26 @@ class ConfigProvider {
   static List<String> get phoneFavContactNames => prefs.getStringList(PrefKeys.phoneFavContactNames) ?? [];
 
   static List<String> get phoneFavContactNumbers => prefs.getStringList(PrefKeys.phoneFavContactNumbers) ?? [];
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Navigation Favourites
+  // -------------------------------------------------------------------------------------------------------------------
+
+  /// All saved navigation destinations, decoded from a single JSON-encoded string dict. Returns an empty list when
+  /// nothing has been saved yet.
+  static List<NavigationDestinationModel> get navigationFavourites {
+    final String? raw = prefs.getString(PrefKeys.navigationFavourites);
+    if (raw == null || raw.isEmpty) return [];
+
+    final Map<String, dynamic> decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return decoded.entries.map((e) => NavigationDestinationModel.fromEntry(e.key, e.value as String)).toList();
+  }
+
+  /// Persists the entire ordered list of navigation favourites as a single JSON-encoded string dict.
+  static Future<void> setNavigationFavourites(List<NavigationDestinationModel> favourites) async {
+    final Map<String, String> encoded = {for (final f in favourites) f.id: f.toEntryValue()};
+    await prefs.setString(PrefKeys.navigationFavourites, jsonEncode(encoded));
+  }
 
   // -------------------------------------------------------------------------------------------------------------------
   // Rider gestures

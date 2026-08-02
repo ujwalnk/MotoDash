@@ -10,6 +10,7 @@ import 'package:moto_dash/screens/screen_setting/sections/dashboard_settings.dar
 import 'package:moto_dash/screens/screen_setting/sections/display_section.dart';
 import 'package:moto_dash/screens/screen_setting/sections/dynamic_volume_setting.dart';
 import 'package:moto_dash/screens/screen_setting/sections/misc_setting.dart';
+import 'package:moto_dash/screens/screen_setting/sections/navigation_settings.dart';
 import 'package:moto_dash/screens/screen_setting/sections/rider_gesture_setting.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -61,6 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           DashboardSettingsSection(),
           DisplaySettingsSection(),
           ContactsSettingsSection(),
+          NavigationSettings(),
           RiderGesturesSettingsSection(),
           DynamicVolumeSettingsSection(),
           MiscSettingsSection(),

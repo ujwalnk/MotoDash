@@ -48,6 +48,9 @@ abstract class PrefKeys {
   static const String phoneFavContactNames = "phone_favourite_contact_names";
   static const String phoneFavContactNumbers = "phone_favourite_contact_numbers";
 
+  // Navigation favourite destinations
+  static const String navigationFavourites = "navigation_favourites";
+
   // Rider Gestures Domain
   static const String riderGesturesEnable = "rider_gestures_enable";
   static const String riderGesturesTtsOnBtOnly = "rider_gestures_tts_on_bt_only";
