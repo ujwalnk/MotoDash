@@ -79,7 +79,7 @@ class NavigationIntentHandler {
       case NavigationIntent.select:
         final oldPage = navigator.page;
 
-        _performAction(items, navigator);
+        await _performAction(items, navigator);
 
         final newPage = navigator.page;
 
@@ -96,7 +96,7 @@ class NavigationIntentHandler {
         break;
 
       case NavigationIntent.back:
-        navigator.pop();
+        await navigator.pop();
 
         // Reset index
         _selectedIndex = 0;
@@ -130,11 +130,11 @@ class NavigationIntentHandler {
   // ACTION EXECUTION
   // -------------------------
 
-  void _performAction(List<DashAction> items, NavigationGraph navigator) {
+  Future<void> _performAction(List<DashAction> items, NavigationGraph navigator) async {
     if (_selectedIndex < items.length) {
-      items[_selectedIndex].action?.call();
+      await items[_selectedIndex].action?.call();
     } else {
-      navigator.pop();
+      await navigator.pop();
     }
   }
 

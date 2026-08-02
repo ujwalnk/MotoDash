@@ -37,6 +37,7 @@ void main() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   await ConfigProvider.init();
+  await NavigationGraph.instance.ensureInitialized();
   await NotificationService.init(navigatorKey);
   await Settings.init(cacheProvider: SharePreferenceCache());
   NavigationIntentHandler.instance.init();

@@ -24,8 +24,6 @@ class PageHome extends DashPage {
 
   @override
   Future<List<DashAction>> buildActions() async {
-    // FIXME: Hot fix, not sure where to call this on first init.
-    await init();
     return [
       if (_callPlacePermission && (_callLogPermission || _callFavContactsNotNull))
         DashAction(

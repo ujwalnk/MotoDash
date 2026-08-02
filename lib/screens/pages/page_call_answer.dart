@@ -15,7 +15,13 @@ class PageCallAnswer extends DashPage {
   @override
   Future<List<DashAction>> buildActions() async {
     return [
-      DashAction(label: NavigationGraph.instance.data[kDisplayValueKey], icons: [], action: () {}),
+      DashAction(
+        label: NavigationGraph.instance.data[kDisplayValueKey],
+        icons: [],
+        action: () {
+          return Future.value();
+        },
+      ),
       DashNavigation(
         label: "Answer",
         icons: [Icons.call_rounded],

@@ -17,27 +17,39 @@ enum CurrentPage {
 }
 
 class NavigationGraph extends ChangeNotifier {
-  NavigationGraph._() {
-    menuActions[_page]?.init();
-    menuActions[_page]?.onRefreshRequired = notifyListeners;
-  } // private constructor
+  NavigationGraph._(); // private constructor
 
   static final NavigationGraph instance = NavigationGraph._();
 
   // Currently Active Page
   CurrentPage _page = CurrentPage.homePage;
 
-  // Getter for current page
   CurrentPage get page => _page;
 
-  // Getter - can pop?
   bool get canPop => _page != CurrentPage.homePage && _page != CurrentPage.callActPage;
+
+  Future<void>? _readyFuture;
 
   // Data
   Map<String, dynamic> data = {};
 
+  /// Call this once, before the root screen is shown / before anything
+  /// reads `menuActions[_page]` for the home page. Safe to call multiple
+  /// times — subsequent calls just await the same in-flight/completed Future.
+  Future<void> ensureInitialized() {
+    return _readyFuture ??= _initialize();
+  }
+
+  Future<void> _initialize() async {
+    menuActions[_page]?.onRefreshRequired = notifyListeners;
+    await menuActions[_page]?.init(); // <-- home page's async init awaited here
+    notifyListeners();
+  }
+
   Future<void> goTo(CurrentPage page) async {
-    // TODO: Check for guard required against navigating to the same page
+    await ensureInitialized();
+
+    if (_page == page) return;
 
     menuActions[_page]?.onRefreshRequired = null;
     await menuActions[_page]?.terminate(); // Terminate the previous page
