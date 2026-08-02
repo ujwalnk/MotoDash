@@ -106,7 +106,7 @@ class _RootScreenState extends SplitScreenState<RootScreen> {
         }
 
         return FutureBuilder<List<DashAction>>(
-          future: builder(),
+          future: builder.buildActions(),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -116,14 +116,11 @@ class _RootScreenState extends SplitScreenState<RootScreen> {
 
             return Scaffold(
               backgroundColor: backgroundColor,
-              body: SafeArea(
-                // TODO: Add setting for the topbar
-                child: Column(
-                  children: [
-                    if (ConfigProvider.dashboardStatusBar) sectionTopBar(),
-                    sectionBody(widgets, items, context, navigator),
-                  ],
-                ),
+              body: Column(
+                children: [
+                  if (ConfigProvider.dashboardStatusBar) sectionTopBar(),
+                  sectionBody(widgets, items, context, navigator),
+                ],
               ),
             );
           },
@@ -179,19 +176,30 @@ class _RootScreenState extends SplitScreenState<RootScreen> {
     );
   }
 
-  Expanded sectionBody(DashWidgets widgets, List<DashAction> items, BuildContext context, NavigationGraph navigator) {
+  Widget sectionBody(DashWidgets widgets, List<DashAction> items, BuildContext context, NavigationGraph navigator) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-        child: widgets.dashView(isSplitScreen, [
-          ...items.map((item) => widgets.dashCardAction(item, context, items.length + (navigator.canPop ? 1 : 0))),
-          if (navigator.canPop)
-            widgets.dashCardAction(
-              DashAction(label: "Back", icons: [Icons.undo_rounded], action: () => navigator.pop()),
-              context,
-              items.length + 1,
-            ),
-        ]),
+        padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          switchInCurve: Curves.easeInQuint,
+          switchOutCurve: Curves.easeOutQuint,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          child: SizedBox(
+            key: ValueKey(navigator.page),
+            child: widgets.dashView(isSplitScreen, [
+              ...items.map((item) => widgets.dashCardAction(item, context, items.length + (navigator.canPop ? 1 : 0))),
+              if (navigator.canPop)
+                widgets.dashCardAction(
+                  DashAction(label: "Back", icons: [Icons.undo_rounded], action: () => navigator.pop()),
+                  context,
+                  items.length + 1,
+                ),
+            ]),
+          ),
+        ),
       ),
     );
   }

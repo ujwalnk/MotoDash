@@ -2,6 +2,7 @@
 // Created: 2026, Mar 22
 
 import 'package:flutter/material.dart';
+import 'package:moto_dash/screens/pages/page_map.dart';
 
 enum CurrentPage {
   homePage,
@@ -12,11 +13,14 @@ enum CurrentPage {
   callActPage,
   callAnsPage,
   volumePage,
-  navigation,
+  navigationPage,
 }
 
 class NavigationGraph extends ChangeNotifier {
-  NavigationGraph._(); // private constructor
+  NavigationGraph._() {
+    menuActions[_page]?.init();
+    menuActions[_page]?.onRefreshRequired = notifyListeners;
+  } // private constructor
 
   static final NavigationGraph instance = NavigationGraph._();
 
@@ -33,20 +37,31 @@ class NavigationGraph extends ChangeNotifier {
   Map<String, dynamic> data = {};
 
   Future<void> goTo(CurrentPage page) async {
+    // TODO: Check for guard required against navigating to the same page
+
+    menuActions[_page]?.onRefreshRequired = null;
+    await menuActions[_page]?.terminate(); // Terminate the previous page
+
     _page = page;
+
+    menuActions[_page]?.onRefreshRequired = notifyListeners;
+    await menuActions[_page]?.init(); // Initialize the new page
+
     notifyListeners();
   }
 
-  void pop() {
+  Future<void> pop() async {
     if (!canPop) return;
 
+    menuActions[_page]?.onRefreshRequired = null;
+    await menuActions[_page]?.terminate();
+
     if (_page == CurrentPage.callFavPage || _page == CurrentPage.callLogPage) {
-      _page = CurrentPage.callNavPage;
+      await goTo(CurrentPage.callNavPage);
     } else {
-      _page = CurrentPage.homePage;
+      await goTo(CurrentPage.homePage);
     }
 
     data = {}; // Clear data on pop
-    notifyListeners();
   }
 }

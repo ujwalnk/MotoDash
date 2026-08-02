@@ -58,7 +58,7 @@ class NavigationIntentHandler {
 
     if (builder == null) return;
 
-    final List<DashAction> items = await builder();
+    final List<DashAction> items = await builder.buildActions();
     final int total = items.length + (navigator.canPop ? 1 : 0);
 
     // Rotate through the available menu
@@ -89,7 +89,7 @@ class NavigationIntentHandler {
 
           final newBuilder = menuActions[newPage];
           if (newBuilder != null) {
-            final newItems = await newBuilder();
+            final newItems = await newBuilder.buildActions();
             _speak(newItems, navigator);
           }
         }
@@ -104,7 +104,7 @@ class NavigationIntentHandler {
         // Speak first item of new page
         final newBuilder = menuActions[navigator.page];
         if (newBuilder != null) {
-          final newItems = await newBuilder();
+          final newItems = await newBuilder.buildActions();
           _speak(newItems, navigator);
         }
         break;

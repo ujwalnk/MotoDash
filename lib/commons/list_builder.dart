@@ -44,7 +44,7 @@ class DashWidgets {
       builder: (context, constraints) {
         const columns = 2;
         const spacing = 10.0;
-        const padding = 10.0;
+        const padding = 0.0;
 
         final totalWidth = constraints.maxWidth;
         final totalHeight = constraints.maxHeight;
@@ -63,7 +63,7 @@ class DashWidgets {
 
         return SizedBox.expand(
           child: Padding(
-            padding: const EdgeInsets.all(padding),
+            padding: const EdgeInsets.all(0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -109,17 +109,27 @@ class DashWidgets {
     bool isSelected = false,
   }) {
     final screenHeight = MediaQuery.of(context).size.height;
+
+    const spacing = 0;
+    const padding = 10.0;
+
+    // Available height after padding & spacing
+    final usableHeight = screenHeight - padding * 2 - spacing * (itemCount - 1);
+
+    // ONE canonical tile height
+    final tileHeight = usableHeight / itemCount;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: (_) => onTap?.call(),
       child: SizedBox(
-        height: (screenHeight - 30 - (itemCount - 1) * 10) / itemCount,
-        // height: tileHeight,
+        height: tileHeight,
         child: Card(
+          margin: EdgeInsets.fromLTRB(0, 4, 0, 4),
           color: backgroundColor,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: (borderColor), width: isSelected ? 3 : 1),
+            borderRadius: BorderRadius.circular(32),
+            side: BorderSide(color: borderColor, width: isSelected ? 3 : 1),
           ),
           child: Center(child: dashListTile(icons, title, overrideShowIcons, overrideShowLabel)),
         ),

@@ -19,3 +19,7 @@ class DashAction {
 
   DashAction({required this.label, required this.icons, required this.action, this.canMask = true});
 }
+
+class DashNavigation extends DashAction {
+  DashNavigation({required super.label, required super.icons, required super.action, super.canMask = true});
+}
