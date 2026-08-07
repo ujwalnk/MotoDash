@@ -131,6 +131,20 @@ class _PermissionsScreenState extends State<PermissionsScreen> with WidgetsBindi
       kind: _PermKind.runtime,
       permission: [Permission.location, Permission.locationAlways],
     ),
+    _PermItem(
+      title: 'Microphone',
+      subtitle: 'Record voice notes',
+      icon: Icons.mic_rounded,
+      kind: _PermKind.runtime,
+      permission: [Permission.microphone],
+    ),
+    // _PermItem(
+    //   title: 'Storage',
+    //   subtitle: 'Save voice notes on Android 9 and below',
+    //   icon: Icons.save_rounded,
+    //   kind: _PermKind.runtime,
+    //   permission: [Permission.storage],
+    // ),
   ];
 
   bool _checking = true;

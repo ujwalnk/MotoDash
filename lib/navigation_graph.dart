@@ -14,6 +14,7 @@ enum CurrentPage {
   callAnsPage,
   volumePage,
   navigationPage,
+  voiceNotePage, // TODO: Change this to notePage
 }
 
 class NavigationGraph extends ChangeNotifier {

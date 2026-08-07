@@ -282,6 +282,8 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        VoiceNoteStorageHandler.register(flutterEngine, this)
     }
 
     override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean) {

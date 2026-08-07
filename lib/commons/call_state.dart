@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:moto_dash/bridges/telephony_bridge.dart';
 import 'package:moto_dash/navigation_graph.dart';
 import 'package:moto_dash/screens/pages/page_call_answer.dart' as page_call_answer;
+import 'package:moto_dash/services/voice_recorder_service.dart';
 import 'package:phone_state/phone_state.dart';
 
 class CallStateListener {
@@ -16,6 +17,21 @@ class CallStateListener {
     if (_initialized) return;
     _initialized = true;
     _phoneStreamSubscription = PhoneState.stream.listen((event) async {
+      // Reuse the existing call-state detection to also finalize any
+      // active voice recording before the call flow takes over. Treated as
+      // a normal recording completion — the file is saved, not discarded.
+      switch (event.status) {
+        case PhoneStateStatus.CALL_INCOMING:
+        case PhoneStateStatus.CALL_STARTED:
+        case PhoneStateStatus.CALL_OUTGOING:
+          if (VoiceRecorderService.instance.isRecording) {
+            await VoiceRecorderService.instance.handleCallInterruption();
+          }
+          break;
+        default:
+          break;
+      }
+
       switch (event.status) {
         case PhoneStateStatus.CALL_INCOMING:
           if (NavigationGraph.instance.page != CurrentPage.callAnsPage) {

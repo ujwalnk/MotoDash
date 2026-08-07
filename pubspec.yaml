@@ -21,9 +21,11 @@ dependencies:
   flutter_tts: ^4.2.5
   fluttertoast: ^9.1.0
   geolocator: ^14.0.3
+  path_provider: ^2.1.5
   permission_handler: ^12.0.1
   phone_state: ^3.0.1
   provider: ^6.1.5+1
+  record: ^6.2.1
   rotation_log: ^0.1.1
   screen_brightness: ^2.1.7
   sensors_plus: ^7.0.0

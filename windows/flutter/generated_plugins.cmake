@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_tts
   geolocator_windows
   permission_handler_windows
+  record_windows
   screen_brightness_windows
   volume_controller
 )

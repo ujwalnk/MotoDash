@@ -24,7 +24,20 @@ class PermissionCheck {
   static Future<bool> get location async =>
       await Permission.location.isGranted && await Permission.locationAlways.isGranted;
 
+  static Future<bool> get microphone async => Permission.microphone.isGranted;
+
+  /// WRITE_EXTERNAL_STORAGE is declared with `android:maxSdkVersion="28"`
+  /// in the manifest, so this permission group doesn't apply on Android
+  /// 10+ and permission_handler reports it as granted automatically there
+  /// — which is correct, since MediaStore's Downloads collection needs no
+  /// storage permission for files the app writes itself.
+  static Future<bool> get storage async => Permission.storage.isGranted;
+
   static Future<bool> callLog() async => NativePermissions.requestCallLog();
 
   static Future<void> notificationListener() async => NativePermissions.openNotificationListenerSettings();
+
+  /// True once every permission the Voice Note feature needs is granted.
+  /// Used to decide whether the Voice Note dashboard item is shown.
+  static Future<bool> hasVoiceNotePermissions() async => await microphone;
 }

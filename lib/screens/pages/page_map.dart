@@ -12,6 +12,7 @@ import 'package:moto_dash/screens/pages/page_call_navigation.dart';
 import 'package:moto_dash/screens/pages/page_home.dart';
 import 'package:moto_dash/screens/pages/page_music.dart';
 import 'package:moto_dash/screens/pages/page_navigation.dart';
+import 'package:moto_dash/screens/pages/page_voice_note.dart';
 import 'package:moto_dash/screens/pages/page_volume.dart';
 
 final Map<CurrentPage, DashPage> menuActions = {
@@ -23,5 +24,6 @@ final Map<CurrentPage, DashPage> menuActions = {
   CurrentPage.homePage: PageHome(),
   CurrentPage.musicPage: PageMusic(),
   CurrentPage.navigationPage: PageNavigation(),
+  CurrentPage.voiceNotePage: PageVoiceNote(),
   CurrentPage.volumePage: PageVolume(),
 };
