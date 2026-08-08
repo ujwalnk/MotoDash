@@ -32,62 +32,7 @@ class _RiderGesturesSettingsSectionState extends State<RiderGesturesSettingsSect
           defaultValue: false,
           onChanged: (_) => setState(() {}),
         ),
-        if (ConfigProvider.riderGesturesMagnetEnabled) ...[
-          const PrefTextFieldTile(
-            label: "Magnet Detection Threshold (µT)",
-            prefKey: PrefKeys.riderGesturesMagnetStrength,
-            defaultValue: "",
-            inputType: TextInputType.number,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 12),
-            child: StreamBuilder<MagnetometerEvent>(
-              stream: magnetometerEventStream(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Text(
-                    "Current Reading: -- µT",
-                    style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
-                  );
-                }
-
-                final event = snapshot.data!;
-
-                final magnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
-
-                return Text(
-                  "Current Reading: ${magnitude.toStringAsFixed(0)} µT",
-                  style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 12),
-            child: Text(
-              "Tune detection for stronger or weaker magnets. A gesture is detected when the magnetic field exceeds this value."
-              "\n\nBring the magnet near the phone and set the threshold to about 80% of the measured value. Adjust as needed for reliable gesture detection. "
-              "\nSee the Moto Dash website for more information.",
-              style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
-            ),
-          ),
-
-          const PrefTextFieldTile(
-            label: "Multi-Tap Window (ms)",
-            prefKey: PrefKeys.riderGesturesMagnetIntentEmissionDelay,
-            defaultValue: "2000",
-            inputType: TextInputType.number,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 4, bottom: 12),
-            child: Text(
-              "The delay before a gesture sequence is finalized. "
-              "Lower values provide snappier feedback, while higher values give you more time "
-              "to complete multi-step gestures.",
-              style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
-            ),
-          ),
-        ],
+        if (ConfigProvider.riderGesturesMagnetEnabled) const MagnetGestureConfig(),
         // TODO: Move to another section
         PrefSwitchTile(
           title: "Bluetooth HID Device",
@@ -120,6 +65,76 @@ class _RiderGesturesSettingsSectionState extends State<RiderGesturesSettingsSect
           title: "Exit app on Bt device disconnect",
           prefKey: PrefKeys.riderGesturesTtsOnBtOnly,
           defaultValue: false,
+        ),
+      ],
+    );
+  }
+}
+
+/// Magnet gesture detection threshold + multi-tap window configuration, plus a live magnetometer reading.
+///
+/// Shown inside "Rider Gestures" whenever magnet detection is enabled, and reused as-is by the first-run onboarding
+/// flow's Riding Controls step so the two surfaces never drift apart.
+class MagnetGestureConfig extends StatelessWidget {
+  const MagnetGestureConfig({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const PrefTextFieldTile(
+          label: "Magnet Detection Threshold (µT)",
+          prefKey: PrefKeys.riderGesturesMagnetStrength,
+          defaultValue: "",
+          inputType: TextInputType.number,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 12),
+          child: StreamBuilder<MagnetometerEvent>(
+            stream: magnetometerEventStream(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Text(
+                  "Current Reading: -- µT",
+                  style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+                );
+              }
+
+              final event = snapshot.data!;
+
+              final magnitude = sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
+
+              return Text(
+                "Current Reading: ${magnitude.toStringAsFixed(0)} µT",
+                style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+              );
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 12),
+          child: Text(
+            "Tune detection for stronger or weaker magnets. A gesture is detected when the magnetic field exceeds this value."
+            "\n\nBring the magnet near the phone and set the threshold to about 80% of the measured value. Adjust as needed for reliable gesture detection. "
+            "\nSee the Moto Dash website for more information.",
+            style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+          ),
+        ),
+        const PrefTextFieldTile(
+          label: "Multi-Tap Window (ms)",
+          prefKey: PrefKeys.riderGesturesMagnetIntentEmissionDelay,
+          defaultValue: "2000",
+          inputType: TextInputType.number,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 12),
+          child: Text(
+            "The delay before a gesture sequence is finalized. "
+            "Lower values provide snappier feedback, while higher values give you more time "
+            "to complete multi-step gestures.",
+            style: TextStyle(color: Colors.white.withAlpha(90), fontSize: 13),
+          ),
         ),
       ],
     );

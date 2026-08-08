@@ -210,4 +210,55 @@ class ConfigProvider {
   static int get miscMaxCallLogsListed => prefs.getDouble(PrefKeys.miscMaxCallLogsListed)?.toInt() ?? 5;
 
   static bool get miscSwapMusicButtonPositions => prefs.getBool(PrefKeys.miscSwapMusicButtonPositions) ?? true;
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Feature Flags — single serialized Map<String, bool>, keyed by FeatureKeys. Every feature defaults to enabled so
+  // that a fresh install (or an upgrade from before this map existed) behaves exactly as it did before.
+  // -------------------------------------------------------------------------------------------------------------------
+
+  static const Map<String, bool> _defaultFeatureFlags = {
+    FeatureKeys.phone: true,
+    FeatureKeys.music: true,
+    FeatureKeys.navigation: true,
+    FeatureKeys.assistant: true,
+    FeatureKeys.voiceNotes: true,
+    FeatureKeys.volumeControls: true,
+  };
+
+  /// The full enable/disable state of every MotoDash feature, decoded from a single JSON-encoded string map. Missing
+  /// or unrecognized keys fall back to their default (enabled).
+  static Map<String, bool> get featureFlags {
+    final String? raw = prefs.getString(PrefKeys.featureFlags);
+    Map<String, dynamic> decoded = {};
+    if (raw != null && raw.isNotEmpty) {
+      decoded = jsonDecode(raw) as Map<String, dynamic>;
+    }
+    return {for (final key in FeatureKeys.all) key: decoded[key] as bool? ?? _defaultFeatureFlags[key]!};
+  }
+
+  /// Persists the entire feature flag map as a single JSON-encoded string.
+  static Future<void> setFeatureFlags(Map<String, bool> flags) async {
+    await prefs.setString(PrefKeys.featureFlags, jsonEncode(flags));
+  }
+
+  /// Updates a single feature's enabled state, preserving every other flag.
+  static Future<void> setFeatureEnabled(String feature, bool enabled) async {
+    final flags = featureFlags;
+    flags[feature] = enabled;
+    await setFeatureFlags(flags);
+  }
+
+  static bool isFeatureEnabled(String feature) => featureFlags[feature] ?? true;
+
+  static bool get phoneEnabled => isFeatureEnabled(FeatureKeys.phone);
+
+  static bool get musicEnabled => isFeatureEnabled(FeatureKeys.music);
+
+  static bool get navigationEnabled => isFeatureEnabled(FeatureKeys.navigation);
+
+  static bool get assistantEnabled => isFeatureEnabled(FeatureKeys.assistant);
+
+  static bool get voiceNotesEnabled => isFeatureEnabled(FeatureKeys.voiceNotes);
+
+  static bool get volumeControlsEnabled => isFeatureEnabled(FeatureKeys.volumeControls);
 }

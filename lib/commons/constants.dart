@@ -87,6 +87,24 @@ abstract class PrefKeys {
   static const String showVolumeTip = "misc_show_volume_tip";
   static const String miscMaxCallLogsListed = "misc_max_call_logs_listed";
   static const String miscSwapMusicButtonPositions = "misc_swap_music_button_position";
+
+  // Feature enable/disable map (single serialized JSON string, see FeatureKeys)
+  static const String featureFlags = "feature_flags";
+}
+
+/// Keys used inside the single serialized feature enable/disable map stored under [PrefKeys.featureFlags].
+///
+/// These are NOT top-level SharedPreferences keys — they only ever exist as entries inside that one JSON map — so
+/// adding or removing a feature here never requires a new [PrefKeys] entry.
+abstract class FeatureKeys {
+  static const String phone = "phone";
+  static const String music = "music";
+  static const String navigation = "navigation";
+  static const String assistant = "assistant";
+  static const String voiceNotes = "voice_notes";
+  static const String volumeControls = "volume_controls";
+
+  static const List<String> all = [phone, music, navigation, assistant, voiceNotes, volumeControls];
 }
 
 abstract class BleConstants {
@@ -108,6 +126,7 @@ abstract class BleConstants {
 /// External variables modified: None.
 abstract class AppRoutes {
   static const String grantPermission = "/setup/permissions";
+  static const String onboarding = "/setup/onboarding";
   static const settings = "/settings";
 
   static const dashboard = "/home";

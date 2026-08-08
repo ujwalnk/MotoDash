@@ -11,6 +11,7 @@ import 'package:moto_dash/controllers/bt_hid_intent_detector/bt_intent_detector.
 import 'package:moto_dash/controllers/magnet_intent_detector.dart';
 import 'package:moto_dash/controllers/navigation_intent_handler.dart';
 import 'package:moto_dash/navigation_graph.dart' show NavigationGraph;
+import 'package:moto_dash/screens/onboarding/screen_onboarding.dart';
 import 'package:moto_dash/screens/screen_permissions.dart';
 import 'package:moto_dash/screens/screen_root.dart';
 import 'package:moto_dash/screens/screen_saver.dart';
@@ -118,7 +119,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
       create: (_) => NavigationGraph.instance,
       child: MaterialApp(
         navigatorKey: navigatorKey,
-        home: showSetupScreen ? const PermissionsScreen() : const RootScreen(),
+        home: showSetupScreen ? const OnboardingScreen() : const RootScreen(),
         theme: ThemeData(fontFamily: 'AtkinsonHyperlegible'),
         onGenerateRoute: router,
       ),
@@ -128,6 +129,7 @@ class _MotoDashState extends State<MotoDash> with WidgetsBindingObserver {
   Route<dynamic>? router(settings) {
     final Widget page = switch (settings.name) {
       AppRoutes.grantPermission => const PermissionsScreen(),
+      AppRoutes.onboarding => const OnboardingScreen(),
       AppRoutes.settings => const SettingsScreen(),
       AppRoutes.screenSaver => const ScreenSaver(),
       AppRoutes.screenSaverBlank => const ScreenSaverBlank(),

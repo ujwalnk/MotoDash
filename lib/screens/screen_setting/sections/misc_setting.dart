@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:moto_dash/commons/config_provider.dart';
 import 'package:moto_dash/commons/constants.dart';
 import 'package:moto_dash/commons/settings_tiles.dart';
+import 'package:moto_dash/screens/onboarding/screen_onboarding.dart';
 import 'package:moto_dash/screens/screen_setting/setting_card.dart';
 
 class MiscSettingsSection extends StatelessWidget {
@@ -46,6 +47,20 @@ class MiscSettingsSection extends StatelessWidget {
           title: "Swap Previous & play/pause key position",
           prefKey: PrefKeys.miscSwapMusicButtonPositions,
           defaultValue: ConfigProvider.miscSwapMusicButtonPositions,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: OutlinedButton.icon(
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const OnboardingScreen(), fullscreenDialog: true)),
+            icon: const Icon(Icons.replay_rounded, color: Colors.white),
+            label: const Text("Replay first-run setup", style: TextStyle(color: Colors.white)),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.white54),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
         ),
       ],
     );
